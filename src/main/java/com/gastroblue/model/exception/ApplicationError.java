@@ -1,0 +1,23 @@
+package com.gastroblue.model.exception;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.gastroblue.model.enums.ErrorCode;
+import lombok.Builder;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@Builder
+public class ApplicationError {
+  private String errorMessage;
+  private ErrorCode errorCode;
+  private String referenceId;
+  private HttpStatus httpStatus;
+  private LocalDateTime timeStamp;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private List<ValidationError> errorDetails;
+}

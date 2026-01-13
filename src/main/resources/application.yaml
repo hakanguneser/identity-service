@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: identity-service
+
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:node_adapter}
+    username: ${DATABASE_USERNAME:node_adapter_admin}
+    password: ${DATABASE_PASSWORD:postgres}
+    hikari:
+      connection-init-sql: SET TIMEZONE TO 'Europe/Istanbul'
+      pool-name: node-adapter-hikari
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: false
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      validation-timeout: 5000
+      connection-test-query: SELECT 1
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+server:
+  port: ${SERVER_PORT:7102}
