@@ -1,5 +1,7 @@
 package com.gastroblue.mapper;
 
+import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
+
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
@@ -9,13 +11,9 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.util.DelimitedStringUtil;
+import java.util.Locale;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import java.util.Locale;
-
-import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
-
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {

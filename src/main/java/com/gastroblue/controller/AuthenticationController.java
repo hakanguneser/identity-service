@@ -4,12 +4,11 @@ import com.gastroblue.facade.AuthenticationFacade;
 import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.response.*;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("v1/auth")

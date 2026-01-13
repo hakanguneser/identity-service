@@ -6,7 +6,6 @@ import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.enums.Zone;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 public record UserUpdateRequest(

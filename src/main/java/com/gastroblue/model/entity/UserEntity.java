@@ -6,14 +6,13 @@ import com.gastroblue.model.enums.Gender;
 import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.enums.Zone;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
 @Setter
 @Getter

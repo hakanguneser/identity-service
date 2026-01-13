@@ -1,6 +1,6 @@
 package com.gastroblue.model.enums;
 
-import com.gastro.formflow.services.exception.InvalidTypeException;
+import com.gastroblue.exception.ValidationException;
 import com.gastroblue.util.enums.IConfigurableEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +16,7 @@ public enum FormType implements IConfigurableEnum {
 
   public void checkFormType(FormType formType) {
     if (this != formType) {
-      throw new InvalidTypeException(ErrorCode.INVALID_FORM_TYPE);
+      throw new ValidationException(ErrorCode.INVALID_FORM_TYPE);
     }
   }
 }

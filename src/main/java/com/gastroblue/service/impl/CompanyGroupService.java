@@ -1,5 +1,8 @@
 package com.gastroblue.service.impl;
 
+import static com.gastroblue.model.enums.DefinitionType.COMPANY_GROUP;
+import static com.gastroblue.util.DelimitedStringUtil.join;
+
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
@@ -9,14 +12,9 @@ import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
 import com.gastroblue.service.IJwtService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.gastroblue.model.enums.DefinitionType.COMPANY_GROUP;
-import static com.gastroblue.util.DelimitedStringUtil.join;
-
 
 @Service
 @RequiredArgsConstructor

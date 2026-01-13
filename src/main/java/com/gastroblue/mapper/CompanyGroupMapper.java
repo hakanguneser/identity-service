@@ -1,5 +1,7 @@
 package com.gastroblue.mapper;
 
+import static com.gastroblue.util.DelimitedStringUtil.join;
+import static com.gastroblue.util.DelimitedStringUtil.split;
 
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.base.CompanyGroup;
@@ -13,9 +15,6 @@ import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import static com.gastroblue.util.DelimitedStringUtil.join;
-import static com.gastroblue.util.DelimitedStringUtil.split;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompanyGroupMapper {
@@ -50,7 +49,7 @@ public class CompanyGroupMapper {
   }
 
   public static CompanyEntity toEntity(
-          final CompanySaveRequest companyRequest, final String companyGroupId) {
+      final CompanySaveRequest companyRequest, final String companyGroupId) {
     return CompanyEntity.builder()
         .companyCode(companyRequest.companyCode())
         .companyName(companyRequest.companyName())

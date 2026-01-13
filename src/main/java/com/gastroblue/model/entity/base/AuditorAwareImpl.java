@@ -1,13 +1,12 @@
 package com.gastroblue.model.entity.base;
 
-import com.gastro.formflow.services.model.base.organization.SessionUser;
-import com.gastro.formflow.services.service.IJwtService;
+import static com.gastroblue.service.IJwtService.ANONYMOUS_USER;
+
+import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.service.IJwtService;
+import java.util.Optional;
 import lombok.NonNull;
 import org.springframework.data.domain.AuditorAware;
-
-import java.util.Optional;
-
-import static com.gastro.formflow.services.service.IJwtService.ANONYMOUS_USER;
 
 public class AuditorAwareImpl implements AuditorAware<String> {
   @Override

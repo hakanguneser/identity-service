@@ -1,8 +1,7 @@
 package com.gastroblue.model.shared;
 
-import lombok.*;
-
 import java.time.LocalDate;
+import lombok.*;
 
 @Setter
 @Getter

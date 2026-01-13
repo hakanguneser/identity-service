@@ -2,12 +2,11 @@ package com.gastroblue.model.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.gastroblue.model.enums.ErrorCode;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder

@@ -4,13 +4,12 @@ import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.Zone;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<UserEntity, String> {
   List<UserEntity> findByCompanyId(String companyId);

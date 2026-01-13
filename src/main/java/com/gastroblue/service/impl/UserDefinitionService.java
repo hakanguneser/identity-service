@@ -1,19 +1,21 @@
 package com.gastroblue.service.impl;
 
+import com.gastroblue.exception.ValidationException;
+import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.UserRepository;
 import com.gastroblue.service.IJwtService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -29,20 +31,20 @@ public class UserDefinitionService {
     try {
       return userRepository.save(entityToBeSaved);
     } catch (DataIntegrityViolationException e) {
-      throw new EntityIsAlreadyExistsException(ErrorCode.USER_ALREADY_EXISTS);
+      throw new ValidationException(ErrorCode.USER_ALREADY_EXISTS);
     }
   }
 
   public UserEntity findById(final String userId) {
     return userRepository
         .findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new ValidationException(ErrorCode.USER_NOT_FOUND));
   }
 
   public UserEntity findUserEntityByUserName(final String username) {
     return userRepository
         .findByUsername(username.toLowerCase(Locale.ENGLISH))
-        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new ValidationException(ErrorCode.USER_NOT_FOUND));
   }
 
   public List<User> findUserByCompanyId(final String companyId) {

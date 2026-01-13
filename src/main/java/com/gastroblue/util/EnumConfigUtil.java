@@ -1,12 +1,11 @@
 package com.gastroblue.util;
 
+import java.util.Locale;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.stereotype.Component;
-
-import java.util.Locale;
 
 @Component
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

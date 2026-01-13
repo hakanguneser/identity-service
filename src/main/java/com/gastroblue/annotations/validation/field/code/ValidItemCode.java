@@ -2,7 +2,6 @@ package com.gastroblue.annotations.validation.field.code;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-
 import java.lang.annotation.*;
 
 @Documented

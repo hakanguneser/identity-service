@@ -1,7 +1,5 @@
 package com.gastroblue.model.enums;
 
-
-
 import com.gastroblue.util.enums.IDisplayableEnum;
 
 public enum DefinitionType implements IDisplayableEnum {

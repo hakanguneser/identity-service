@@ -1,7 +1,6 @@
 package com.gastroblue.util.enums;
 
 import com.gastroblue.util.EnumConfigUtil;
-
 import java.util.Arrays;
 import java.util.List;
 

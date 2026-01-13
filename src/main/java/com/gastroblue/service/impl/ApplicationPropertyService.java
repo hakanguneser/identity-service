@@ -1,5 +1,7 @@
 package com.gastroblue.service.impl;
 
+import static com.gastroblue.model.enums.DefinitionType.APPLICATION_PROPERTY;
+
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.ApplicationPropertyMapper;
 import com.gastroblue.model.entity.ApplicationPropertyEntity;
@@ -11,17 +13,13 @@ import com.gastroblue.model.shared.EnumDisplay;
 import com.gastroblue.repository.ApplicationPropertyRepository;
 import com.gastroblue.util.enums.IConfigurableEnum;
 import com.gastroblue.util.enums.IDisplayableEnum;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static com.gastroblue.model.enums.DefinitionType.APPLICATION_PROPERTY;
-
 
 @Service
 @Slf4j

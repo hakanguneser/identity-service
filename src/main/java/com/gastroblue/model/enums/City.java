@@ -1,14 +1,11 @@
 package com.gastroblue.model.enums;
 
-
-import com.gastroblue.util.enums.IConfigurableEnum;
-
-import java.util.Arrays;
-import java.util.List;
-
 import static com.gastroblue.model.enums.Country.GERMANY;
 import static com.gastroblue.model.enums.Country.TURKEY;
 
+import com.gastroblue.util.enums.IConfigurableEnum;
+import java.util.Arrays;
+import java.util.List;
 
 public enum City implements IConfigurableEnum {
   ADANA(TURKEY),

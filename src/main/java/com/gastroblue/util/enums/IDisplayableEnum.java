@@ -2,9 +2,8 @@ package com.gastroblue.util.enums;
 
 import com.gastroblue.model.shared.EnumDisplay;
 import com.gastroblue.util.EnumConfigUtil;
-import org.springframework.context.i18n.LocaleContextHolder;
-
 import java.util.Locale;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 public interface IDisplayableEnum {
 

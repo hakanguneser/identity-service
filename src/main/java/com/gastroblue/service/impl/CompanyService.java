@@ -1,19 +1,17 @@
 package com.gastroblue.service.impl;
 
+import static com.gastroblue.model.enums.DefinitionType.COMPANY;
+
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.enums.Zone;
 import com.gastroblue.repository.CompanyRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.gastroblue.model.enums.DefinitionType.COMPANY;
-
 
 @Service
 @RequiredArgsConstructor

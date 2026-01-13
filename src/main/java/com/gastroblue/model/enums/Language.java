@@ -1,10 +1,9 @@
 package com.gastroblue.model.enums;
 
 import com.gastroblue.util.enums.IConfigurableEnum;
+import java.util.Locale;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.Locale;
 
 @Getter
 @AllArgsConstructor

@@ -1,8 +1,7 @@
 package com.gastroblue.model.response;
 
-import lombok.*;
-
 import java.util.List;
+import lombok.*;
 
 @Getter
 @Setter

@@ -1,17 +1,15 @@
 package com.gastroblue.model.base;
 
+import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gastroblue.model.enums.*;
 import com.gastroblue.model.shared.EnumDisplay;
-import lombok.*;
-
 import java.util.List;
-
-import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
-
+import lombok.*;
 
 @Setter
 @Getter

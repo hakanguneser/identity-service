@@ -1,5 +1,8 @@
 package com.gastroblue.facade;
 
+import static com.gastroblue.model.enums.ApplicationRole.*;
+
+import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
@@ -19,19 +22,16 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static com.gastroblue.model.enums.ApplicationRole.*;
 
 @Service
 @Slf4j
@@ -99,7 +99,8 @@ public class UserDefinitionFacade {
         UserMapper.toEntity(
             companyGroup.getId(), company.getId(), request, passwordEncoder.encode(otp));
     UserEntity savedEntity = userService.save(entityToBeSaved);
-    // TODO : notifyNewPassword(savedEntity, generatedPassword); buradaki stratejiyi konusmamiz
+    // TODO : notifyNewPassword(savedEntity, generatedPassword); buradaki stratejiyi
+    // konusmamiz
     // lazim
     return UserMapper.toResponse(savedEntity);
   }
@@ -109,7 +110,7 @@ public class UserDefinitionFacade {
     SessionUser sessionUser = IJwtService.findSessionUser();
     if (sessionUser == null) {
       if (!adminRegistrationEnabled) {
-        throw new UnauthorizedRegistrationException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
+        throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
       }
       isAuthorized =
           request.departments().contains(Department.ALL)
@@ -119,7 +120,7 @@ public class UserDefinitionFacade {
     }
 
     if (!isAuthorized) {
-      throw new UnauthorizedRegistrationException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
+      throw new AccessDeniedException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
     }
   }
 
@@ -161,13 +162,15 @@ public class UserDefinitionFacade {
 
   public void sendOtp(final String userId) {
     UserEntity userEntity = userService.findById(userId);
-    // TODO : check session user otp icin gelinen userin amiri mi ? daha once otp gonderilmis mi ?
+    // TODO : check session user otp icin gelinen userin amiri mi ? daha once otp
+    // gonderilmis mi ?
     // 120 saniye sayaci ?
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);
     userService.updateUser(userEntity);
-    // notifyNewPassword(generatedPassword, request.getEmail()); // TODO : kisi forgat password
+    // notifyNewPassword(generatedPassword, request.getEmail()); // TODO : kisi
+    // forgat password
     // yapamaz, bir ustu bunu yapabilir ona mail atacaz
   }
 

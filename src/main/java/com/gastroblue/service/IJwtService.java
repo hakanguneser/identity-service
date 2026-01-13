@@ -6,12 +6,11 @@ import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import io.jsonwebtoken.Claims;
+import java.util.Map;
+import java.util.function.Function;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Map;
-import java.util.function.Function;
 
 public interface IJwtService {
   String ANONYMOUS_USER = "anonymousUser";

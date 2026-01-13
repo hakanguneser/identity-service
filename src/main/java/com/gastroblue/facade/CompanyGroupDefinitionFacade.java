@@ -1,5 +1,8 @@
 package com.gastroblue.facade;
 
+import static com.gastroblue.model.enums.ErrorCode.COMPANY_GROUP_BULK_INSERT_EXCEPTION;
+import static com.gastroblue.util.DelimitedStringUtil.join;
+
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.SessionUser;
@@ -14,16 +17,12 @@ import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.ApplicationPropertyService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.gastroblue.model.enums.ErrorCode.COMPANY_GROUP_BULK_INSERT_EXCEPTION;
-import static com.gastroblue.util.DelimitedStringUtil.join;
 
 @Service
 @Slf4j

@@ -1,5 +1,7 @@
 package com.gastroblue.facade;
 
+import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
+
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
@@ -15,17 +17,13 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.JwtService;
 import com.gastroblue.service.impl.UserDefinitionService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
-
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +60,7 @@ public class AuthenticationFacade {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AuthUserInfoResponse response = new AuthUserInfoResponse();
     response.setUser(UserMapper.toBase(sessionUser));
-    if (sessiintellionUser.companyGroupId() != null) {
+    if (sessionUser.companyGroupId() != null) {
       try {
         CompanyGroup companyGroup = companyGroupService.findByBaseId(sessionUser.companyGroupId());
         response.setCompanyGroup(companyGroup);

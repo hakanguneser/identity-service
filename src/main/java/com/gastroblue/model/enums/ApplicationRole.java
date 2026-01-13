@@ -2,12 +2,11 @@ package com.gastroblue.model.enums;
 
 import com.gastroblue.util.EnumConfigUtil;
 import com.gastroblue.util.enums.IConfigurableEnum;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 @Getter

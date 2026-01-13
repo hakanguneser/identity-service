@@ -1,6 +1,6 @@
 package com.gastroblue.model.enums;
 
-import com.gastro.formflow.services.util.enums.IDisplayableEnum;
+import com.gastroblue.util.enums.IDisplayableEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

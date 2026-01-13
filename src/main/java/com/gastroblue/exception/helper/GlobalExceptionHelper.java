@@ -1,5 +1,7 @@
 package com.gastroblue.exception.helper;
 
+import static com.gastroblue.model.enums.ErrorCode.*;
+
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.exception.base.AbstractRuntimeException;
 import com.gastroblue.model.entity.ApplicationPropertyEntity;
@@ -9,6 +11,8 @@ import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.model.exception.ValidationError;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.ApplicationPropertyService;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +24,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static com.gastroblue.model.enums.ErrorCode.*;
-
 
 @RestControllerAdvice
 @RequiredArgsConstructor

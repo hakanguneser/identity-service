@@ -1,16 +1,14 @@
 package com.gastroblue.model.request;
 
-
+import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
 import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.Gender;
 import com.gastroblue.model.enums.Zone;
-import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.util.List;
 
 public record UserSaveRequest(

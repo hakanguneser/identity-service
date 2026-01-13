@@ -1,13 +1,10 @@
 package com.gastroblue.model.base;
 
+import static com.gastroblue.service.IJwtService.ANONYMOUS_USER;
 
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.enums.*;
-
 import java.util.List;
-
-import static com.gastroblue.service.IJwtService.ANONYMOUS_USER;
-
 
 public record SessionUser(
     String userId,
