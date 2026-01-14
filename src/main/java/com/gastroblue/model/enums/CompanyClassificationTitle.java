@@ -1,8 +1,6 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.util.enums.IConfigurableEnum;
-
-public enum CompanyClassificationTitle implements IConfigurableEnum {
+public enum CompanyClassificationTitle {
   zone,
   city,
   country,

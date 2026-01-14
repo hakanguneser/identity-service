@@ -1,12 +1,11 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.util.enums.IConfigurableEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Department implements IConfigurableEnum {
+public enum Department {
   ALL,
   KITCHEN,
   F_B,

@@ -1,29 +1,29 @@
 package com.gastroblue.util;
 
 import java.util.Locale;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
-import org.springframework.context.MessageSourceAware;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Component;
 
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class EnumConfigUtil implements MessageSourceAware {
+@RequiredArgsConstructor
+@Slf4j
+public class EnumConfigUtil {
 
-  private static MessageSource messageSource;
+  private final MessageSource messageSource;
 
-  public static boolean resolveBooleanFlag(String activePropertyKey) {
-    return Boolean.parseBoolean(
-        messageSource.getMessage(activePropertyKey, null, Locale.getDefault()));
+  public boolean resolveBooleanFlag(String activePropertyKey) {
+    return Boolean.parseBoolean(labelOf(activePropertyKey, Locale.getDefault()));
   }
 
-  @Override
-  public void setMessageSource(MessageSource source) {
-    messageSource = source;
-  }
-
-  public static String labelOf(String key, Locale locale) {
-    return messageSource.getMessage(key, null, locale);
+  public String labelOf(String key, Locale locale) {
+    try {
+      return messageSource.getMessage(key, null, locale);
+    } catch (NoSuchMessageException nse) {
+      log.error("Message Not Found for " + key + locale, nse);
+    }
+    return "BJK";
   }
 }

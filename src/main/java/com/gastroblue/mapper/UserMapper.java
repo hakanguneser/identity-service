@@ -29,7 +29,7 @@ public class UserMapper {
         .password(password)
         .departments(DelimitedStringUtil.join(request.departments()))
         .applicationRole(request.applicationRole())
-        .language(Language.TR)
+        .language(Language.defaultLang())
         .email(request.email())
         .active(true)
         .phone(request.phone())

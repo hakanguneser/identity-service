@@ -11,8 +11,6 @@ import com.gastroblue.model.request.ApplicationPropertyUpdateRequest;
 import com.gastroblue.model.response.ApplicationPropertyResponse;
 import com.gastroblue.model.shared.EnumDisplay;
 import com.gastroblue.repository.ApplicationPropertyRepository;
-import com.gastroblue.util.enums.IConfigurableEnum;
-import com.gastroblue.util.enums.IDisplayableEnum;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -52,21 +50,11 @@ public class ApplicationPropertyService {
       value = "dropdownItems",
       key =
           "#enumClass.name + '_' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale().toLanguageTag()")
-  public <T extends Enum<T> & IDisplayableEnum> List<EnumDisplay> getDropdownItems(
-      Class<T> enumClass) {
+  public <T extends Enum<T>> List<EnumDisplay> getDropdownItems(Class<T> enumClass) {
     if (enumClass == null || enumClass.getEnumConstants() == null) {
       return Collections.emptyList();
     }
-    return Arrays.stream(enumClass.getEnumConstants())
-        .filter(
-            e -> {
-              if (e instanceof IConfigurableEnum configurableEnum) {
-                return configurableEnum.isActive();
-              }
-              return true;
-            })
-        .map(IDisplayableEnum::toDropdownItem)
-        .toList();
+    return Arrays.stream(enumClass.getEnumConstants()).map(EnumDisplay::of).toList();
   }
 
   public List<ApplicationPropertyResponse> saveBatch(

@@ -1,16 +1,12 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.util.EnumConfigUtil;
-import com.gastroblue.util.enums.IConfigurableEnum;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRole implements IConfigurableEnum {
+public enum ApplicationRole {
   ADMIN(Set.of(), 1),
   GROUP_MANAGER(Set.of(ADMIN), 2),
   ZONE_MANAGER(Set.of(ADMIN, GROUP_MANAGER), 3),
@@ -19,15 +15,7 @@ public enum ApplicationRole implements IConfigurableEnum {
   STAFF(Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR), 6);
 
   private final Set<ApplicationRole> visibleFor;
-  private final int level; // TODO : burada leveli kullanmak gerekiyor
-
-  public boolean isPlannable() {
-    return EnumConfigUtil.resolveBooleanFlag(getPlannableEnumKey());
-  }
-
-  public String getPlannableEnumKey() {
-    return "enum." + getEnumNameKebabCase() + "." + getEnumCode() + ".is-plannable";
-  }
+  private final int level;
 
   public boolean isVisibleFor(ApplicationRole role) {
     return visibleFor.contains(role);
@@ -63,12 +51,5 @@ public enum ApplicationRole implements IConfigurableEnum {
 
   public boolean isSupervisorAndAbove() {
     return Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR).contains(this);
-  }
-
-  public static List<ApplicationRole> activeAndPlannableRoles() {
-    return Arrays.stream(ApplicationRole.values())
-        .filter(ApplicationRole::isPlannable)
-        .filter(ApplicationRole::isActive)
-        .toList();
   }
 }

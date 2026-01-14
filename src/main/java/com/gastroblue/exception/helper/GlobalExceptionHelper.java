@@ -11,6 +11,7 @@ import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.model.exception.ValidationError;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.ApplicationPropertyService;
+import com.gastroblue.util.EnumConfigUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHelper {
   private final ApplicationPropertyService errorMessageService;
+  private final EnumConfigUtil enumConfigUtil;
 
   @ExceptionHandler({IllegalDefinitionException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -175,6 +177,8 @@ public class GlobalExceptionHelper {
   }
 
   private Language sessionLanguage() {
-    return IJwtService.findSessionUser().getSessionLanguage();
+    return IJwtService.findSessionUser() == null
+        ? Language.defaultLang()
+        : IJwtService.findSessionUser().getSessionLanguage();
   }
 }

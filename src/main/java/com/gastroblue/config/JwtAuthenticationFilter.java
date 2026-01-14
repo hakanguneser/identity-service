@@ -59,7 +59,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (MalformedJwtException | ExpiredJwtException e) {
       response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
-      response.getWriter().print(EXPIRED_JWT_TOKEN.getLabel());
+      response
+          .getWriter()
+          .print(com.gastroblue.model.shared.EnumDisplay.of(EXPIRED_JWT_TOKEN).getDisplay());
     }
   }
 }

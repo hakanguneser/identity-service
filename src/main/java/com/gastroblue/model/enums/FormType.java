@@ -1,13 +1,12 @@
 package com.gastroblue.model.enums;
 
 import com.gastroblue.exception.ValidationException;
-import com.gastroblue.util.enums.IConfigurableEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum FormType implements IConfigurableEnum {
+public enum FormType {
   PERSONNEL,
   ACTIVITY,
   CHECKLIST,

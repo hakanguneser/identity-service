@@ -3,8 +3,8 @@ spring:
     name: identity-service
 
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:node_adapter}
-    username: ${DATABASE_USERNAME:node_adapter_admin}
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:identity}
+    username: ${DATABASE_USERNAME:identity_admin}
     password: ${DATABASE_PASSWORD:postgres}
     hikari:
       connection-init-sql: SET TIMEZONE TO 'Europe/Istanbul'
@@ -20,9 +20,16 @@ spring:
 
   jpa:
     open-in-view: false
-    hibernate:
-      ddl-auto: validate
     show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: ${SERVER_PORT:7102}
+
+admin:
+  registration:
+    enabled: true

@@ -1,12 +1,9 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.util.enums.IDisplayableEnum;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public enum ErrorCode implements IDisplayableEnum {
+public enum ErrorCode {
   COMPANY_NOT_FOUND,
   USER_NOT_ALLOWED_FOR_REGISTRATION,
   COMPANY_MASTER_FORM_NOT_FOUND,
@@ -73,8 +70,7 @@ public enum ErrorCode implements IDisplayableEnum {
   ITEM_HAS_WITHOUT_QUESTION,
   COMPANY_GROUP_BULK_INSERT_EXCEPTION;
 
-  @Override
   public String getMessageKey() {
-    return "error.message." + getEnumCode();
+    return "error.message." + name().toLowerCase(java.util.Locale.ENGLISH).replace("_", "-");
   }
 }

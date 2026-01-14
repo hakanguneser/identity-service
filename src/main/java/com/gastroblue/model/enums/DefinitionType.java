@@ -1,8 +1,6 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.util.enums.IDisplayableEnum;
-
-public enum DefinitionType implements IDisplayableEnum {
+public enum DefinitionType {
   COMPANY,
   COMPANY_GROUP,
   PERSONNEL_GROUP,
@@ -17,8 +15,7 @@ public enum DefinitionType implements IDisplayableEnum {
   COMPANY_FORM_TEMPLATE,
   APPLICATION_PROPERTY;
 
-  @Override
   public String getMessageKey() {
-    return "definition.type." + getEnumCode();
+    return "definition.type." + name().toLowerCase(java.util.Locale.ENGLISH).replace("_", "-");
   }
 }

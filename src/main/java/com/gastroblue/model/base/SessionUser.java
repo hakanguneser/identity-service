@@ -55,7 +55,7 @@ public record SessionUser(
   }
 
   public Language getSessionLanguage() {
-    Language language = Language.TR;
+    Language language = Language.defaultLang();
     if (this.language() != null) {
       language = this.language();
     }
