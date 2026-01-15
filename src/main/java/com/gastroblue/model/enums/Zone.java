@@ -1,9 +1,10 @@
 package com.gastroblue.model.enums;
 
+import com.gastroblue.model.base.ConfigurableEnum;
 import lombok.Getter;
 
 @Getter
-public enum Zone {
+public enum Zone implements ConfigurableEnum {
   ZONE_1,
   ZONE_2,
   ZONE_3,

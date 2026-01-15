@@ -1,6 +1,8 @@
 package com.gastroblue.model.enums;
 
-public enum CompanySegment5Values {
+import com.gastroblue.model.base.ConfigurableEnum;
+
+public enum CompanySegment5Values implements ConfigurableEnum {
   SEGMENT_5_VALUE_1,
   SEGMENT_5_VALUE_2,
   SEGMENT_5_VALUE_3,

@@ -16,9 +16,9 @@ import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.BatchUserDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.service.IJwtService;
-import com.gastroblue.service.impl.ApplicationPropertyService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
+import com.gastroblue.service.impl.ErrorMessageService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class UserDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final CompanyService companyService;
   private final PasswordEncoder passwordEncoder;
-  private final ApplicationPropertyService appPropertyService;
+  private final ErrorMessageService appPropertyService;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);

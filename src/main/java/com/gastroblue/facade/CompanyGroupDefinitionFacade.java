@@ -30,6 +30,7 @@ public class CompanyGroupDefinitionFacade {
 
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
+  private final com.gastroblue.service.EnumConfigurationService enumService;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
     return CompanyGroupMapper.toResponse(companyGroupService.save(request));
@@ -50,14 +51,14 @@ public class CompanyGroupDefinitionFacade {
 
   public List<CompanyDefinitionResponse> findCompaniesByCompanyGroupId(String companyGroupId) {
     return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(CompanyGroupMapper::toResponse)
+        .map(entity -> CompanyGroupMapper.toResponse(entity, enumService))
         .toList();
   }
 
   public CompanyDefinitionResponse findCompanyByCompanyIdAndCompanyGroupId(
       String companyGroupId, String companyId) {
     CompanyEntity byId = companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(byId);
+    return CompanyGroupMapper.toResponse(byId, enumService);
   }
 
   public CompanyDefinitionResponse saveCompany(
@@ -65,7 +66,7 @@ public class CompanyGroupDefinitionFacade {
     companyGroupService.findById(companyGroupId);
     CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(companyRequest, companyGroupId);
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
-    return CompanyGroupMapper.toResponse(savedCompany);
+    return CompanyGroupMapper.toResponse(savedCompany, enumService);
   }
 
   public CompanyDefinitionResponse updateCompany(
@@ -85,24 +86,24 @@ public class CompanyGroupDefinitionFacade {
     entityToBeUpdated.setSegment4(companyRequest.segment4());
     entityToBeUpdated.setSegment5(companyRequest.segment5());
     CompanyEntity savedCompany = companyService.save(entityToBeUpdated);
-    return CompanyGroupMapper.toResponse(savedCompany);
+    return CompanyGroupMapper.toResponse(savedCompany, enumService);
   }
 
   public CompanyDefinitionResponse findByCompanyId(String companyId) {
     CompanyEntity company = companyService.findOrThrow(companyId);
-    return CompanyGroupMapper.toResponse(company);
+    return CompanyGroupMapper.toResponse(company, enumService);
   }
 
   public List<CompanyDefinitionResponse> findByCompanyGroupId(String companyGroupId) {
     return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(CompanyGroupMapper::toResponse)
+        .map(entity -> CompanyGroupMapper.toResponse(entity, enumService))
         .toList();
   }
 
   public List<CompanyDefinitionResponse> findByCompanyGroupAndZone(
       String companyGroupId, Zone zone) {
     return companyService.findByCompanyGroupIdAndZone(companyGroupId, zone).stream()
-        .map(CompanyGroupMapper::toResponse)
+        .map(entity -> CompanyGroupMapper.toResponse(entity, enumService))
         .toList();
   }
 
@@ -126,7 +127,7 @@ public class CompanyGroupDefinitionFacade {
 
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(companyEntity);
+    return CompanyGroupMapper.toResponse(companyEntity, enumService);
   }
 
   @Transactional

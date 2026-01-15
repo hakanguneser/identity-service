@@ -13,6 +13,7 @@ import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
 import com.gastroblue.model.response.AuthUserCompanyResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.service.EnumConfigurationService;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -67,26 +68,46 @@ public class CompanyGroupMapper {
         .build();
   }
 
-  public static CompanyDefinitionResponse toResponse(final CompanyEntity entity) {
+  public static CompanyDefinitionResponse toResponse(
+      final CompanyEntity entity, final EnumConfigurationService service) {
     return CompanyDefinitionResponse.builder()
         .companyId(entity.getId())
         .companyGroupId(entity.getCompanyGroupId())
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(entity.getCity())
-        .country(entity.getCountry())
-        .zone(entity.getZone())
-        .segment1(entity.getSegment1())
-        .segment2(entity.getSegment2())
-        .segment3(entity.getSegment3())
-        .segment4(entity.getSegment4())
-        .segment5(entity.getSegment5())
+        .city(entity.getCity() != null ? entity.getCity().resolve(service, entity.getId()) : null)
+        .country(
+            entity.getCountry() != null
+                ? entity.getCountry().resolve(service, entity.getId())
+                : null)
+        .zone(entity.getZone() != null ? entity.getZone().resolve(service, entity.getId()) : null)
+        .segment1(
+            entity.getSegment1() != null
+                ? entity.getSegment1().resolve(service, entity.getId())
+                : null)
+        .segment2(
+            entity.getSegment2() != null
+                ? entity.getSegment2().resolve(service, entity.getId())
+                : null)
+        .segment3(
+            entity.getSegment3() != null
+                ? entity.getSegment3().resolve(service, entity.getId())
+                : null)
+        .segment4(
+            entity.getSegment4() != null
+                ? entity.getSegment4().resolve(service, entity.getId())
+                : null)
+        .segment5(
+            entity.getSegment5() != null
+                ? entity.getSegment5().resolve(service, entity.getId())
+                : null)
         .isActive(entity.isActive())
         .build();
   }
 
-  public static AuthUserCompanyResponse toAuthResponse(final CompanyEntity entity) {
+  public static AuthUserCompanyResponse toAuthResponse(
+      final CompanyEntity entity, final EnumConfigurationService service) {
     return AuthUserCompanyResponse.builder()
         .companyId(entity.getId())
         .companyGroupId(entity.getCompanyGroupId())
@@ -96,11 +117,26 @@ public class CompanyGroupMapper {
         .city(entity.getCity())
         .country(entity.getCountry())
         .zone(entity.getZone())
-        .segment1(entity.getSegment1())
-        .segment2(entity.getSegment2())
-        .segment3(entity.getSegment3())
-        .segment4(entity.getSegment4())
-        .segment5(entity.getSegment5())
+        .segment1(
+            entity.getSegment1() != null
+                ? entity.getSegment1().resolve(service, entity.getId())
+                : null)
+        .segment2(
+            entity.getSegment2() != null
+                ? entity.getSegment2().resolve(service, entity.getId())
+                : null)
+        .segment3(
+            entity.getSegment3() != null
+                ? entity.getSegment3().resolve(service, entity.getId())
+                : null)
+        .segment4(
+            entity.getSegment4() != null
+                ? entity.getSegment4().resolve(service, entity.getId())
+                : null)
+        .segment5(
+            entity.getSegment5() != null
+                ? entity.getSegment5().resolve(service, entity.getId())
+                : null)
         .isActive(entity.isActive())
         .build();
   }

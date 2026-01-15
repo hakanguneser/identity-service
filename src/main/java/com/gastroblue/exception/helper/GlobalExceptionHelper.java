@@ -10,7 +10,7 @@ import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.model.exception.ValidationError;
 import com.gastroblue.service.IJwtService;
-import com.gastroblue.service.impl.ApplicationPropertyService;
+import com.gastroblue.service.impl.ErrorMessageService;
 import com.gastroblue.util.EnumConfigUtil;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHelper {
-  private final ApplicationPropertyService errorMessageService;
+  private final ErrorMessageService errorMessageService;
   private final EnumConfigUtil enumConfigUtil;
 
   @ExceptionHandler({IllegalDefinitionException.class})
