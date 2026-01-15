@@ -4,7 +4,7 @@ import static com.gastroblue.model.enums.ErrorCode.*;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.exception.base.AbstractRuntimeException;
-import com.gastroblue.model.entity.ApplicationPropertyEntity;
+import com.gastroblue.model.entity.ErrorMessageEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.exception.ApplicationError;
@@ -37,18 +37,11 @@ public class GlobalExceptionHelper {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Object> handleGlobalException(final IllegalDefinitionException exception) {
     Language sessionLanguage = sessionLanguage();
-    ApplicationPropertyEntity definitionType =
-        errorMessageService.findOrCreatePropertyValue(
-            exception.getDefinitionType().getMessageKey(), sessionLanguage);
-    ApplicationPropertyEntity errorProp =
-        errorMessageService.findOrCreatePropertyValue(
-            exception.getErrorCode().getMessageKey(), sessionLanguage);
-
+    ErrorMessageEntity errorProp =
+        errorMessageService.findOrCreatePropertyValue(exception.getErrorCode(), sessionLanguage);
     ApplicationError applicationError =
         ApplicationError.builder()
-            .errorMessage(
-                String.format(
-                    "%s : %s", errorProp.getPropertyValue(), definitionType.getPropertyValue()))
+            .errorMessage(errorProp.getMessage())
             .errorCode(exception.getErrorCode())
             .referenceId(errorProp.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
@@ -62,13 +55,12 @@ public class GlobalExceptionHelper {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Object> handleGlobalException(final AbstractRuntimeException exception) {
 
-    ApplicationPropertyEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(
-            exception.getErrorCode().getMessageKey(), sessionLanguage());
+    ErrorMessageEntity propertyEntity =
+        errorMessageService.findOrCreatePropertyValue(exception.getErrorCode(), sessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
-            .errorMessage(propertyEntity.getPropertyValue())
+            .errorMessage(propertyEntity.getMessage())
             .errorCode(exception.getErrorCode())
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
@@ -83,13 +75,12 @@ public class GlobalExceptionHelper {
   public ResponseEntity<Object> handleBadCredentialsException(
       final BadCredentialsException exception) {
 
-    ApplicationPropertyEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(
-            UNAUTHORIZED_USER.getMessageKey(), sessionLanguage());
+    ErrorMessageEntity propertyEntity =
+        errorMessageService.findOrCreatePropertyValue(UNAUTHORIZED_USER, sessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
-            .errorMessage(propertyEntity.getPropertyValue())
+            .errorMessage(propertyEntity.getMessage())
             .errorCode(ErrorCode.UNAUTHORIZED_USER)
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.UNAUTHORIZED)
@@ -115,13 +106,12 @@ public class GlobalExceptionHelper {
                         .build())
             .toList();
 
-    ApplicationPropertyEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(
-            INVALID_REQUEST_BODY.getMessageKey(), sessionLanguage());
+    ErrorMessageEntity propertyEntity =
+        errorMessageService.findOrCreatePropertyValue(INVALID_REQUEST_BODY, sessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
-            .errorMessage(propertyEntity.getPropertyValue())
+            .errorMessage(propertyEntity.getMessage())
             .errorCode(INVALID_REQUEST_BODY)
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
@@ -137,14 +127,13 @@ public class GlobalExceptionHelper {
   public ResponseEntity<Object> handleDatabaseException(
       final DataIntegrityViolationException exception) {
 
-    ApplicationPropertyEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(
-            DATA_INTEGRITY_VIOLATION.getMessageKey(), sessionLanguage());
+    ErrorMessageEntity propertyEntity =
+        errorMessageService.findOrCreatePropertyValue(DATA_INTEGRITY_VIOLATION, sessionLanguage());
 
     log.error("Database exception: ", exception);
     ApplicationError applicationError =
         ApplicationError.builder()
-            .errorMessage(propertyEntity.getPropertyValue())
+            .errorMessage(propertyEntity.getMessage())
             .errorCode(DATA_INTEGRITY_VIOLATION)
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
@@ -159,13 +148,12 @@ public class GlobalExceptionHelper {
   public ResponseEntity<Object> handleInvalidEnumValue(
       final HttpMessageNotReadableException exception) {
 
-    ApplicationPropertyEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(
-            INVALID_ENUM_VALUE.getMessageKey(), sessionLanguage());
+    ErrorMessageEntity propertyEntity =
+        errorMessageService.findOrCreatePropertyValue(INVALID_ENUM_VALUE, sessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
-            .errorMessage(propertyEntity.getPropertyValue())
+            .errorMessage(propertyEntity.getMessage())
             .errorCode(INVALID_ENUM_VALUE)
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)

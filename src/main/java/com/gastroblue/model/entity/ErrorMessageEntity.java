@@ -1,6 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,26 +15,24 @@ import org.hibernate.annotations.NaturalId;
 @Builder
 @Entity
 @Table(
-    name = "APPLICATION_PROPERTIES",
+    name = "ERROR_MESSAGES",
     uniqueConstraints = {
       @UniqueConstraint(
           name = "uk_app_properties_key_lang",
-          columnNames = {"PROPERTY_KEY", "LANGUAGE"})
+          columnNames = {"ERROR_CODE", "LANGUAGE"})
     })
-public class ApplicationPropertyEntity extends Auditable {
+public class ErrorMessageEntity extends Auditable {
 
   @NaturalId
-  @Column(name = "PROPERTY_KEY", nullable = false, length = 500, updatable = false)
-  private String propertyKey;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "ERROR_CODE", nullable = false, length = 500, updatable = false)
+  private ErrorCode errorCode;
 
   @NaturalId
   @Column(name = "LANGUAGE", nullable = false, length = 5, updatable = false)
   @Enumerated(EnumType.STRING)
   private Language language;
 
-  @Column(name = "PROPERTY_VALUE", nullable = false, length = 1000)
-  private String propertyValue;
-
-  @Column(name = "DESCRIPTION", length = 1000)
-  private String description;
+  @Column(name = "MESSAGE", nullable = false, length = 1000)
+  private String message;
 }

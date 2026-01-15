@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-@RequestMapping("v1/definition/users")
+@RequestMapping("api/v1/definition/users")
 @RequiredArgsConstructor
 public class UserDefinitionController {
   private final UserDefinitionFacade userFacade;

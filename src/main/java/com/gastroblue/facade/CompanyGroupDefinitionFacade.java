@@ -13,7 +13,6 @@ import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.service.IJwtService;
-import com.gastroblue.service.impl.ApplicationPropertyService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ public class CompanyGroupDefinitionFacade {
 
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
-  private final ApplicationPropertyService appPropertyService;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
     return CompanyGroupMapper.toResponse(companyGroupService.save(request));

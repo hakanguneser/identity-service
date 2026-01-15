@@ -1,6 +1,5 @@
 package com.gastroblue.service.impl;
 
-import static com.gastroblue.model.enums.DefinitionType.COMPANY_GROUP;
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
 import com.gastroblue.exception.IllegalDefinitionException;
@@ -31,7 +30,7 @@ public class CompanyGroupService {
     CompanyGroupEntity entityToBeUpdate =
         companyGroupRepository
             .findById(companyGroupId)
-            .orElseThrow(() -> new IllegalDefinitionException(COMPANY_GROUP));
+            .orElseThrow(IllegalDefinitionException::new);
     entityToBeUpdate.setName(request.name());
     entityToBeUpdate.setGroupCode(request.groupCode());
     entityToBeUpdate.setGroupMail(join(request.groupMails()));
@@ -48,7 +47,7 @@ public class CompanyGroupService {
         ? null
         : companyGroupRepository
             .findById(companyGroupId)
-            .orElseThrow(() -> new IllegalDefinitionException(COMPANY_GROUP));
+            .orElseThrow(IllegalDefinitionException::new);
   }
 
   public List<CompanyGroupEntity> findMyCompanyGroups() {
@@ -64,6 +63,6 @@ public class CompanyGroupService {
     return companyGroupRepository
         .findById(companyGroupId)
         .map(CompanyGroupMapper::toBase)
-        .orElseThrow(() -> new IllegalDefinitionException(COMPANY_GROUP));
+        .orElseThrow(IllegalDefinitionException::new);
   }
 }

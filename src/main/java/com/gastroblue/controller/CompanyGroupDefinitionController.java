@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-@RequestMapping(value = "v1/definition/company-groups")
+@RequestMapping(value = "api/v1/definition/company-groups")
 @RequiredArgsConstructor
 public class CompanyGroupDefinitionController {
 

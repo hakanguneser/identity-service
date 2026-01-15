@@ -1,7 +1,5 @@
 package com.gastroblue.service.impl;
 
-import static com.gastroblue.model.enums.DefinitionType.COMPANY;
-
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.Company;
@@ -24,13 +22,11 @@ public class CompanyService {
     return companyRepository
         .findById(id)
         .map(CompanyGroupMapper::toBase)
-        .orElseThrow(() -> new IllegalDefinitionException(COMPANY));
+        .orElseThrow(IllegalDefinitionException::new);
   }
 
   public CompanyEntity findOrThrow(String id) {
-    return companyRepository
-        .findById(id)
-        .orElseThrow(() -> new IllegalDefinitionException(COMPANY));
+    return companyRepository.findById(id).orElseThrow(IllegalDefinitionException::new);
   }
 
   public List<CompanyEntity> findByCompanyGroupId(String companyGroupId) {
@@ -49,7 +45,7 @@ public class CompanyService {
     return companyRepository
         .findById(companyId)
         .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
-        .orElseThrow(() -> new IllegalDefinitionException(COMPANY));
+        .orElseThrow(IllegalDefinitionException::new);
   }
 
   public CompanyEntity toggleCompanyStatus(String companyGroupId, String companyId) {
@@ -57,7 +53,7 @@ public class CompanyService {
         companyRepository
             .findById(companyId)
             .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
-            .orElseThrow(() -> new IllegalDefinitionException(COMPANY));
+            .orElseThrow(IllegalDefinitionException::new);
 
     entity.setActive(!entity.isActive());
     return companyRepository.save(entity);
