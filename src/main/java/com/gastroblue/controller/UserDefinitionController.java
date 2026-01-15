@@ -1,13 +1,13 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.UserDefinitionFacade;
+import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.BatchUserSaveRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.BatchUserDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.EnumDisplay;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -80,22 +80,22 @@ public class UserDefinitionController {
   }
 
   @GetMapping("dropdown/application-roles")
-  public ResponseEntity<List<EnumDisplay>> findAllApplicationRoles() {
+  public ResponseEntity<List<ApplicationRole>> findAllApplicationRoles() {
     return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")
-  public ResponseEntity<List<EnumDisplay>> findAllDepartments() {
+  public ResponseEntity<List<Department>> findAllDepartments() {
     return ResponseEntity.ok(userFacade.findAllDepartments());
   }
 
   @GetMapping("dropdown/genders")
-  public ResponseEntity<List<EnumDisplay>> findAllGenders() {
+  public ResponseEntity<List<Gender>> findAllGenders() {
     return ResponseEntity.ok(userFacade.findAllGenders());
   }
 
   @GetMapping("dropdown/zones")
-  public ResponseEntity<List<EnumDisplay>> findAllZones() {
+  public ResponseEntity<List<Zone>> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
   }
 }

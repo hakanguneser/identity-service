@@ -1,12 +1,12 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.CompanyGroupDefinitionFacade;
+import com.gastroblue.model.enums.*;
 import com.gastroblue.model.enums.Country;
 import com.gastroblue.model.request.*;
 import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
-import com.gastroblue.model.shared.EnumDisplay;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -102,43 +102,43 @@ public class CompanyGroupDefinitionController {
   }
 
   @GetMapping("/dropdown/zones")
-  public ResponseEntity<List<EnumDisplay>> findZones() {
+  public ResponseEntity<List<Zone>> findZones() {
     return ResponseEntity.ok(companyFacade.findZones());
   }
 
   @GetMapping("/dropdown/countries")
-  public ResponseEntity<List<EnumDisplay>> findCountries() {
+  public ResponseEntity<List<Country>> findCountries() {
     return ResponseEntity.ok(companyFacade.findCountries());
   }
 
   @GetMapping("/dropdown/country/{country}/cities")
-  public ResponseEntity<List<EnumDisplay>> findCities(
+  public ResponseEntity<List<City>> findCities(
       @PathVariable(name = "country") final Country country) {
     return ResponseEntity.ok(companyFacade.findCities(country));
   }
 
   @GetMapping("/dropdown/segment1")
-  public ResponseEntity<List<EnumDisplay>> findSegment1() {
+  public ResponseEntity<List<CompanySegment1Values>> findSegment1() {
     return ResponseEntity.ok(companyFacade.findSegment1());
   }
 
   @GetMapping("/dropdown/segment2")
-  public ResponseEntity<List<EnumDisplay>> findSegment2() {
+  public ResponseEntity<List<CompanySegment2Values>> findSegment2() {
     return ResponseEntity.ok(companyFacade.findSegment2());
   }
 
   @GetMapping("/dropdown/segment3")
-  public ResponseEntity<List<EnumDisplay>> findSegment3() {
+  public ResponseEntity<List<CompanySegment3Values>> findSegment3() {
     return ResponseEntity.ok(companyFacade.findSegment3());
   }
 
   @GetMapping("/dropdown/segment4")
-  public ResponseEntity<List<EnumDisplay>> findSegment4() {
+  public ResponseEntity<List<CompanySegment4Values>> findSegment4() {
     return ResponseEntity.ok(companyFacade.findSegment4());
   }
 
   @GetMapping("/dropdown/segment5")
-  public ResponseEntity<List<EnumDisplay>> findSegment5() {
+  public ResponseEntity<List<CompanySegment5Values>> findSegment5() {
     return ResponseEntity.ok(companyFacade.findSegment5());
   }
 }

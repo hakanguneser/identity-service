@@ -2,12 +2,10 @@ package com.gastroblue.model.base;
 
 import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gastroblue.model.enums.*;
-import com.gastroblue.model.shared.EnumDisplay;
 import java.util.List;
 import lombok.*;
 
@@ -51,31 +49,6 @@ public class User {
 
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private Zone zone;
-
-  @JsonGetter("departments")
-  public List<EnumDisplay> getDepartmentDisplay() {
-    return EnumDisplay.of(departments);
-  }
-
-  @JsonGetter("applicationRole")
-  public EnumDisplay getApplicationRoleDisplay() {
-    return EnumDisplay.of(applicationRole);
-  }
-
-  @JsonGetter("language")
-  public EnumDisplay getLanguageDisplay() {
-    return EnumDisplay.of(language);
-  }
-
-  @JsonGetter("gender")
-  public EnumDisplay getGenderDisplay() {
-    return EnumDisplay.of(gender);
-  }
-
-  @JsonGetter("zone")
-  public EnumDisplay getZoneDisplay() {
-    return EnumDisplay.of(zone);
-  }
 
   public User(
       String userId,

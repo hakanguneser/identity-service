@@ -15,7 +15,6 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.BatchUserDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.EnumDisplay;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.ApplicationPropertyService;
 import com.gastroblue.service.impl.CompanyGroupService;
@@ -23,6 +22,7 @@ import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -190,7 +190,7 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  public List<EnumDisplay> findAllApplicationRoles() {
+  public List<ApplicationRole> findAllApplicationRoles() {
     SessionUser sessionUser = IJwtService.findSessionUser();
     ApplicationRole role = sessionUser != null ? sessionUser.applicationRole() : null;
 
@@ -198,12 +198,11 @@ public class UserDefinitionFacade {
       return Collections.emptyList();
     }
 
-    return appPropertyService.getDropdownItems(ApplicationRole.class).stream()
+    return Arrays.stream(ApplicationRole.values())
         .filter(
             item -> {
               try {
-                ApplicationRole candidate = ApplicationRole.valueOf(item.getKey());
-                return candidate.isVisibleFor(role);
+                return item.isVisibleFor(role);
               } catch (IllegalArgumentException e) {
                 return false;
               }
@@ -211,16 +210,16 @@ public class UserDefinitionFacade {
         .toList();
   }
 
-  public List<EnumDisplay> findAllDepartments() {
-    return appPropertyService.getDropdownItems(Department.class);
+  public List<Department> findAllDepartments() {
+    return Arrays.asList(Department.values());
   }
 
-  public List<EnumDisplay> findAllZones() {
-    return appPropertyService.getDropdownItems(Zone.class);
+  public List<Zone> findAllZones() {
+    return Arrays.asList(Zone.values());
   }
 
-  public List<EnumDisplay> findAllGenders() {
-    return appPropertyService.getDropdownItems(Gender.class);
+  public List<Gender> findAllGenders() {
+    return Arrays.asList(Gender.values());
   }
 
   public BatchUserDefinitionResponse saveUsersBatch(List<UserSaveRequest> items) {

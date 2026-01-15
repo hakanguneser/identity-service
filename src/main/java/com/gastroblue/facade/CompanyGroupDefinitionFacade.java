@@ -12,12 +12,12 @@ import com.gastroblue.model.request.*;
 import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
-import com.gastroblue.model.shared.EnumDisplay;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.ApplicationPropertyService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -157,36 +157,36 @@ public class CompanyGroupDefinitionFacade {
     return successes;
   }
 
-  public List<EnumDisplay> findZones() {
-    return appPropertyService.getDropdownItems(Zone.class);
+  public List<Zone> findZones() {
+    return Arrays.asList(Zone.values());
   }
 
-  public List<EnumDisplay> findCountries() {
-    return appPropertyService.getDropdownItems(Country.class);
+  public List<Country> findCountries() {
+    return Arrays.asList(Country.values());
   }
 
-  public List<EnumDisplay> findCities(final Country country) {
+  public List<City> findCities(final Country country) {
     // TODO: add country to request
-    return appPropertyService.getDropdownItems(City.class);
+    return Arrays.asList(City.values());
   }
 
-  public List<EnumDisplay> findSegment1() {
-    return appPropertyService.getDropdownItems(CompanySegment1Values.class);
+  public List<CompanySegment1Values> findSegment1() {
+    return Arrays.asList(CompanySegment1Values.values());
   }
 
-  public List<EnumDisplay> findSegment2() {
-    return appPropertyService.getDropdownItems(CompanySegment2Values.class);
+  public List<CompanySegment2Values> findSegment2() {
+    return Arrays.asList(CompanySegment2Values.values());
   }
 
-  public List<EnumDisplay> findSegment3() {
-    return appPropertyService.getDropdownItems(CompanySegment3Values.class);
+  public List<CompanySegment3Values> findSegment3() {
+    return Arrays.asList(CompanySegment3Values.values());
   }
 
-  public List<EnumDisplay> findSegment4() {
-    return appPropertyService.getDropdownItems(CompanySegment4Values.class);
+  public List<CompanySegment4Values> findSegment4() {
+    return Arrays.asList(CompanySegment4Values.values());
   }
 
-  public List<EnumDisplay> findSegment5() {
-    return appPropertyService.getDropdownItems(CompanySegment5Values.class);
+  public List<CompanySegment5Values> findSegment5() {
+    return Arrays.asList(CompanySegment5Values.values());
   }
 }
