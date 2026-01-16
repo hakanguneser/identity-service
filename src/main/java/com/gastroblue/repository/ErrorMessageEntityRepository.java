@@ -7,6 +7,5 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ErrorMessageEntityRepository extends JpaRepository<ErrorMessageEntity, String> {
-  Optional<ErrorMessageEntity> findByErrorCodeAfterAndLanguage(
-      ErrorCode errorCode, Language language);
+  Optional<ErrorMessageEntity> findByErrorCodeAndLanguage(ErrorCode errorCode, Language language);
 }
