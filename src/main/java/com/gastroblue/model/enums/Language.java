@@ -1,13 +1,13 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.model.base.ConfigurableEnum;
+import com.gastroblue.model.base.GlobalConfigurableEnum;
 import java.util.Locale;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
-public enum Language implements ConfigurableEnum {
+@Getter
+public enum Language implements GlobalConfigurableEnum {
   TR;
 
   public static Language valueOf(Locale language) {

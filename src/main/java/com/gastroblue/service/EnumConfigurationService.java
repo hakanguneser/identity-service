@@ -2,6 +2,7 @@ package com.gastroblue.service;
 
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.base.ConfigurableEnum;
+import com.gastroblue.model.base.GlobalConfigurableEnum;
 import com.gastroblue.model.entity.EnumValueConfiguration;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
@@ -28,6 +29,9 @@ public class EnumConfigurationService {
   @Transactional
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
       Class<T> enumClass, String companyGroupId) {
+    if (GlobalConfigurableEnum.class.isAssignableFrom(enumClass)) {
+      companyGroupId = "*";
+    }
     String enumType = enumClass.getSimpleName();
     Language sessionLanguage = IJwtService.getSessionLanguage();
 
@@ -86,6 +90,10 @@ public class EnumConfigurationService {
       return null;
     }
 
+    if (enumValue instanceof GlobalConfigurableEnum) {
+      companyGroupId = "*";
+    }
+
     String enumType = enumValue.getClass().getSimpleName();
     String key = enumValue.name();
     Language sessionLanguage = IJwtService.getSessionLanguage();
@@ -122,7 +130,8 @@ public class EnumConfigurationService {
             .findById(id)
             .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
 
-    if (!entity.getCompanyGroupId().equals(companyGroupId)) {
+    if (!entity.getCompanyGroupId().equals("*")
+        && !entity.getCompanyGroupId().equals(companyGroupId)) {
       throw new ValidationException(ErrorCode.COMPANY_MISMATCH);
     }
 
@@ -132,9 +141,14 @@ public class EnumConfigurationService {
   @Transactional
   @CacheEvict(value = "enum_configs", allEntries = true)
   public EnumValueConfiguration save(EnumConfigurationSaveRequest request) {
+    String finalCompanyGroupId = request.companyGroupId();
+    if (isGlobal(request.enumType())) {
+      finalCompanyGroupId = "*";
+    }
+
     EnumValueConfiguration entity =
         EnumValueConfiguration.builder()
-            .companyGroupId(request.companyGroupId())
+            .companyGroupId(finalCompanyGroupId)
             .enumType(request.enumType())
             .enumKey(request.enumKey())
             .language(request.language())
@@ -161,5 +175,14 @@ public class EnumConfigurationService {
   @Transactional(readOnly = true)
   public List<EnumValueConfiguration> findAll(String companyGroupId) {
     return repository.findByCompanyGroupId(companyGroupId);
+  }
+
+  private boolean isGlobal(String enumType) {
+    try {
+      Class<?> clazz = Class.forName("com.gastroblue.model.enums." + enumType);
+      return GlobalConfigurableEnum.class.isAssignableFrom(clazz);
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 }
