@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EnumValueConfigurationRepository
     extends JpaRepository<EnumValueConfiguration, String> {
+
   List<EnumValueConfiguration> findByCompanyGroupIdAndEnumTypeAndLanguage(
       String companyGroupId, String enumType, Language language);
+
+  List<EnumValueConfiguration> findByCompanyGroupId(String companyGroupId);
 }

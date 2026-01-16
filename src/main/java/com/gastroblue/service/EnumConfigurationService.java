@@ -1,8 +1,12 @@
 package com.gastroblue.service;
 
+import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.entity.EnumValueConfiguration;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
+import com.gastroblue.model.request.EnumConfigurationSaveRequest;
+import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
 import java.util.ArrayList;
@@ -10,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,5 +113,53 @@ public class EnumConfigurationService {
     }
 
     return ResolvedEnum.<T>builder().key(enumValue).display(config.getLabel()).build();
+  }
+
+  @Transactional(readOnly = true)
+  public EnumValueConfiguration findById(String id, String companyGroupId) {
+    EnumValueConfiguration entity =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
+
+    if (!entity.getCompanyGroupId().equals(companyGroupId)) {
+      throw new ValidationException(ErrorCode.COMPANY_MISMATCH);
+    }
+
+    return entity;
+  }
+
+  @Transactional
+  @CacheEvict(value = "enum_configs", allEntries = true)
+  public EnumValueConfiguration save(EnumConfigurationSaveRequest request) {
+    EnumValueConfiguration entity =
+        EnumValueConfiguration.builder()
+            .companyGroupId(request.companyGroupId())
+            .enumType(request.enumType())
+            .enumKey(request.enumKey())
+            .language(request.language())
+            .label(request.label())
+            .active(request.active())
+            .build();
+    return repository.save(entity);
+  }
+
+  @Transactional
+  @CacheEvict(value = "enum_configs", allEntries = true)
+  public EnumValueConfiguration update(
+      String id, EnumConfigurationUpdateRequest request, String companyGroupId) {
+    EnumValueConfiguration entity = findById(id, companyGroupId);
+    if (request.label() != null) {
+      entity.setLabel(request.label());
+    }
+    if (request.active() != null) {
+      entity.setActive(request.active());
+    }
+    return repository.save(entity);
+  }
+
+  @Transactional(readOnly = true)
+  public List<EnumValueConfiguration> findAll(String companyGroupId) {
+    return repository.findByCompanyGroupId(companyGroupId);
   }
 }

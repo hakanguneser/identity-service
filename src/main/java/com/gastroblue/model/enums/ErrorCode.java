@@ -68,7 +68,8 @@ public enum ErrorCode {
   DUPLICATE_ID,
   ILLEGAL_DEFINITION,
   ITEM_HAS_WITHOUT_QUESTION,
-  COMPANY_GROUP_BULK_INSERT_EXCEPTION;
+  COMPANY_GROUP_BULK_INSERT_EXCEPTION,
+  CONFIGURATION_NOT_FOUND;
 
   public String getMessageKey() {
     return "error.message." + name().toLowerCase(java.util.Locale.ENGLISH).replace("_", "-");

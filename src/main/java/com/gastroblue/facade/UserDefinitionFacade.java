@@ -19,14 +19,9 @@ import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
-import com.gastroblue.service.impl.ErrorMessageService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +41,6 @@ public class UserDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final CompanyService companyService;
   private final PasswordEncoder passwordEncoder;
-  private final ErrorMessageService appPropertyService;
   private final EnumConfigurationService enumService;
 
   public UserDefinitionResponse findUserById(String userId) {
