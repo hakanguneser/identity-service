@@ -1,6 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
+import com.gastroblue.model.enums.Language;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,13 +17,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EnumValueConfiguration extends Auditable {
 
-  private String companyId;
+  private String companyGroupId;
 
   private String enumType;
 
   private String enumKey;
 
-  private String language;
+  private Language language;
 
   private String label;
 

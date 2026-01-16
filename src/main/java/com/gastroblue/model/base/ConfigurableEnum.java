@@ -9,7 +9,7 @@ public interface ConfigurableEnum {
 
   @SuppressWarnings("unchecked")
   default <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
-      EnumConfigurationService service, String companyId) {
-    return service.resolve((T) this, companyId, Language.defaultLang().name());
+      EnumConfigurationService service, String companyGroupId) {
+    return service.resolve((T) this, companyGroupId, Language.defaultLang().name());
   }
 }

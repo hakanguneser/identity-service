@@ -12,11 +12,11 @@ import com.gastroblue.model.request.*;
 import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -156,36 +156,36 @@ public class CompanyGroupDefinitionFacade {
     return successes;
   }
 
-  public List<Zone> findZones() {
-    return Arrays.asList(Zone.values());
+  public List<ResolvedEnum<Zone>> findZones(String companyGroupId) {
+    return enumService.getDropdownValues(Zone.class, companyGroupId);
   }
 
-  public List<Country> findCountries() {
-    return Arrays.asList(Country.values());
+  public List<ResolvedEnum<Country>> findCountries(String companyGroupId) {
+    return enumService.getDropdownValues(Country.class, companyGroupId);
   }
 
-  public List<City> findCities(final Country country) {
-    // TODO: add country to request
-    return Arrays.asList(City.values());
+  public List<ResolvedEnum<City>> findCities(String companyGroupId, final Country country) {
+    List<ResolvedEnum<City>> allCities = enumService.getDropdownValues(City.class, companyGroupId);
+    return allCities.stream().filter(resolved -> resolved.getKey().country() == country).toList();
   }
 
-  public List<CompanySegment1Values> findSegment1() {
-    return Arrays.asList(CompanySegment1Values.values());
+  public List<ResolvedEnum<CompanySegment1Values>> findSegment1(String companyGroupId) {
+    return enumService.getDropdownValues(CompanySegment1Values.class, companyGroupId);
   }
 
-  public List<CompanySegment2Values> findSegment2() {
-    return Arrays.asList(CompanySegment2Values.values());
+  public List<ResolvedEnum<CompanySegment2Values>> findSegment2(String companyGroupId) {
+    return enumService.getDropdownValues(CompanySegment2Values.class, companyGroupId);
   }
 
-  public List<CompanySegment3Values> findSegment3() {
-    return Arrays.asList(CompanySegment3Values.values());
+  public List<ResolvedEnum<CompanySegment3Values>> findSegment3(String companyGroupId) {
+    return enumService.getDropdownValues(CompanySegment3Values.class, companyGroupId);
   }
 
-  public List<CompanySegment4Values> findSegment4() {
-    return Arrays.asList(CompanySegment4Values.values());
+  public List<ResolvedEnum<CompanySegment4Values>> findSegment4(String companyGroupId) {
+    return enumService.getDropdownValues(CompanySegment4Values.class, companyGroupId);
   }
 
-  public List<CompanySegment5Values> findSegment5() {
-    return Arrays.asList(CompanySegment5Values.values());
+  public List<ResolvedEnum<CompanySegment5Values>> findSegment5(String companyGroupId) {
+    return enumService.getDropdownValues(CompanySegment5Values.class, companyGroupId);
   }
 }

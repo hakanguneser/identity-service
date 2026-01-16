@@ -7,6 +7,7 @@ import com.gastroblue.model.request.*;
 import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -101,44 +102,52 @@ public class CompanyGroupDefinitionController {
     return ResponseEntity.ok(companyFacade.toggleCompanyStatus(companyGroupId, companyId));
   }
 
-  @GetMapping("/dropdown/zones")
-  public ResponseEntity<List<Zone>> findZones() {
-    return ResponseEntity.ok(companyFacade.findZones());
+  @GetMapping("/{companyGroupId}/dropdown/zones")
+  public ResponseEntity<List<ResolvedEnum<Zone>>> findZones(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findZones(companyGroupId));
   }
 
-  @GetMapping("/dropdown/countries")
-  public ResponseEntity<List<Country>> findCountries() {
-    return ResponseEntity.ok(companyFacade.findCountries());
+  @GetMapping("/{companyGroupId}/dropdown/countries")
+  public ResponseEntity<List<ResolvedEnum<Country>>> findCountries(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findCountries(companyGroupId));
   }
 
-  @GetMapping("/dropdown/country/{country}/cities")
-  public ResponseEntity<List<City>> findCities(
+  @GetMapping("/{companyGroupId}/dropdown/country/{country}/cities")
+  public ResponseEntity<List<ResolvedEnum<City>>> findCities(
+      @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "country") final Country country) {
-    return ResponseEntity.ok(companyFacade.findCities(country));
+    return ResponseEntity.ok(companyFacade.findCities(companyGroupId, country));
   }
 
-  @GetMapping("/dropdown/segment1")
-  public ResponseEntity<List<CompanySegment1Values>> findSegment1() {
-    return ResponseEntity.ok(companyFacade.findSegment1());
+  @GetMapping("/{companyGroupId}/dropdown/segment1")
+  public ResponseEntity<List<ResolvedEnum<CompanySegment1Values>>> findSegment1(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findSegment1(companyGroupId));
   }
 
-  @GetMapping("/dropdown/segment2")
-  public ResponseEntity<List<CompanySegment2Values>> findSegment2() {
-    return ResponseEntity.ok(companyFacade.findSegment2());
+  @GetMapping("/{companyGroupId}/dropdown/segment2")
+  public ResponseEntity<List<ResolvedEnum<CompanySegment2Values>>> findSegment2(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findSegment2(companyGroupId));
   }
 
-  @GetMapping("/dropdown/segment3")
-  public ResponseEntity<List<CompanySegment3Values>> findSegment3() {
-    return ResponseEntity.ok(companyFacade.findSegment3());
+  @GetMapping("/{companyGroupId}/dropdown/segment3")
+  public ResponseEntity<List<ResolvedEnum<CompanySegment3Values>>> findSegment3(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findSegment3(companyGroupId));
   }
 
-  @GetMapping("/dropdown/segment4")
-  public ResponseEntity<List<CompanySegment4Values>> findSegment4() {
-    return ResponseEntity.ok(companyFacade.findSegment4());
+  @GetMapping("/{companyGroupId}/dropdown/segment4")
+  public ResponseEntity<List<ResolvedEnum<CompanySegment4Values>>> findSegment4(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findSegment4(companyGroupId));
   }
 
-  @GetMapping("/dropdown/segment5")
-  public ResponseEntity<List<CompanySegment5Values>> findSegment5() {
-    return ResponseEntity.ok(companyFacade.findSegment5());
+  @GetMapping("/{companyGroupId}/dropdown/segment5")
+  public ResponseEntity<List<ResolvedEnum<CompanySegment5Values>>> findSegment5(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findSegment5(companyGroupId));
   }
 }

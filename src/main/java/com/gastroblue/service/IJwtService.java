@@ -5,6 +5,7 @@ import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.Language;
 import io.jsonwebtoken.Claims;
 import java.util.Map;
 import java.util.function.Function;
@@ -44,5 +45,10 @@ public interface IJwtService {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
     return UserMapper.toSessionUser(sessionUser);
+  }
+
+  static Language getSessionLanguage() {
+    // bu class notnull kalmali
+    return Language.TR;
   }
 }
