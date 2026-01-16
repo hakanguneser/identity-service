@@ -10,7 +10,11 @@ import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.model.shared.ResolvedEnum;
+import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.util.DelimitedStringUtil;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -104,22 +108,38 @@ public class UserMapper {
         .build();
   }
 
-  public static UserDefinitionResponse toResponse(final UserEntity entity) {
+  public static UserDefinitionResponse toResponse(
+      final UserEntity entity, EnumConfigurationService enumService) {
+    if (entity == null) {
+      return null;
+    }
+
+    String companyGroupId = entity.getCompanyGroupId();
+    String language = entity.getLanguage() != null ? entity.getLanguage().name() : null;
+
+    List<Department> departmentList = splitToEnumList(entity.getDepartments(), Department.class);
+    List<ResolvedEnum<Department>> resolvedDepartmentList =
+        departmentList == null
+            ? Collections.emptyList()
+            : departmentList.stream()
+                .map(d -> enumService.resolve(d, companyGroupId, language))
+                .toList();
+
     return UserDefinitionResponse.builder()
         .userId(entity.getId())
         .companyId(entity.getCompanyId())
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
-        .departments(splitToEnumList(entity.getDepartments(), Department.class))
-        .applicationRole(entity.getApplicationRole())
-        .language(entity.getLanguage())
+        .departments(resolvedDepartmentList)
+        .applicationRole(enumService.resolve(entity.getApplicationRole(), companyGroupId, language))
+        .language(enumService.resolve(entity.getLanguage(), companyGroupId, language))
         .email(entity.getEmail())
         .isActive(entity.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())
-        .gender(entity.getGender())
-        .zone(entity.getZone())
+        .gender(enumService.resolve(entity.getGender(), companyGroupId, language))
+        .zone(enumService.resolve(entity.getZone(), companyGroupId, language))
         .build();
   }
 

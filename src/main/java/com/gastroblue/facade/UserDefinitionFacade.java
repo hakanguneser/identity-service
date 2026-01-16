@@ -15,6 +15,7 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.BatchUserDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
@@ -46,17 +47,18 @@ public class UserDefinitionFacade {
   private final CompanyService companyService;
   private final PasswordEncoder passwordEncoder;
   private final ErrorMessageService appPropertyService;
+  private final EnumConfigurationService enumService;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
-    return UserMapper.toResponse(userEntity);
+    return UserMapper.toResponse(userEntity, enumService);
   }
 
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
-    return UserMapper.toResponse(updatedEntity);
+    return UserMapper.toResponse(updatedEntity, enumService);
   }
 
   public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
@@ -86,7 +88,7 @@ public class UserDefinitionFacade {
           };
     }
     return userService.findAccessibleUser(targetRoles).stream()
-        .map(UserMapper::toResponse)
+        .map(u -> UserMapper.toResponse(u, enumService))
         .toList();
   }
 
@@ -102,7 +104,7 @@ public class UserDefinitionFacade {
     // TODO : notifyNewPassword(savedEntity, generatedPassword); buradaki stratejiyi
     // konusmamiz
     // lazim
-    return UserMapper.toResponse(savedEntity);
+    return UserMapper.toResponse(savedEntity, enumService);
   }
 
   private void checkRegisteredUserRole(UserSaveRequest request) {
@@ -157,7 +159,7 @@ public class UserDefinitionFacade {
 
   public UserDefinitionResponse toggleUser(String userId) {
     UserEntity toggledEntity = userService.toggleUser(userId);
-    return UserMapper.toResponse(toggledEntity);
+    return UserMapper.toResponse(toggledEntity, enumService);
   }
 
   public void sendOtp(final String userId) {

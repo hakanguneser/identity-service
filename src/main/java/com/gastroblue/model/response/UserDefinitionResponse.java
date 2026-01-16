@@ -1,6 +1,7 @@
 package com.gastroblue.model.response;
 
 import com.gastroblue.model.enums.*;
+import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.List;
 import lombok.*;
 
@@ -20,9 +21,9 @@ public class UserDefinitionResponse {
   private String name;
   private String surname;
   private String phone;
-  private Language language;
-  private Gender gender;
-  private Zone zone;
-  private List<Department> departments;
-  private ApplicationRole applicationRole;
+  private ResolvedEnum<Language> language;
+  private ResolvedEnum<Gender> gender;
+  private ResolvedEnum<Zone> zone;
+  private List<ResolvedEnum<Department>> departments;
+  private ResolvedEnum<ApplicationRole> applicationRole;
 }
