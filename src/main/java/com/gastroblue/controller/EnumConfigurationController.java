@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/enum-configurations")
+@RequestMapping("api/v1/configuration/enums")
 @RequiredArgsConstructor
 public class EnumConfigurationController {
 

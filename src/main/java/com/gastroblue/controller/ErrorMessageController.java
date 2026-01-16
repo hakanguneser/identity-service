@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/error-messages")
+@RequestMapping("/api/v1/configuration/errors")
 @RequiredArgsConstructor
 public class ErrorMessageController {
 
