@@ -2,6 +2,7 @@ package com.gastroblue.mapper;
 
 import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 
+import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
@@ -131,15 +132,16 @@ public class UserMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        .applicationRole(enumService.resolve(entity.getApplicationRole(), companyGroupId, language))
-        .language(enumService.resolve(entity.getLanguage(), companyGroupId, language))
+        .applicationRole(
+            resolve(enumService, entity.getApplicationRole(), companyGroupId, language))
+        .language(resolve(enumService, entity.getLanguage(), companyGroupId, language))
         .email(entity.getEmail())
         .isActive(entity.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())
-        .gender(enumService.resolve(entity.getGender(), companyGroupId, language))
-        .zone(enumService.resolve(entity.getZone(), companyGroupId, language))
+        .gender(resolve(enumService, entity.getGender(), companyGroupId, language))
+        .zone(resolve(enumService, entity.getZone(), companyGroupId, language))
         .build();
   }
 
@@ -155,5 +157,13 @@ public class UserMapper {
   private static String emptyToNull(String s) {
     s = s == null ? null : s.trim();
     return (s == null || s.isEmpty()) ? null : s;
+  }
+
+  public static <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
+      EnumConfigurationService enumService, T enumValue, String companyGroupId, String language) {
+    if (enumValue == null) {
+      return null;
+    }
+    return enumService.resolve(enumValue, companyGroupId, language);
   }
 }

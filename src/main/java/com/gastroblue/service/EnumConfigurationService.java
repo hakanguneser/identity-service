@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +71,10 @@ public class EnumConfigurationService {
   }
 
   @Transactional
+  @Cacheable(
+      value = "enum_configs",
+      key =
+          "{#enumValue.getClass().getSimpleName(), #enumValue.name(), #companyGroupId, #language}")
   public <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
       T enumValue, String companyGroupId, String language) {
     if (enumValue == null) {
