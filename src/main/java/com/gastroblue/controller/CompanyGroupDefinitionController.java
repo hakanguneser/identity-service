@@ -4,7 +4,6 @@ import com.gastroblue.facade.CompanyGroupDefinitionFacade;
 import com.gastroblue.model.enums.*;
 import com.gastroblue.model.enums.Country;
 import com.gastroblue.model.request.*;
-import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
@@ -26,13 +25,6 @@ public class CompanyGroupDefinitionController {
   @GetMapping
   public ResponseEntity<List<CompanyGroupDefinitionResponse>> findAllCompanyGroups() {
     return ResponseEntity.ok(companyFacade.findAllCompanyGroups());
-  }
-
-  @PostMapping("/batch")
-  public ResponseEntity<BatchCompanyGroupDefinitionResponse> saveCompanyGroupsBatch(
-      @Valid @RequestBody final BatchCompanyGroupSaveRequest request) {
-    BatchCompanyGroupDefinitionResponse response = companyFacade.saveCompanyGroupsBatch(request);
-    return ResponseEntity.ok(response);
   }
 
   @PostMapping

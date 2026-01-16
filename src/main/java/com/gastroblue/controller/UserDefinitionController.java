@@ -2,11 +2,9 @@ package com.gastroblue.controller;
 
 import com.gastroblue.facade.UserDefinitionFacade;
 import com.gastroblue.model.enums.*;
-import com.gastroblue.model.request.BatchUserSaveRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
-import com.gastroblue.model.response.BatchUserDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -32,13 +30,6 @@ public class UserDefinitionController {
             .buildAndExpand(userDefinitionResponse.getUserId())
             .toUri();
     return ResponseEntity.created(location).body(userDefinitionResponse);
-  }
-
-  @PostMapping("/batch")
-  public ResponseEntity<BatchUserDefinitionResponse> saveUsersBatch(
-      @Valid @RequestBody final BatchUserSaveRequest request) {
-    BatchUserDefinitionResponse response = userFacade.saveUsersBatch(request.items());
-    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{userId}")

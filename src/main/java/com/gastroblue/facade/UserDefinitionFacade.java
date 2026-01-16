@@ -13,7 +13,6 @@ import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
-import com.gastroblue.model.response.BatchUserDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
@@ -216,14 +215,5 @@ public class UserDefinitionFacade {
 
   public List<Gender> findAllGenders() {
     return Arrays.asList(Gender.values());
-  }
-
-  public BatchUserDefinitionResponse saveUsersBatch(List<UserSaveRequest> items) {
-    List<UserDefinitionResponse> createdUsers = new ArrayList<>();
-    for (UserSaveRequest request : items) {
-      UserDefinitionResponse created = saveUser(request);
-      createdUsers.add(created);
-    }
-    return new BatchUserDefinitionResponse(createdUsers);
   }
 }

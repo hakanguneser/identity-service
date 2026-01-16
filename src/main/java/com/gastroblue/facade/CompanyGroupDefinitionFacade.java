@@ -1,27 +1,25 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.model.enums.ErrorCode.COMPANY_GROUP_BULK_INSERT_EXCEPTION;
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
-import com.gastroblue.exception.ValidationException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.enums.*;
-import com.gastroblue.model.request.*;
-import com.gastroblue.model.response.BatchCompanyGroupDefinitionResponse;
+import com.gastroblue.model.request.CompanyGroupSaveRequest;
+import com.gastroblue.model.request.CompanyGroupUpdateRequest;
+import com.gastroblue.model.request.CompanySaveRequest;
+import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -128,32 +126,6 @@ public class CompanyGroupDefinitionFacade {
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
     return CompanyGroupMapper.toResponse(companyEntity, enumService);
-  }
-
-  @Transactional
-  public BatchCompanyGroupDefinitionResponse saveCompanyGroupsBatch(
-      BatchCompanyGroupSaveRequest request) {
-
-    try {
-      CompanyGroupDefinitionResponse createdGroup = saveCompanyGroup(request.companyGroup());
-      List<CompanyDefinitionResponse> companies =
-          saveCompaniesBatch(createdGroup.getCompanyGroupId(), request.items());
-      return new BatchCompanyGroupDefinitionResponse(createdGroup, companies);
-    } catch (Exception ex) {
-      log.error("Company group bulk save failed: {}", ex.getMessage(), ex);
-      throw new ValidationException(COMPANY_GROUP_BULK_INSERT_EXCEPTION);
-    }
-  }
-
-  private List<CompanyDefinitionResponse> saveCompaniesBatch(
-      final String companyGroupId, final List<CompanySaveRequest> items) {
-
-    List<CompanyDefinitionResponse> successes = new ArrayList<>(items.size());
-    for (CompanySaveRequest req : items) {
-      CompanyDefinitionResponse created = saveCompany(companyGroupId, req);
-      successes.add(created);
-    }
-    return successes;
   }
 
   public List<ResolvedEnum<Zone>> findZones(String companyGroupId) {
