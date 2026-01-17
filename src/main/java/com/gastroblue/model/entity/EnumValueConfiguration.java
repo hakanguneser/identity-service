@@ -18,14 +18,9 @@ import lombok.NoArgsConstructor;
 public class EnumValueConfiguration extends Auditable {
 
   private String companyGroupId;
-
   private String enumType;
-
   private String enumKey;
-
   private Language language;
-
   private String label;
-
-  @Builder.Default private boolean active = true;
+  private boolean active;
 }
