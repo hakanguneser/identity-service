@@ -1,7 +1,7 @@
 package com.gastroblue.facade;
 
 import com.gastroblue.model.base.DefaultConfigurableEnum;
-import com.gastroblue.model.entity.EnumValueConfiguration;
+import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.response.EnumConfigurationResponse;
@@ -53,7 +53,7 @@ public class EnumConfigurationFacade {
         enumValue, finalCompanyGroupId, IJwtService.getSessionLanguage());
   }
 
-  private EnumConfigurationResponse toResponse(EnumValueConfiguration entity) {
+  private EnumConfigurationResponse toResponse(EnumValueConfigurationEntity entity) {
     return EnumConfigurationResponse.builder()
         .id(entity.getId())
         .companyGroupId(entity.getCompanyGroupId())

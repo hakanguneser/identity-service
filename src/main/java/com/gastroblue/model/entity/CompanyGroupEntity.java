@@ -1,9 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Setter
@@ -13,13 +11,18 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "COMPANY_GROUPS")
+@Table(
+    name = "COMPANY_GROUPS",
+    uniqueConstraints = {
+      @UniqueConstraint(name = "UK_COMPANY_GROUPS_COMPANY_CODE", columnNames = "GROUP_CODE")
+    },
+    indexes = {@Index(name = "IDX_COMPANY_GROUPS_COMPANY_CODE", columnList = "GROUP_CODE")})
 public class CompanyGroupEntity extends Auditable {
 
   @Column(name = "NAME", length = 100)
   private String name;
 
-  @Column(name = "GROUP_CODE", length = 25, unique = true)
+  @Column(name = "GROUP_CODE", length = 25)
   private String groupCode;
 
   @Column(name = "GROUP_MAIL", length = 500)

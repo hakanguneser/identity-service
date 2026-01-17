@@ -3,7 +3,7 @@ package com.gastroblue.service;
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.base.DefaultConfigurableEnum;
-import com.gastroblue.model.entity.EnumValueConfiguration;
+import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
@@ -34,12 +34,12 @@ public class EnumConfigurationService {
     Language sessionLanguage = IJwtService.getSessionLanguage();
 
     // 1. Fetch existing configs
-    List<EnumValueConfiguration> existingConfigs =
+    List<EnumValueConfigurationEntity> existingConfigs =
         repository.findByCompanyGroupIdAndEnumTypeAndLanguage(
             companyGroupId, enumType, sessionLanguage);
-    Map<String, EnumValueConfiguration> configMap =
+    Map<String, EnumValueConfigurationEntity> configMap =
         existingConfigs.stream()
-            .collect(Collectors.toMap(EnumValueConfiguration::getEnumKey, config -> config));
+            .collect(Collectors.toMap(EnumValueConfigurationEntity::getEnumKey, config -> config));
 
     List<ResolvedEnum<T>> options = new ArrayList<>();
     T[] enumConstants = enumClass.getEnumConstants();
@@ -51,13 +51,13 @@ public class EnumConfigurationService {
     // 2. Iterate and resolve
     for (T enumConstant : enumConstants) {
       String key = enumConstant.name();
-      EnumValueConfiguration config = configMap.get(key);
+      EnumValueConfigurationEntity config = configMap.get(key);
 
       if (config == null) {
         // 3. Create default if missing
         String defaultLabel = String.format("%s-%s", key, sessionLanguage);
         config =
-            EnumValueConfiguration.builder()
+            EnumValueConfigurationEntity.builder()
                 .companyGroupId(companyGroupId)
                 .enumType(enumType)
                 .enumKey(key)
@@ -86,7 +86,7 @@ public class EnumConfigurationService {
     String enumType = enumValue.getClass().getSimpleName();
     String key = enumValue.name();
 
-    EnumValueConfiguration config =
+    EnumValueConfigurationEntity config =
         repository
             .findByCompanyGroupIdAndEnumTypeAndLanguage(companyGroupId, enumType, language)
             .stream()
@@ -97,7 +97,7 @@ public class EnumConfigurationService {
     if (config == null) {
       String defaultLabel = String.format("%s-%s", key, language);
       config =
-          EnumValueConfiguration.builder()
+          EnumValueConfigurationEntity.builder()
               .companyGroupId(companyGroupId)
               .enumType(enumType)
               .enumKey(key)
@@ -112,7 +112,7 @@ public class EnumConfigurationService {
   }
 
   @Transactional(readOnly = true)
-  public EnumValueConfiguration findByIdAndCompanyGroupId(String id, String companyGroupId) {
+  public EnumValueConfigurationEntity findByIdAndCompanyGroupId(String id, String companyGroupId) {
     return repository
         .findByIdAndCompanyGroupId(id, companyGroupId)
         .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
@@ -120,10 +120,10 @@ public class EnumConfigurationService {
 
   @Transactional
   @CacheEvict(value = "enum_configs", allEntries = true)
-  public EnumValueConfiguration save(EnumConfigurationSaveRequest request) {
+  public EnumValueConfigurationEntity save(EnumConfigurationSaveRequest request) {
     String finalCompanyGroupId = request.companyGroupId() == null ? "*" : request.companyGroupId();
-    EnumValueConfiguration entity =
-        EnumValueConfiguration.builder()
+    EnumValueConfigurationEntity entity =
+        EnumValueConfigurationEntity.builder()
             .companyGroupId(finalCompanyGroupId)
             .enumType(request.enumType())
             .enumKey(request.enumKey())
@@ -136,9 +136,9 @@ public class EnumConfigurationService {
 
   @Transactional
   @CacheEvict(value = "enum_configs", allEntries = true)
-  public EnumValueConfiguration update(
+  public EnumValueConfigurationEntity update(
       String id, EnumConfigurationUpdateRequest request, String companyGroupId) {
-    EnumValueConfiguration entity =
+    EnumValueConfigurationEntity entity =
         repository
             .findByIdAndCompanyGroupId(id, companyGroupId)
             .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
@@ -152,7 +152,7 @@ public class EnumConfigurationService {
   }
 
   @Transactional(readOnly = true)
-  public List<EnumValueConfiguration> findAll(String companyGroupId) {
+  public List<EnumValueConfigurationEntity> findAll(String companyGroupId) {
     if (companyGroupId == null) {
       companyGroupId = "*";
     }

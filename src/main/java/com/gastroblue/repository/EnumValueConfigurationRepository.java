@@ -1,6 +1,6 @@
 package com.gastroblue.repository;
 
-import com.gastroblue.model.entity.EnumValueConfiguration;
+import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.enums.Language;
 import java.util.List;
 import java.util.Optional;
@@ -9,12 +9,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EnumValueConfigurationRepository
-    extends JpaRepository<EnumValueConfiguration, String> {
+    extends JpaRepository<EnumValueConfigurationEntity, String> {
 
-  List<EnumValueConfiguration> findByCompanyGroupIdAndEnumTypeAndLanguage(
+  List<EnumValueConfigurationEntity> findByCompanyGroupIdAndEnumTypeAndLanguage(
       String companyGroupId, String enumType, Language language);
 
-  List<EnumValueConfiguration> findByCompanyGroupId(String companyGroupId);
+  List<EnumValueConfigurationEntity> findByCompanyGroupId(String companyGroupId);
 
-  Optional<EnumValueConfiguration> findByIdAndCompanyGroupId(String id, String companyGroupId);
+  Optional<EnumValueConfigurationEntity> findByIdAndCompanyGroupId(
+      String id, String companyGroupId);
 }
