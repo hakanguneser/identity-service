@@ -8,6 +8,8 @@ import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import io.jsonwebtoken.Claims;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +30,9 @@ public interface IJwtService {
 
   static UserEntity findUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || authentication.getPrincipal().equals(ANONYMOUS_USER)) {
+    if (authentication == null
+        || authentication.getPrincipal() == null
+        || Objects.equals(authentication.getPrincipal(), ANONYMOUS_USER)) {
       return null;
     }
     return (UserEntity) authentication.getPrincipal();
@@ -48,7 +52,8 @@ public interface IJwtService {
   }
 
   static Language getSessionLanguage() {
-    // bu class notnull kalmali
-    return Language.TR;
+    return Optional.ofNullable(findUser())
+        .map(UserEntity::getLanguage)
+        .orElse(Language.defaultLang());
   }
 }
