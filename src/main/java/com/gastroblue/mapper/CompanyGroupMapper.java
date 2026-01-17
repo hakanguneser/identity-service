@@ -3,6 +3,7 @@ package com.gastroblue.mapper;
 import static com.gastroblue.util.DelimitedStringUtil.join;
 import static com.gastroblue.util.DelimitedStringUtil.split;
 
+import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -13,7 +14,6 @@ import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
 import com.gastroblue.model.response.AuthUserCompanyResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
-import com.gastroblue.service.EnumConfigurationService;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -69,45 +69,45 @@ public class CompanyGroupMapper {
   }
 
   public static CompanyDefinitionResponse toResponse(
-      final CompanyEntity entity, final EnumConfigurationService service) {
+      final CompanyEntity entity, final EnumConfigurationFacade facade) {
     return CompanyDefinitionResponse.builder()
         .companyId(entity.getId())
         .companyGroupId(entity.getCompanyGroupId())
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(entity.getCity() != null ? entity.getCity().resolve(service, entity.getId()) : null)
+        .city(entity.getCity() != null ? entity.getCity().resolve(facade, entity.getId()) : null)
         .country(
             entity.getCountry() != null
-                ? entity.getCountry().resolve(service, entity.getId())
+                ? entity.getCountry().resolve(facade, entity.getId())
                 : null)
-        .zone(entity.getZone() != null ? entity.getZone().resolve(service, entity.getId()) : null)
+        .zone(entity.getZone() != null ? entity.getZone().resolve(facade, entity.getId()) : null)
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(service, entity.getId())
+                ? entity.getSegment1().resolve(facade, entity.getId())
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(service, entity.getId())
+                ? entity.getSegment2().resolve(facade, entity.getId())
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(service, entity.getId())
+                ? entity.getSegment3().resolve(facade, entity.getId())
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(service, entity.getId())
+                ? entity.getSegment4().resolve(facade, entity.getId())
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(service, entity.getId())
+                ? entity.getSegment5().resolve(facade, entity.getId())
                 : null)
         .isActive(entity.isActive())
         .build();
   }
 
   public static AuthUserCompanyResponse toAuthResponse(
-      final CompanyEntity entity, final EnumConfigurationService service) {
+      final CompanyEntity entity, final EnumConfigurationFacade facade) {
     return AuthUserCompanyResponse.builder()
         .companyId(entity.getId())
         .companyGroupId(entity.getCompanyGroupId())
@@ -119,23 +119,23 @@ public class CompanyGroupMapper {
         .zone(entity.getZone())
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(service, entity.getId())
+                ? entity.getSegment1().resolve(facade, entity.getId())
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(service, entity.getId())
+                ? entity.getSegment2().resolve(facade, entity.getId())
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(service, entity.getId())
+                ? entity.getSegment3().resolve(facade, entity.getId())
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(service, entity.getId())
+                ? entity.getSegment4().resolve(facade, entity.getId())
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(service, entity.getId())
+                ? entity.getSegment5().resolve(facade, entity.getId())
                 : null)
         .isActive(entity.isActive())
         .build();

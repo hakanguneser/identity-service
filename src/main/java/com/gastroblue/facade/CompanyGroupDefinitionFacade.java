@@ -28,7 +28,7 @@ public class CompanyGroupDefinitionFacade {
 
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
-  private final com.gastroblue.service.EnumConfigurationService enumService;
+  private final EnumConfigurationFacade enunConfigurationFacade;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
     return CompanyGroupMapper.toResponse(companyGroupService.save(request));
@@ -44,27 +44,27 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public CompanyGroupDefinitionResponse findCompanyGroupById(String companyGroupId) {
-    return CompanyGroupMapper.toResponse(companyGroupService.findById(companyGroupId));
+    return CompanyGroupMapper.toResponse(companyGroupService.findByIdOrThrow(companyGroupId));
   }
 
   public List<CompanyDefinitionResponse> findCompaniesByCompanyGroupId(String companyGroupId) {
     return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(entity -> CompanyGroupMapper.toResponse(entity, enumService))
+        .map(entity -> CompanyGroupMapper.toResponse(entity, enunConfigurationFacade))
         .toList();
   }
 
   public CompanyDefinitionResponse findCompanyByCompanyIdAndCompanyGroupId(
       String companyGroupId, String companyId) {
     CompanyEntity byId = companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(byId, enumService);
+    return CompanyGroupMapper.toResponse(byId, enunConfigurationFacade);
   }
 
   public CompanyDefinitionResponse saveCompany(
       String companyGroupId, CompanySaveRequest companyRequest) {
-    companyGroupService.findById(companyGroupId);
+    companyGroupService.findByIdOrThrow(companyGroupId);
     CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(companyRequest, companyGroupId);
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
-    return CompanyGroupMapper.toResponse(savedCompany, enumService);
+    return CompanyGroupMapper.toResponse(savedCompany, enunConfigurationFacade);
   }
 
   public CompanyDefinitionResponse updateCompany(
@@ -84,24 +84,24 @@ public class CompanyGroupDefinitionFacade {
     entityToBeUpdated.setSegment4(companyRequest.segment4());
     entityToBeUpdated.setSegment5(companyRequest.segment5());
     CompanyEntity savedCompany = companyService.save(entityToBeUpdated);
-    return CompanyGroupMapper.toResponse(savedCompany, enumService);
+    return CompanyGroupMapper.toResponse(savedCompany, enunConfigurationFacade);
   }
 
   public CompanyDefinitionResponse findByCompanyId(String companyId) {
     CompanyEntity company = companyService.findOrThrow(companyId);
-    return CompanyGroupMapper.toResponse(company, enumService);
+    return CompanyGroupMapper.toResponse(company, enunConfigurationFacade);
   }
 
   public List<CompanyDefinitionResponse> findByCompanyGroupId(String companyGroupId) {
     return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(entity -> CompanyGroupMapper.toResponse(entity, enumService))
+        .map(entity -> CompanyGroupMapper.toResponse(entity, enunConfigurationFacade))
         .toList();
   }
 
   public List<CompanyDefinitionResponse> findByCompanyGroupAndZone(
       String companyGroupId, Zone zone) {
     return companyService.findByCompanyGroupIdAndZone(companyGroupId, zone).stream()
-        .map(entity -> CompanyGroupMapper.toResponse(entity, enumService))
+        .map(entity -> CompanyGroupMapper.toResponse(entity, enunConfigurationFacade))
         .toList();
   }
 
@@ -125,39 +125,40 @@ public class CompanyGroupDefinitionFacade {
 
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(companyEntity, enumService);
+    return CompanyGroupMapper.toResponse(companyEntity, enunConfigurationFacade);
   }
 
   public List<ResolvedEnum<Zone>> findZones(String companyGroupId) {
-    return enumService.getDropdownValues(Zone.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(Zone.class, companyGroupId);
   }
 
   public List<ResolvedEnum<Country>> findCountries(String companyGroupId) {
-    return enumService.getDropdownValues(Country.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(Country.class, companyGroupId);
   }
 
   public List<ResolvedEnum<City>> findCities(String companyGroupId, final Country country) {
-    List<ResolvedEnum<City>> allCities = enumService.getDropdownValues(City.class, companyGroupId);
+    List<ResolvedEnum<City>> allCities =
+        enunConfigurationFacade.getDropdownValues(City.class, companyGroupId);
     return allCities.stream().filter(resolved -> resolved.getKey().country() == country).toList();
   }
 
   public List<ResolvedEnum<CompanySegment1Values>> findSegment1(String companyGroupId) {
-    return enumService.getDropdownValues(CompanySegment1Values.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(CompanySegment1Values.class, companyGroupId);
   }
 
   public List<ResolvedEnum<CompanySegment2Values>> findSegment2(String companyGroupId) {
-    return enumService.getDropdownValues(CompanySegment2Values.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(CompanySegment2Values.class, companyGroupId);
   }
 
   public List<ResolvedEnum<CompanySegment3Values>> findSegment3(String companyGroupId) {
-    return enumService.getDropdownValues(CompanySegment3Values.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(CompanySegment3Values.class, companyGroupId);
   }
 
   public List<ResolvedEnum<CompanySegment4Values>> findSegment4(String companyGroupId) {
-    return enumService.getDropdownValues(CompanySegment4Values.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(CompanySegment4Values.class, companyGroupId);
   }
 
   public List<ResolvedEnum<CompanySegment5Values>> findSegment5(String companyGroupId) {
-    return enumService.getDropdownValues(CompanySegment5Values.class, companyGroupId);
+    return enunConfigurationFacade.getDropdownValues(CompanySegment5Values.class, companyGroupId);
   }
 }

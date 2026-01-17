@@ -2,7 +2,7 @@ package com.gastroblue.service;
 
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.base.ConfigurableEnum;
-import com.gastroblue.model.base.GlobalConfigurableEnum;
+import com.gastroblue.model.base.DefaultConfigurableEnum;
 import com.gastroblue.model.entity.EnumValueConfiguration;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
@@ -27,11 +27,9 @@ public class EnumConfigurationService {
   private final EnumValueConfigurationRepository repository;
 
   @Transactional
-  public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
-      Class<T> enumClass, String companyGroupId) {
-    if (GlobalConfigurableEnum.class.isAssignableFrom(enumClass)) {
-      companyGroupId = "*";
-    }
+  public <T extends DefaultConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
+      Class<T> enumClass, final String companyGroupId) {
+
     String enumType = enumClass.getSimpleName();
     Language sessionLanguage = IJwtService.getSessionLanguage();
 
@@ -65,7 +63,7 @@ public class EnumConfigurationService {
                 .enumKey(key)
                 .language(sessionLanguage)
                 .label(defaultLabel)
-                .active(true)
+                .active(getDefaultStatus(enumClass))
                 .build();
         config = repository.save(config);
       }
@@ -82,25 +80,15 @@ public class EnumConfigurationService {
   @Transactional
   @Cacheable(
       value = "enum_configs",
-      key =
-          "{#enumValue.getClass().getSimpleName(), #enumValue.name(), #companyGroupId, #language}")
-  public <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
-      T enumValue, String companyGroupId, String language) {
-    if (enumValue == null) {
-      return null;
-    }
-
-    if (enumValue instanceof GlobalConfigurableEnum) {
-      companyGroupId = "*";
-    }
-
+      key = "{#enumValue.getClass().getSimpleName(), #companyGroupId, #language}")
+  public <T extends DefaultConfigurableEnum> ResolvedEnum<T> resolve(
+      T enumValue, final String companyGroupId, Language language) {
     String enumType = enumValue.getClass().getSimpleName();
     String key = enumValue.name();
-    Language sessionLanguage = IJwtService.getSessionLanguage();
 
     EnumValueConfiguration config =
         repository
-            .findByCompanyGroupIdAndEnumTypeAndLanguage(companyGroupId, enumType, sessionLanguage)
+            .findByCompanyGroupIdAndEnumTypeAndLanguage(companyGroupId, enumType, language)
             .stream()
             .filter(c -> c.getEnumKey().equals(key))
             .findFirst()
@@ -113,7 +101,7 @@ public class EnumConfigurationService {
               .companyGroupId(companyGroupId)
               .enumType(enumType)
               .enumKey(key)
-              .language(sessionLanguage)
+              .language(language)
               .label(defaultLabel)
               .active(true)
               .build();
@@ -124,28 +112,16 @@ public class EnumConfigurationService {
   }
 
   @Transactional(readOnly = true)
-  public EnumValueConfiguration findById(String id, String companyGroupId) {
-    EnumValueConfiguration entity =
-        repository
-            .findById(id)
-            .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
-
-    if (!entity.getCompanyGroupId().equals("*")
-        && !entity.getCompanyGroupId().equals(companyGroupId)) {
-      throw new ValidationException(ErrorCode.COMPANY_MISMATCH);
-    }
-
-    return entity;
+  public EnumValueConfiguration findByIdAndCompanyGroupId(String id, String companyGroupId) {
+    return repository
+        .findByIdAndCompanyGroupId(id, companyGroupId)
+        .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
   }
 
   @Transactional
   @CacheEvict(value = "enum_configs", allEntries = true)
   public EnumValueConfiguration save(EnumConfigurationSaveRequest request) {
-    String finalCompanyGroupId = request.companyGroupId();
-    if (isGlobal(request.enumType())) {
-      finalCompanyGroupId = "*";
-    }
-
+    String finalCompanyGroupId = request.companyGroupId() == null ? "*" : request.companyGroupId();
     EnumValueConfiguration entity =
         EnumValueConfiguration.builder()
             .companyGroupId(finalCompanyGroupId)
@@ -162,7 +138,10 @@ public class EnumConfigurationService {
   @CacheEvict(value = "enum_configs", allEntries = true)
   public EnumValueConfiguration update(
       String id, EnumConfigurationUpdateRequest request, String companyGroupId) {
-    EnumValueConfiguration entity = findById(id, companyGroupId);
+    EnumValueConfiguration entity =
+        repository
+            .findByIdAndCompanyGroupId(id, companyGroupId)
+            .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
     if (request.label() != null) {
       entity.setLabel(request.label());
     }
@@ -174,15 +153,17 @@ public class EnumConfigurationService {
 
   @Transactional(readOnly = true)
   public List<EnumValueConfiguration> findAll(String companyGroupId) {
+    if (companyGroupId == null) {
+      companyGroupId = "*";
+    }
     return repository.findByCompanyGroupId(companyGroupId);
   }
 
-  private boolean isGlobal(String enumType) {
-    try {
-      Class<?> clazz = Class.forName("com.gastroblue.model.enums." + enumType);
-      return GlobalConfigurableEnum.class.isAssignableFrom(clazz);
-    } catch (ClassNotFoundException e) {
-      return false;
-    }
+  private boolean getDefaultStatus(Class<? extends DefaultConfigurableEnum> enumClass) {
+    return isDefaultEnum(enumClass);
+  }
+
+  public boolean isDefaultEnum(Class<? extends DefaultConfigurableEnum> enumClass) {
+    return !ConfigurableEnum.class.isAssignableFrom(enumClass);
   }
 }

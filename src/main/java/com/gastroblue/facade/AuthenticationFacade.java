@@ -36,7 +36,7 @@ public class AuthenticationFacade {
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
   private final UserDefinitionService userDefinitionService;
-  private final com.gastroblue.service.EnumConfigurationService enumService;
+  private final EnumConfigurationFacade enumConfigurationFacade;
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
     try {
@@ -90,7 +90,7 @@ public class AuthenticationFacade {
     return companyService
         .findByCompanyGroupId(IJwtService.findSessionUserOrThrow().companyGroupId())
         .stream()
-        .map(entity -> CompanyGroupMapper.toAuthResponse(entity, enumService))
+        .map(entity -> CompanyGroupMapper.toAuthResponse(entity, enumConfigurationFacade))
         .toList();
   }
 

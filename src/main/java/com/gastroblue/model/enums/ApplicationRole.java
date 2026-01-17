@@ -1,13 +1,13 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.model.base.ConfigurableEnum;
+import com.gastroblue.model.base.DefaultConfigurableEnum;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRole implements ConfigurableEnum {
+public enum ApplicationRole implements DefaultConfigurableEnum {
   ADMIN(Set.of(), 1),
   GROUP_MANAGER(Set.of(ADMIN), 2),
   ZONE_MANAGER(Set.of(ADMIN, GROUP_MANAGER), 3),

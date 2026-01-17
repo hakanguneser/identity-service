@@ -14,7 +14,6 @@ import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
@@ -40,18 +39,18 @@ public class UserDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final CompanyService companyService;
   private final PasswordEncoder passwordEncoder;
-  private final EnumConfigurationService enumService;
+  private final EnumConfigurationFacade enumFacade;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
-    return UserMapper.toResponse(userEntity, enumService);
+    return UserMapper.toResponse(userEntity, enumFacade);
   }
 
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
-    return UserMapper.toResponse(updatedEntity, enumService);
+    return UserMapper.toResponse(updatedEntity, enumFacade);
   }
 
   public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
@@ -81,7 +80,7 @@ public class UserDefinitionFacade {
           };
     }
     return userService.findAccessibleUser(targetRoles).stream()
-        .map(u -> UserMapper.toResponse(u, enumService))
+        .map(u -> UserMapper.toResponse(u, enumFacade))
         .toList();
   }
 
@@ -97,7 +96,7 @@ public class UserDefinitionFacade {
     // TODO : notifyNewPassword(savedEntity, generatedPassword); buradaki stratejiyi
     // konusmamiz
     // lazim
-    return UserMapper.toResponse(savedEntity, enumService);
+    return UserMapper.toResponse(savedEntity, enumFacade);
   }
 
   private void checkRegisteredUserRole(UserSaveRequest request) {
@@ -142,17 +141,17 @@ public class UserDefinitionFacade {
       if (request.companyGroupId() == null) {
         throw new ValidationException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
       }
-      return companyGroupService.findById(request.companyGroupId());
+      return companyGroupService.findByIdOrThrow(request.companyGroupId());
     }
     if (sessionUser.companyGroupId() == null) {
       throw new ValidationException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
     }
-    return companyGroupService.findById(sessionUser.companyGroupId());
+    return companyGroupService.findByIdOrThrow(sessionUser.companyGroupId());
   }
 
   public UserDefinitionResponse toggleUser(String userId) {
     UserEntity toggledEntity = userService.toggleUser(userId);
-    return UserMapper.toResponse(toggledEntity, enumService);
+    return UserMapper.toResponse(toggledEntity, enumFacade);
   }
 
   public void sendOtp(final String userId) {

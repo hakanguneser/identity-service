@@ -42,7 +42,7 @@ public class CompanyGroupService {
     return companyGroupRepository.findAll().stream().toList();
   }
 
-  public CompanyGroupEntity findById(final String companyGroupId) {
+  public CompanyGroupEntity findByIdOrThrow(final String companyGroupId) {
     return companyGroupId == null
         ? null
         : companyGroupRepository
@@ -54,7 +54,8 @@ public class CompanyGroupService {
     SessionUser user = IJwtService.findSessionUserOrThrow();
     return switch (user.applicationRole()) {
       case ADMIN -> findAll();
-      case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR -> List.of(findById(user.companyGroupId()));
+      case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR ->
+          List.of(findByIdOrThrow(user.companyGroupId()));
       default -> null;
     };
   }
