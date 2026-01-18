@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 public enum ApplicationRole implements DefaultConfigurableEnum {
   ADMIN(Set.of(), 1),
+  APP_CLIENT(Set.of(), 1),
   GROUP_MANAGER(Set.of(ADMIN), 2),
   ZONE_MANAGER(Set.of(ADMIN, GROUP_MANAGER), 3),
   COMPANY_MANAGER(Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER), 4),
