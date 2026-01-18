@@ -8,8 +8,8 @@ public interface DefaultConfigurableEnum {
 
   @SuppressWarnings("unchecked")
   default <T extends DefaultConfigurableEnum> ResolvedEnum<T> resolve(
-      EnumConfigurationFacade facade, String companyId) {
-    return facade.resolve((T) this, companyId);
+      EnumConfigurationFacade facade, String companyGroupId) {
+    return facade.resolve((T) this, companyGroupId);
   }
 
   default boolean isDefault() {

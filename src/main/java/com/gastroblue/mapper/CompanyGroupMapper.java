@@ -70,37 +70,38 @@ public class CompanyGroupMapper {
 
   public static CompanyDefinitionResponse toResponse(
       final CompanyEntity entity, final EnumConfigurationFacade facade) {
+    String companyGroupId = entity.getCompanyGroupId();
     return CompanyDefinitionResponse.builder()
         .companyId(entity.getId())
-        .companyGroupId(entity.getCompanyGroupId())
+        .companyGroupId(companyGroupId)
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(entity.getCity() != null ? entity.getCity().resolve(facade, entity.getId()) : null)
+        .city(entity.getCity() != null ? entity.getCity().resolve(facade, companyGroupId) : null)
         .country(
             entity.getCountry() != null
-                ? entity.getCountry().resolve(facade, entity.getId())
+                ? entity.getCountry().resolve(facade, companyGroupId)
                 : null)
-        .zone(entity.getZone() != null ? entity.getZone().resolve(facade, entity.getId()) : null)
+        .zone(entity.getZone() != null ? entity.getZone().resolve(facade, companyGroupId) : null)
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(facade, entity.getId())
+                ? entity.getSegment1().resolve(facade, companyGroupId)
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(facade, entity.getId())
+                ? entity.getSegment2().resolve(facade, companyGroupId)
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(facade, entity.getId())
+                ? entity.getSegment3().resolve(facade, companyGroupId)
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(facade, entity.getId())
+                ? entity.getSegment4().resolve(facade, companyGroupId)
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(facade, entity.getId())
+                ? entity.getSegment5().resolve(facade, companyGroupId)
                 : null)
         .isActive(entity.isActive())
         .build();
