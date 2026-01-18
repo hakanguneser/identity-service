@@ -143,6 +143,7 @@ public class CompanyGroupDefinitionController {
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyFacade.findSegment5(companyGroupId));
   }
+
   @GetMapping("/context")
   public ResponseEntity<CompanyContextResponse> findCompanyAndGroupContext(
       @RequestParam(name = "companyGroupCode") final String companyGroupCode,
