@@ -7,8 +7,6 @@ services:
       - "7102:7102"
     env_file:
       - /etc/infra-env/identity.env
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - postgres_db_network
       - rabbitmq_default
