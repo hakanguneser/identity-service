@@ -4,6 +4,7 @@ import com.gastroblue.facade.CompanyGroupDefinitionFacade;
 import com.gastroblue.model.enums.*;
 import com.gastroblue.model.enums.Country;
 import com.gastroblue.model.request.*;
+import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
@@ -141,5 +142,12 @@ public class CompanyGroupDefinitionController {
   public ResponseEntity<List<ResolvedEnum<CompanySegment5Values>>> findSegment5(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyFacade.findSegment5(companyGroupId));
+  }
+  @GetMapping("/context")
+  public ResponseEntity<CompanyContextResponse> findCompanyAndGroupContext(
+      @RequestParam(name = "companyGroupCode") final String companyGroupCode,
+      @RequestParam(name = "companyCode") final String companyCode) {
+    return ResponseEntity.ok(
+        companyFacade.findCompanyAndGroupContext(companyGroupCode, companyCode));
   }
 }

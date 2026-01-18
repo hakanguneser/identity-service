@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 @Builder
 public class ApplicationError {
   private String errorMessage;
+  private String debugContext;
   private ErrorCode errorCode;
   private String referenceId;
   private HttpStatus httpStatus;

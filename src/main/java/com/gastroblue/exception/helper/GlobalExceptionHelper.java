@@ -44,6 +44,7 @@ public class GlobalExceptionHelper {
             .referenceId(errorProp.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
             .timeStamp(LocalDateTime.now())
+            .debugContext(exception.getMessage())
             .build();
 
     return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
@@ -63,6 +64,7 @@ public class GlobalExceptionHelper {
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
             .timeStamp(LocalDateTime.now())
+            .debugContext(exception.getMessage())
             .build();
 
     return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
@@ -83,6 +85,7 @@ public class GlobalExceptionHelper {
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.UNAUTHORIZED)
             .timeStamp(LocalDateTime.now())
+            .debugContext(exception.getMessage())
             .build();
 
     return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
@@ -115,6 +118,7 @@ public class GlobalExceptionHelper {
             .httpStatus(HttpStatus.BAD_REQUEST)
             .timeStamp(LocalDateTime.now())
             .errorDetails(validationErrors)
+            .debugContext(exception.getMessage())
             .build();
 
     return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
@@ -136,6 +140,7 @@ public class GlobalExceptionHelper {
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
             .timeStamp(LocalDateTime.now())
+            .debugContext(exception.getMessage())
             .build();
 
     return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
@@ -156,6 +161,7 @@ public class GlobalExceptionHelper {
             .referenceId(propertyEntity.getId())
             .httpStatus(HttpStatus.BAD_REQUEST)
             .timeStamp(LocalDateTime.now())
+            .debugContext(exception.getMessage())
             .build();
 
     log.warn("Json parse exception: ", exception);

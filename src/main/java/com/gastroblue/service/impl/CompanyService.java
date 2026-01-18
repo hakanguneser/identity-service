@@ -58,4 +58,8 @@ public class CompanyService {
     entity.setActive(!entity.isActive());
     return companyRepository.save(entity);
   }
+
+  public java.util.Optional<CompanyEntity> findByCompanyCode(String companyCode) {
+    return companyRepository.findByCompanyCode(companyCode);
+  }
 }

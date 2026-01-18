@@ -11,4 +11,9 @@ public abstract class AbstractRuntimeException extends RuntimeException {
     super(errorCode.name());
     this.errorCode = errorCode;
   }
+
+  protected AbstractRuntimeException(ErrorCode errorCode, String message) {
+    super(message);
+    this.errorCode = errorCode;
+  }
 }

@@ -2,6 +2,7 @@ package com.gastroblue.service.impl;
 
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
+import com.gastroblue.exception.DefinitionNotFoundException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
@@ -65,5 +66,11 @@ public class CompanyGroupService {
         .findById(companyGroupId)
         .map(CompanyGroupMapper::toBase)
         .orElseThrow(IllegalDefinitionException::new);
+  }
+
+  public CompanyGroupEntity findByGroupCode(String groupCode) {
+    return companyGroupRepository
+        .findByGroupCode(groupCode)
+        .orElseThrow(() -> new DefinitionNotFoundException("Group not found: " + groupCode));
   }
 }
