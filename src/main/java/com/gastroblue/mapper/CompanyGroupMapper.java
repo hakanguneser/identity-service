@@ -26,16 +26,31 @@ public class CompanyGroupMapper {
         .groupCode(request.groupCode())
         .groupMail(join(request.groupMails()))
         .logoUrl(request.logoUrl())
+        .thermometerTrackerApiUrl(request.thermometerTrackerApiUrl())
+        .thermometerTrackerApiVersion(request.thermometerTrackerApiVersion())
+        .thermometerTrackerEnabled(
+            request.thermometerTrackerEnabled() != null
+                ? request.thermometerTrackerEnabled()
+                : false)
+        .formflowApiUrl(request.formflowApiUrl())
+        .formflowApiVersion(request.formflowApiVersion())
+        .formflowEnabled(request.formflowEnabled() != null ? request.formflowEnabled() : false)
         .build();
   }
 
-  public static CompanyGroupDefinitionResponse toResponse(CompanyGroupEntity companyGroupEntity) {
+  public static CompanyGroupDefinitionResponse toResponse(CompanyGroupEntity entity) {
     return CompanyGroupDefinitionResponse.builder()
-        .companyGroupId(companyGroupEntity.getId())
-        .groupCode(companyGroupEntity.getGroupCode())
-        .name(companyGroupEntity.getName())
-        .groupMails(split(companyGroupEntity.getGroupMail()))
-        .logoUrl(companyGroupEntity.getLogoUrl())
+        .companyGroupId(entity.getId())
+        .groupCode(entity.getGroupCode())
+        .name(entity.getName())
+        .groupMails(split(entity.getGroupMail()))
+        .logoUrl(entity.getLogoUrl())
+        .thermometerTrackerApiUrl(entity.getThermometerTrackerApiUrl())
+        .thermometerTrackerApiVersion(entity.getThermometerTrackerApiVersion())
+        .thermometerTrackerEnabled(entity.getThermometerTrackerEnabled())
+        .formflowApiUrl(entity.getFormflowApiUrl())
+        .formflowApiVersion(entity.getFormflowApiVersion())
+        .formflowEnabled(entity.getFormflowEnabled())
         .build();
   }
 
@@ -168,6 +183,12 @@ public class CompanyGroupMapper {
         .groupCode(entity.getGroupCode())
         .groupMails(split(entity.getGroupMail()))
         .logoUrl(entity.getLogoUrl())
+        .thermometerTrackerApiUrl(entity.getThermometerTrackerApiUrl())
+        .thermometerTrackerApiVersion(entity.getThermometerTrackerApiVersion())
+        .thermometerTrackerEnabled(entity.getThermometerTrackerEnabled())
+        .formflowApiUrl(entity.getFormflowApiUrl())
+        .formflowApiVersion(entity.getFormflowApiVersion())
+        .formflowEnabled(entity.getFormflowEnabled())
         .build();
   }
 }

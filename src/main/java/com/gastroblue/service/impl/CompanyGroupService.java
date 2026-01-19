@@ -36,6 +36,16 @@ public class CompanyGroupService {
     entityToBeUpdate.setGroupCode(request.groupCode());
     entityToBeUpdate.setGroupMail(join(request.groupMails()));
     entityToBeUpdate.setLogoUrl(request.logoUrl());
+    entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
+    entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
+    if (request.thermometerTrackerEnabled() != null) {
+      entityToBeUpdate.setThermometerTrackerEnabled(request.thermometerTrackerEnabled());
+    }
+    entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
+    entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
+    if (request.formflowEnabled() != null) {
+      entityToBeUpdate.setFormflowEnabled(request.formflowEnabled());
+    }
     return companyGroupRepository.save(entityToBeUpdate);
   }
 

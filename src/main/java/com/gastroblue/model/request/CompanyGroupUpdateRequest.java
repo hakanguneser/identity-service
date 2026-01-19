@@ -13,4 +13,10 @@ public record CompanyGroupUpdateRequest(
                 @NotBlank(message = "validation.email.check.blank")
                 @Email(message = "{validation.email}") String>
             groupMails,
-    String logoUrl) {}
+    String logoUrl,
+    String thermometerTrackerApiUrl,
+    String thermometerTrackerApiVersion,
+    Boolean thermometerTrackerEnabled,
+    String formflowApiUrl,
+    String formflowApiVersion,
+    Boolean formflowEnabled) {}

@@ -30,4 +30,24 @@ public class CompanyGroupEntity extends Auditable {
 
   @Column(name = "LOGO_URL", length = 100)
   private String logoUrl;
+
+  @Column(name = "THERMOMETER_TRACKER_API_URL", length = 512)
+  private String thermometerTrackerApiUrl;
+
+  @Column(name = "THERMOMETER_TRACKER_API_VERSION", length = 16)
+  private String thermometerTrackerApiVersion;
+
+  @Column(name = "THERMOMETER_TRACKER_ENABLED", nullable = false)
+  @Builder.Default
+  private Boolean thermometerTrackerEnabled = false;
+
+  @Column(name = "FORMFLOW_API_URL", length = 512)
+  private String formflowApiUrl;
+
+  @Column(name = "FORMFLOW_API_VERSION", length = 16)
+  private String formflowApiVersion;
+
+  @Column(name = "FORMFLOW_ENABLED", nullable = false)
+  @Builder.Default
+  private Boolean formflowEnabled = false;
 }
