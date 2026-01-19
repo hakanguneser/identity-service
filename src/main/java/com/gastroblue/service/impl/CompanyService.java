@@ -22,11 +22,19 @@ public class CompanyService {
     return companyRepository
         .findById(id)
         .map(CompanyGroupMapper::toBase)
-        .orElseThrow(IllegalDefinitionException::new);
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    String.format("Company not found (companyId=%s)", id)));
   }
 
   public CompanyEntity findOrThrow(String id) {
-    return companyRepository.findById(id).orElseThrow(IllegalDefinitionException::new);
+    return companyRepository
+        .findById(id)
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    String.format("Company not found (companyId=%s)", id)));
   }
 
   public List<CompanyEntity> findByCompanyGroupId(String companyGroupId) {
@@ -45,7 +53,12 @@ public class CompanyService {
     return companyRepository
         .findById(companyId)
         .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
-        .orElseThrow(IllegalDefinitionException::new);
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    String.format(
+                        "Company not found (companyId=%s, companyGroupId=%s)",
+                        companyId, companyGroupId)));
   }
 
   public CompanyEntity toggleCompanyStatus(String companyGroupId, String companyId) {
@@ -53,7 +66,12 @@ public class CompanyService {
         companyRepository
             .findById(companyId)
             .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
-            .orElseThrow(IllegalDefinitionException::new);
+            .orElseThrow(
+                () ->
+                    new IllegalDefinitionException(
+                        String.format(
+                            "Company not found (companyId=%s, companyGroupId=%s)",
+                            companyId, companyGroupId)));
 
     entity.setActive(!entity.isActive());
     return companyRepository.save(entity);

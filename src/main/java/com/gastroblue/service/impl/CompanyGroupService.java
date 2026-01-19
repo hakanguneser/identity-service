@@ -71,7 +71,7 @@ public class CompanyGroupService {
     };
   }
 
-  public CompanyGroup findByBaseId(String companyGroupId) {
+  public CompanyGroup findById(String companyGroupId) {
     return companyGroupRepository
         .findById(companyGroupId)
         .map(CompanyGroupMapper::toBase)

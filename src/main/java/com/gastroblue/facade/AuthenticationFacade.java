@@ -6,10 +6,13 @@ import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
+import com.gastroblue.model.base.ApiInfoDto;
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
@@ -49,11 +52,13 @@ public class AuthenticationFacade {
       log.error("Authentication failed1: {}", e.getMessage());
     }
     UserEntity userEntity = userService.findUserEntityByUserName(loginRequest.username());
+    ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
     String token = jwtService.generateToken(userEntity);
     return AuthLoginResponse.builder()
         .token(token)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
         .termsAcceptanceRequired(userEntity.isTermsAcceptanceRequired())
+        .apiInfo(apiInfo)
         .build();
   }
 
@@ -63,7 +68,7 @@ public class AuthenticationFacade {
     response.setUser(UserMapper.toBase(sessionUser));
     if (sessionUser.companyGroupId() != null) {
       try {
-        CompanyGroup companyGroup = companyGroupService.findByBaseId(sessionUser.companyGroupId());
+        CompanyGroup companyGroup = companyGroupService.findById(sessionUser.companyGroupId());
         response.setCompanyGroup(companyGroup);
       } catch (IllegalDefinitionException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
@@ -99,6 +104,38 @@ public class AuthenticationFacade {
   }
 
   public AgreementResponse getAgreement() {
-    return new AgreementResponse("Yemin Et Kimseye soylemicem diye !");
+    return new AgreementResponse(
+        "Yemin Et Kimseye soylemicem diye !"); // TODO companygroup bazinda bir entegrasyon
+    // dusunmelisin
+  }
+
+  private ApiInfoDto getApiInfo(UserEntity userEntity, ApplicationProduct product) {
+    if (userEntity.getApplicationRole().isAdministrator()) {
+      return ApiInfoDto.builder().build();
+    }
+
+    CompanyGroup companyGroup = companyGroupService.findById(userEntity.getCompanyGroupId());
+
+    return switch (product) {
+      case THERMOMETER_TRACKER ->
+          buildApiInfo(
+              companyGroup.getThermometerTrackerEnabled(),
+              companyGroup.getThermometerTrackerApiUrl(),
+              companyGroup.getThermometerTrackerApiVersion());
+      case FORMFLOW ->
+          buildApiInfo(
+              companyGroup.getFormflowEnabled(),
+              companyGroup.getFormflowApiUrl(),
+              companyGroup.getFormflowApiVersion());
+      case ADMIN_PANEL -> ApiInfoDto.builder().build();
+    };
+  }
+
+  private ApiInfoDto buildApiInfo(boolean enabled, String url, String version) {
+    if (!enabled || url == null) {
+      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+    }
+
+    return ApiInfoDto.builder().url(url).version(version).build();
   }
 }
