@@ -1,6 +1,6 @@
 package com.gastroblue.service;
 
-import com.gastroblue.exception.ValidationException;
+import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.base.DefaultConfigurableEnum;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
@@ -115,7 +115,13 @@ public class EnumConfigurationService {
   public EnumValueConfigurationEntity findByIdAndCompanyGroupId(String id, String companyGroupId) {
     return repository
         .findByIdAndCompanyGroupId(id, companyGroupId)
-        .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    ErrorCode.ENUM_CONFIGURATION_NOT_FOUND,
+                    String.format(
+                        "Enum Configuration not found (id=%s, companyGroupId=%s)",
+                        id, companyGroupId)));
   }
 
   @Transactional
@@ -141,7 +147,13 @@ public class EnumConfigurationService {
     EnumValueConfigurationEntity entity =
         repository
             .findByIdAndCompanyGroupId(id, companyGroupId)
-            .orElseThrow(() -> new ValidationException(ErrorCode.CONFIGURATION_NOT_FOUND));
+            .orElseThrow(
+                () ->
+                    new IllegalDefinitionException(
+                        ErrorCode.ENUM_CONFIGURATION_NOT_FOUND,
+                        String.format(
+                            "Enum Configuration not found (id=%s, companyGroupId=%s)",
+                            id, companyGroupId)));
     if (request.label() != null) {
       entity.setLabel(request.label());
     }

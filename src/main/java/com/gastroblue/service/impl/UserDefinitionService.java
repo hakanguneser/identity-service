@@ -1,6 +1,6 @@
 package com.gastroblue.service.impl;
 
-import com.gastroblue.exception.ValidationException;
+import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
@@ -31,20 +31,29 @@ public class UserDefinitionService {
     try {
       return userRepository.save(entityToBeSaved);
     } catch (DataIntegrityViolationException e) {
-      throw new ValidationException(ErrorCode.USER_ALREADY_EXISTS);
+      throw new IllegalDefinitionException(
+          ErrorCode.USER_ALREADY_EXISTS,
+          String.format("User already exists (userId=%s)", entityToBeSaved.getId()));
     }
   }
 
   public UserEntity findById(final String userId) {
     return userRepository
         .findById(userId)
-        .orElseThrow(() -> new ValidationException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    ErrorCode.USER_NOT_FOUND, String.format("User not found (userId=%s)", userId)));
   }
 
   public UserEntity findUserEntityByUserName(final String username) {
     return userRepository
         .findByUsername(username.toLowerCase(Locale.ENGLISH))
-        .orElseThrow(() -> new ValidationException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    ErrorCode.USER_NOT_FOUND,
+                    String.format("User not found (username=%s)", username)));
   }
 
   public List<User> findUserByCompanyId(final String companyId) {

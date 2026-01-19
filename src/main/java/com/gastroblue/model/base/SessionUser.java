@@ -25,13 +25,18 @@ public record SessionUser(
     String userFullName) {
   public void checkUserCompanyId(String companyId) {
     if (this.companyId() != null && !companyId.equals(this.companyId())) {
-      throw new ValidationException(ErrorCode.COMPANY_MISMATCH);
+      throw new ValidationException(
+          ErrorCode.COMPANY_MISMATCH,
+          String.format(
+              "User companyId mismatch. User: %s, companyId: %s", this.username(), companyId));
     }
   }
 
   public String findCurrentUserMail() {
     if (this.email() == null) {
-      throw new ValidationException(ErrorCode.USER_EMAIL_NOT_FOUND);
+      throw new ValidationException(
+          ErrorCode.USER_EMAIL_NOT_FOUND,
+          String.format("User email not found. User: %s", this.username()));
     }
     return this.email();
   }

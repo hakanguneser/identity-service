@@ -4,6 +4,7 @@ import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.entity.CompanyEntity;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Zone;
 import com.gastroblue.repository.CompanyRepository;
 import java.util.List;
@@ -25,6 +26,7 @@ public class CompanyService {
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
+                    ErrorCode.COMPANY_NOT_FOUND,
                     String.format("Company not found (companyId=%s)", id)));
   }
 
@@ -34,6 +36,7 @@ public class CompanyService {
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
+                    ErrorCode.COMPANY_NOT_FOUND,
                     String.format("Company not found (companyId=%s)", id)));
   }
 
@@ -56,6 +59,7 @@ public class CompanyService {
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
+                    ErrorCode.COMPANY_NOT_FOUND,
                     String.format(
                         "Company not found (companyId=%s, companyGroupId=%s)",
                         companyId, companyGroupId)));
@@ -69,6 +73,7 @@ public class CompanyService {
             .orElseThrow(
                 () ->
                     new IllegalDefinitionException(
+                        ErrorCode.COMPANY_NOT_FOUND,
                         String.format(
                             "Company not found (companyId=%s, companyGroupId=%s)",
                             companyId, companyGroupId)));

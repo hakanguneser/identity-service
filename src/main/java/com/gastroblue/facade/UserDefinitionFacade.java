@@ -19,7 +19,10 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -139,12 +142,18 @@ public class UserDefinitionFacade {
     }
     if (request.applicationRole().isGroupManagerOrZoneManager()) {
       if (request.companyGroupId() == null) {
-        throw new ValidationException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
+        throw new ValidationException(
+            ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
+            String.format(
+                "Requested user %s has GroupManager or ZoneManager role, but no companyGroupId is assigned. ApplicationRole: %s, companyGroupId is null",
+                request.username(), request.applicationRole()));
       }
       return companyGroupService.findByIdOrThrow(request.companyGroupId());
     }
     if (sessionUser.companyGroupId() == null) {
-      throw new ValidationException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
+      throw new ValidationException(
+          ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
+          String.format("Requested user %s has no companyGroupId", sessionUser.username()));
     }
     return companyGroupService.findByIdOrThrow(sessionUser.companyGroupId());
   }
