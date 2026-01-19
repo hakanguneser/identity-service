@@ -17,8 +17,8 @@ public class CompanyGroup {
   private String logoUrl;
   private String thermometerTrackerApiUrl;
   private String thermometerTrackerApiVersion;
-  private Boolean thermometerTrackerEnabled;
+  private boolean thermometerTrackerEnabled;
   private String formflowApiUrl;
   private String formflowApiVersion;
-  private Boolean formflowEnabled;
+  private boolean formflowEnabled;
 }

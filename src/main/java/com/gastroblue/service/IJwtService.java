@@ -7,6 +7,7 @@ import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import io.jsonwebtoken.Claims;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public interface IJwtService {
 
   <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
-  String generateToken(UserDetails userDetails);
+  String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims);
 
   String generateToken(Map<String, Object> extraClaims, UserDetails userDetails);
 

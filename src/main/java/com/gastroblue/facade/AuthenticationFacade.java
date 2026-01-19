@@ -10,6 +10,7 @@ import com.gastroblue.model.base.ApiInfoDto;
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
@@ -20,9 +21,10 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.JwtService;
 import com.gastroblue.service.impl.UserDefinitionService;
-import java.util.List;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,6 +43,9 @@ public class AuthenticationFacade {
   private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
 
+  @Value("${spring.application.name}")
+  private String issuer;
+
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
     try {
       authenticationManager.authenticate(
@@ -53,7 +58,8 @@ public class AuthenticationFacade {
     }
     UserEntity userEntity = userService.findUserEntityByUserName(loginRequest.username());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
-    String token = jwtService.generateToken(userEntity);
+    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest);
+    String token = jwtService.generateToken(userEntity, extraClaims);
     return AuthLoginResponse.builder()
         .token(token)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
@@ -113,18 +119,16 @@ public class AuthenticationFacade {
     if (userEntity.getApplicationRole().isAdministrator()) {
       return ApiInfoDto.builder().build();
     }
-
     CompanyGroup companyGroup = companyGroupService.findById(userEntity.getCompanyGroupId());
-
     return switch (product) {
       case THERMOMETER_TRACKER ->
           buildApiInfo(
-              companyGroup.getThermometerTrackerEnabled(),
+              companyGroup.isThermometerTrackerEnabled(),
               companyGroup.getThermometerTrackerApiUrl(),
               companyGroup.getThermometerTrackerApiVersion());
       case FORMFLOW ->
           buildApiInfo(
-              companyGroup.getFormflowEnabled(),
+              companyGroup.isFormflowEnabled(),
               companyGroup.getFormflowApiUrl(),
               companyGroup.getFormflowApiVersion());
       case ADMIN_PANEL -> ApiInfoDto.builder().build();
@@ -137,5 +141,28 @@ public class AuthenticationFacade {
     }
 
     return ApiInfoDto.builder().url(url).version(version).build();
+  }
+
+  private HashMap<String, Object> getExtraClaims(
+      UserEntity sessionUser, AuthLoginRequest loginRequest) {
+    HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put("companyGroupId", sessionUser.getCompanyGroupId());
+    extraClaims.put("applicationRole", sessionUser.getApplicationRole());
+    extraClaims.put("companyIds", getResponsibleCompanyIds(sessionUser));
+    extraClaims.put("iss", issuer);
+    extraClaims.put("aud", loginRequest.product());
+    extraClaims.put("channel", loginRequest.channel());
+    return extraClaims;
+  }
+
+  private List<String> getResponsibleCompanyIds(UserEntity sessionUser) {
+    return switch (sessionUser.getApplicationRole()) {
+      case ADMIN, GROUP_MANAGER -> List.of();
+      case ZONE_MANAGER ->
+          companyService.findByCompanyGroupId(sessionUser.getCompanyGroupId()).stream()
+              .map(CompanyEntity::getId)
+              .toList();
+      default -> List.of(sessionUser.getCompanyId());
+    };
   }
 }

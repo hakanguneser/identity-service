@@ -33,11 +33,7 @@ public class JwtService implements IJwtService {
   }
 
   @Override
-  public String generateToken(UserDetails userDetails) {
-    HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put("authorities", userDetails.getAuthorities());
-    extraClaims.put("accountNonExpired", true);
-    extraClaims.put("accountNonLocked", true);
+  public String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims) {
     return generateToken(extraClaims, userDetails);
   }
 

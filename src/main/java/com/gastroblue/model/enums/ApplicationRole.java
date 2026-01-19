@@ -31,8 +31,8 @@ public enum ApplicationRole implements DefaultConfigurableEnum {
     return this == SUPERVISOR;
   }
 
-  public boolean isStaff() {
-    return this == STAFF;
+  public boolean isZoneManager() {
+    return this == ZONE_MANAGER;
   }
 
   public boolean isGroupManagerOrZoneManager() {
