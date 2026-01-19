@@ -2,7 +2,7 @@ package com.gastroblue.facade;
 
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
-import com.gastroblue.exception.DefinitionNotFoundException;
+import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -171,7 +171,11 @@ public class CompanyGroupDefinitionFacade {
         companyService
             .findByCompanyCode(companyCode)
             .orElseThrow(
-                () -> new DefinitionNotFoundException("Company not found: " + companyCode));
+                () -> {
+                  log.debug("Company not found with code: {}", companyCode);
+                  return new IllegalDefinitionException(
+                      ErrorCode.COMPANY_NOT_FOUND, "Company not found: " + companyCode);
+                });
 
     return CompanyContextResponse.builder()
         .companyGroup(CompanyGroupMapper.toResponse(group))

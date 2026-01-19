@@ -13,4 +13,12 @@ public class IllegalDefinitionException extends AbstractRuntimeException {
   public IllegalDefinitionException(String message) {
     super(ErrorCode.ILLEGAL_DEFINITION, message);
   }
+
+  public IllegalDefinitionException(ErrorCode errorCode, String message) {
+    super(errorCode, message);
+  }
+
+  public IllegalDefinitionException(ErrorCode errorCode) {
+    super(errorCode);
+  }
 }

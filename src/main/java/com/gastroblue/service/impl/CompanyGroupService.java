@@ -2,22 +2,24 @@ package com.gastroblue.service.impl;
 
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
-import com.gastroblue.exception.DefinitionNotFoundException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyGroupEntity;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
 import com.gastroblue.service.IJwtService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CompanyGroupService {
 
   private final CompanyGroupRepository companyGroupRepository;
@@ -31,7 +33,12 @@ public class CompanyGroupService {
     CompanyGroupEntity entityToBeUpdate =
         companyGroupRepository
             .findById(companyGroupId)
-            .orElseThrow(IllegalDefinitionException::new);
+            .orElseThrow(
+                () -> {
+                  log.debug("Company Group not found for update with id: {}", companyGroupId);
+                  return new IllegalDefinitionException(
+                      ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
+                });
     entityToBeUpdate.setName(request.name());
     entityToBeUpdate.setGroupCode(request.groupCode());
     entityToBeUpdate.setGroupMail(join(request.groupMails()));
@@ -58,7 +65,12 @@ public class CompanyGroupService {
         ? null
         : companyGroupRepository
             .findById(companyGroupId)
-            .orElseThrow(IllegalDefinitionException::new);
+            .orElseThrow(
+                () -> {
+                  log.debug("Company Group not found with id: {}", companyGroupId);
+                  return new IllegalDefinitionException(
+                      ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
+                });
   }
 
   public List<CompanyGroupEntity> findMyCompanyGroups() {
@@ -75,12 +87,22 @@ public class CompanyGroupService {
     return companyGroupRepository
         .findById(companyGroupId)
         .map(CompanyGroupMapper::toBase)
-        .orElseThrow(IllegalDefinitionException::new);
+        .orElseThrow(
+            () -> {
+              log.debug("Company Group not found with id: {}", companyGroupId);
+              return new IllegalDefinitionException(
+                  ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
+            });
   }
 
   public CompanyGroupEntity findByGroupCode(String groupCode) {
     return companyGroupRepository
         .findByGroupCode(groupCode)
-        .orElseThrow(() -> new DefinitionNotFoundException("Group not found: " + groupCode));
+        .orElseThrow(
+            () -> {
+              log.debug("Company Group not found with code: {}", groupCode);
+              return new IllegalDefinitionException(
+                  ErrorCode.COMPANY_GROUP_NOT_FOUND, "Group not found: " + groupCode);
+            });
   }
 }
