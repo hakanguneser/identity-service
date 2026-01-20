@@ -106,7 +106,7 @@ public class CompanyGroupEulaContentService {
 
   public String getActiveEulaContent(String companyGroupId) {
     return findActiveEulaContent(companyGroupId)
-        .or(() -> findActiveEulaContent("*"))
+        .or(() -> findActiveEulaContent(CompanyGroupService.DEFAULT_COMPANY_GROUP_ID))
         .map(CompanyGroupEulaContentEntity::getContent)
         .orElse("");
   }

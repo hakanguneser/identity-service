@@ -10,6 +10,7 @@ import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
+import com.gastroblue.service.impl.CompanyGroupService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +128,10 @@ public class EnumConfigurationService {
   @Transactional
   @CacheEvict(value = "enum_configs", allEntries = true)
   public EnumValueConfigurationEntity save(EnumConfigurationSaveRequest request) {
-    String finalCompanyGroupId = request.companyGroupId() == null ? "*" : request.companyGroupId();
+    String finalCompanyGroupId =
+        request.companyGroupId() == null
+            ? CompanyGroupService.DEFAULT_COMPANY_GROUP_ID
+            : request.companyGroupId();
     EnumValueConfigurationEntity entity =
         EnumValueConfigurationEntity.builder()
             .companyGroupId(finalCompanyGroupId)
@@ -166,7 +170,7 @@ public class EnumConfigurationService {
   @Transactional(readOnly = true)
   public List<EnumValueConfigurationEntity> findAll(String companyGroupId) {
     if (companyGroupId == null) {
-      companyGroupId = "*";
+      companyGroupId = CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
     }
     return repository.findByCompanyGroupId(companyGroupId);
   }

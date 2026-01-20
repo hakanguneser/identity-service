@@ -13,6 +13,7 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
+import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.util.DelimitedStringUtil;
 import java.util.Collections;
 import java.util.List;
@@ -115,7 +116,10 @@ public class UserMapper {
       return null;
     }
 
-    String companyGroupId = entity.getCompanyGroupId();
+    String companyGroupId =
+        entity.getCompanyGroupId() == null
+            ? CompanyGroupService.DEFAULT_COMPANY_GROUP_ID
+            : entity.getCompanyGroupId();
 
     List<Department> departmentList = splitToEnumList(entity.getDepartments(), Department.class);
     List<ResolvedEnum<Department>> resolvedDepartmentList =

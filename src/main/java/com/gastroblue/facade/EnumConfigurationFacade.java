@@ -10,6 +10,7 @@ import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -68,8 +69,9 @@ public class EnumConfigurationFacade {
   private <T extends DefaultConfigurableEnum> String getCompanyGroupId(
       T enumValue, String companyGroupId) {
     boolean defaultEnum = enumValue.isDefault();
-    if (defaultEnum) {
-      return "*";
+    if (defaultEnum
+        || Objects.equals(companyGroupId, CompanyGroupService.DEFAULT_COMPANY_GROUP_ID)) {
+      return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
     } else {
       return companyGroupService.findByIdOrThrow(companyGroupId).getId();
     }
