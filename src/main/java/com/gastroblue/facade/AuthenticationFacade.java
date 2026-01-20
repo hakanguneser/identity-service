@@ -14,10 +14,7 @@ import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
-import com.gastroblue.service.impl.CompanyGroupService;
-import com.gastroblue.service.impl.CompanyService;
-import com.gastroblue.service.impl.JwtService;
-import com.gastroblue.service.impl.UserDefinitionService;
+import com.gastroblue.service.impl.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +37,7 @@ public class AuthenticationFacade {
   private final CompanyGroupService companyGroupService;
   private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
+  private final CompanyGroupEulaContentService eulaContentService;
 
   @Value("${spring.application.name}")
   private String issuer;
@@ -108,10 +106,11 @@ public class AuthenticationFacade {
     userDefinitionService.signAgreement(IJwtService.findSessionUserOrThrow().userId());
   }
 
-  public AgreementResponse getAgreement() {
-    return new AgreementResponse(
-        "Yemin Et Kimseye soylemicem diye !"); // TODO companygroup bazinda bir entegrasyon
-    // dusunmelisin
+  public EulaResponse getEula() {
+    String activeEulaContent =
+        eulaContentService.getActiveEulaContent(
+            IJwtService.findSessionUserOrThrow().companyGroupId());
+    return new EulaResponse(activeEulaContent);
   }
 
   private ApiInfoDto getApiInfo(UserEntity userEntity, ApplicationProduct product) {

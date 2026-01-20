@@ -79,7 +79,7 @@ public class EnumConfigurationFacade {
       Class<T> enumClass, String companyGroupId) {
     boolean defaultEnum = enumConfigurationService.isDefaultEnum(enumClass);
     if (defaultEnum) {
-      return "*";
+      return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
     } else {
       return companyGroupService.findByIdOrThrow(companyGroupId).getId();
     }

@@ -24,6 +24,8 @@ public class CompanyGroupService {
 
   private final CompanyGroupRepository companyGroupRepository;
 
+  public static final String DEFAULT_COMPANY_GROUP_ID = "*";
+
   public CompanyGroupEntity save(final CompanyGroupSaveRequest companyGroupRequest) {
     CompanyGroupEntity entityToBeSave = CompanyGroupMapper.toEntity(companyGroupRequest);
     return companyGroupRepository.save(entityToBeSave);

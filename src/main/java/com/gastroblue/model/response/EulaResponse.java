@@ -7,6 +7,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 @Getter
-public class AgreementResponse {
-  private String agreementBody;
+public class EulaResponse {
+  private String eulaContent;
 }

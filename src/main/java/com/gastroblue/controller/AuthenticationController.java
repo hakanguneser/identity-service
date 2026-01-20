@@ -39,9 +39,9 @@ public class AuthenticationController {
     return ResponseEntity.ok(authenticationFacade.findMyCompanies());
   }
 
-  @GetMapping("/agreement")
-  public ResponseEntity<AgreementResponse> getAgreement() {
-    return ResponseEntity.ok(authenticationFacade.getAgreement());
+  @GetMapping("/eula")
+  public ResponseEntity<EulaResponse> getEula() {
+    return ResponseEntity.ok(authenticationFacade.getEula());
   }
 
   @PatchMapping("/agreement")
