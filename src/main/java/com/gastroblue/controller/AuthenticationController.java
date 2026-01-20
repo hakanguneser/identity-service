@@ -2,6 +2,7 @@ package com.gastroblue.controller;
 
 import com.gastroblue.facade.AuthenticationFacade;
 import com.gastroblue.model.request.AuthLoginRequest;
+import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -22,6 +23,12 @@ public class AuthenticationController {
   public ResponseEntity<AuthLoginResponse> login(
       @Valid @RequestBody AuthLoginRequest loginRequest) {
     return ResponseEntity.ok(authenticationFacade.login(loginRequest));
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<AuthLoginResponse> refresh(
+      @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
+    return ResponseEntity.ok(authenticationFacade.refreshToken(refreshTokenRequest));
   }
 
   @GetMapping("/my/info")

@@ -10,6 +10,7 @@ import lombok.*;
 @Builder
 public class AuthLoginResponse {
   private String token;
+  private String refreshToken;
   private boolean passwordChangeRequired;
   private boolean termsAcceptanceRequired;
   private ApiInfoDto apiInfo;

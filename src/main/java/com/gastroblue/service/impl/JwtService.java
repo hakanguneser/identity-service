@@ -39,11 +39,21 @@ public class JwtService implements IJwtService {
 
   @Override
   public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    return buildToken(extraClaims, userDetails, 1000 * 60 * 15); // 15 minutes
+  }
+
+  @Override
+  public String generateRefreshToken(UserDetails userDetails) {
+    return buildToken(new HashMap<>(), userDetails, 1000 * 60 * 60 * 24 * 7); // 7 days
+  }
+
+  private String buildToken(
+      Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
     return Jwts.builder()
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 15)))
+        .setExpiration(new Date(System.currentTimeMillis() + expiration))
         .signWith(getSignInKey(), SignatureAlgorithm.HS256)
         .compact();
   }
@@ -54,7 +64,8 @@ public class JwtService implements IJwtService {
     return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
   }
 
-  private boolean isTokenExpired(String token) {
+  @Override
+  public boolean isTokenExpired(String token) {
     return extractExpiration(token).before(new Date());
   }
 
