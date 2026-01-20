@@ -1,10 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ApplicationRole;
-import com.gastroblue.model.enums.Gender;
-import com.gastroblue.model.enums.Language;
-import com.gastroblue.model.enums.Zone;
+import com.gastroblue.model.enums.*;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -74,6 +71,16 @@ public class UserEntity extends Auditable implements UserDetails {
 
   @Column(name = "PASSWORD_CHANGE_REQUIRED", nullable = false)
   private boolean passwordChangeRequired;
+
+  @Column(name = "PASSWORD_VALID_UNTIL")
+  private LocalDateTime passwordValidUntil;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "LAST_SUCCESS_LOGIN_PRODUCT")
+  private ApplicationProduct lastSuccessLoginProduct;
+
+  @Column(name = "LAST_SUCCESS_LOGIN")
+  private LocalDateTime lastSuccessLogin;
 
   @Column(name = "TERMS_ACCEPTANCE_REQUIRED", nullable = false)
   private boolean termsAcceptanceRequired;

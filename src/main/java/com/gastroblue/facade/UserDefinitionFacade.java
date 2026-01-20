@@ -19,6 +19,7 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -171,6 +172,7 @@ public class UserDefinitionFacade {
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);
+    userEntity.setPasswordValidUntil(LocalDateTime.now().plusMinutes(15));
     userService.updateUser(userEntity);
     // notifyNewPassword(generatedPassword, request.getEmail()); // TODO : kisi
     // forgat password
@@ -189,6 +191,7 @@ public class UserDefinitionFacade {
     if (userEntity.isPasswordChangeRequired()) {
       userEntity.setPasswordChangeRequired(false);
     }
+    userEntity.setPasswordValidUntil(LocalDateTime.now().plusMonths(12));
 
     userService.updateUser(userEntity);
   }

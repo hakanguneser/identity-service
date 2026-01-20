@@ -6,10 +6,7 @@ import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
-import com.gastroblue.model.base.ApiInfoDto;
-import com.gastroblue.model.base.Company;
-import com.gastroblue.model.base.CompanyGroup;
-import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.model.base.*;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
@@ -21,6 +18,7 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.JwtService;
 import com.gastroblue.service.impl.UserDefinitionService;
+import java.time.LocalDateTime;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +55,7 @@ public class AuthenticationFacade {
       log.error("Authentication failed1: {}", e.getMessage());
     }
     UserEntity userEntity = userService.findUserEntityByUserName(loginRequest.username());
+    updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
     HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest);
     String token = jwtService.generateToken(userEntity, extraClaims);
@@ -164,5 +163,15 @@ public class AuthenticationFacade {
               .toList();
       default -> List.of(sessionUser.getCompanyId());
     };
+  }
+
+  private void updateUserAfterSuccessfulLogin(UserEntity userEntity, ApplicationProduct product) {
+    userEntity.setLastSuccessLogin(LocalDateTime.now());
+    userEntity.setLastSuccessLoginProduct(product);
+    if (userEntity.getPasswordValidUntil() == null
+        || userEntity.getPasswordValidUntil().isBefore(LocalDateTime.now())) {
+      userEntity.setPasswordChangeRequired(true);
+    }
+    userService.save(userEntity);
   }
 }
