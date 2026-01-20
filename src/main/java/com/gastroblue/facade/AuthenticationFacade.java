@@ -1,5 +1,7 @@
 package com.gastroblue.facade;
 
+import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
+import static com.gastroblue.model.enums.ApplicationProduct.THERMOMETER_TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
@@ -56,7 +58,7 @@ public class AuthenticationFacade {
     UserEntity userEntity = userService.findUserEntityByUserName(loginRequest.username());
     updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
-    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest);
+    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest.product());
     String token = jwtService.generateToken(userEntity, extraClaims);
     String refreshToken = jwtService.generateRefreshToken(userEntity);
     return AuthLoginResponse.builder()
@@ -102,14 +104,7 @@ public class AuthenticationFacade {
     if (product == null) {
       product = ApplicationProduct.ADMIN_PANEL; // Fallback? or throw?
     }
-
-    HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put("companyGroupId", userEntity.getCompanyGroupId());
-    extraClaims.put("applicationRole", userEntity.getApplicationRole());
-    extraClaims.put("companyIds", getResponsibleCompanyIds(userEntity));
-    extraClaims.put("iss", issuer);
-    extraClaims.put("aud", product);
-    extraClaims.put("channel", request.channel());
+    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, product);
 
     String newToken = jwtService.generateToken(userEntity, extraClaims);
     String newRefreshToken = jwtService.generateRefreshToken(userEntity);
@@ -179,11 +174,13 @@ public class AuthenticationFacade {
     return switch (product) {
       case THERMOMETER_TRACKER ->
           buildApiInfo(
+              THERMOMETER_TRACKER,
               companyGroup.isThermometerTrackerEnabled(),
               companyGroup.getThermometerTrackerApiUrl(),
               companyGroup.getThermometerTrackerApiVersion());
       case FORMFLOW ->
           buildApiInfo(
+              FORMFLOW,
               companyGroup.isFormflowEnabled(),
               companyGroup.getFormflowApiUrl(),
               companyGroup.getFormflowApiVersion());
@@ -191,23 +188,30 @@ public class AuthenticationFacade {
     };
   }
 
-  private ApiInfoDto buildApiInfo(boolean enabled, String url, String version) {
+  private ApiInfoDto buildApiInfo(
+      ApplicationProduct product, boolean enabled, String url, String version) {
     if (!enabled || url == null) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+      switch (product) {
+        case FORMFLOW:
+          throw new AccessDeniedException(ErrorCode.FORMFLOW_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
+        case THERMOMETER_TRACKER:
+          throw new AccessDeniedException(
+              ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
+        default:
+          throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+      }
     }
-
     return ApiInfoDto.builder().url(url).version(version).build();
   }
 
   private HashMap<String, Object> getExtraClaims(
-      UserEntity sessionUser, AuthLoginRequest loginRequest) {
+      UserEntity sessionUser, ApplicationProduct product) {
     HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put("companyGroupId", sessionUser.getCompanyGroupId());
-    extraClaims.put("applicationRole", sessionUser.getApplicationRole());
-    extraClaims.put("companyIds", getResponsibleCompanyIds(sessionUser));
+    extraClaims.put("cgId", sessionUser.getCompanyGroupId());
+    extraClaims.put("role", sessionUser.getApplicationRole());
+    extraClaims.put("cIds", getResponsibleCompanyIds(sessionUser));
     extraClaims.put("iss", issuer);
-    extraClaims.put("aud", loginRequest.product());
-    extraClaims.put("channel", loginRequest.channel());
+    extraClaims.put("aud", product);
     return extraClaims;
   }
 
