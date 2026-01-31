@@ -1,5 +1,8 @@
 services:
   identity:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: identity:latest
     container_name: identity
     restart: unless-stopped
