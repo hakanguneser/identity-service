@@ -5,14 +5,9 @@ services:
     restart: unless-stopped
     ports:
       - "7102:7102"
-    env_file:
-      - /etc/infra-env/identity.env
     networks:
-      - postgres_db_network
-      - rabbitmq_default
+      - network_infra
 
 networks:
-  postgres_db_network:
-    external: true
-  rabbitmq_default:
+  network_infra:
     external: true
