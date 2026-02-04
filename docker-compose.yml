@@ -16,6 +16,7 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       SERVER_PORT: ${SERVER_PORT}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      
     networks:
       - network_infra
 
