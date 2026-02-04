@@ -6,8 +6,8 @@ services:
     image: identity:latest
     container_name: identity
     restart: unless-stopped
-    expose:
-      - 7102
+    ports:
+      - "127.0.0.1:7102:7102"
     environment:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
