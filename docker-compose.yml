@@ -7,7 +7,15 @@ services:
     container_name: identity
     restart: unless-stopped
     ports:
-      - "7102:7102"
+      - "127.0.0.1:7102:7102"
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SERVER_PORT: ${SERVER_PORT}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     networks:
       - network_infra
 
