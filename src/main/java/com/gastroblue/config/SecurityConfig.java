@@ -26,7 +26,10 @@ public class SecurityConfig {
             authorize ->
                 authorize
                     .requestMatchers(
-                        "/api/v1/auth/login", "/api/v1/auth/refresh", "/actuator/health/**")
+                        "/api/v1/auth/login",
+                        "/api/v1/auth/refresh",
+                        "/actuator/health/**",
+                        "/swagger-ui/index.html")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
