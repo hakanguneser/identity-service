@@ -26,7 +26,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<AuthLoginResponse> refresh(
+  public ResponseEntity<AuthRefreshTokenResponse> refresh(
       @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
     return ResponseEntity.ok(authenticationFacade.refreshToken(refreshTokenRequest));
   }

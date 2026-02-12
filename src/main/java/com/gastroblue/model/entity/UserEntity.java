@@ -76,9 +76,6 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "LAST_SUCCESS_LOGIN")
   private LocalDateTime lastSuccessLogin;
 
-  @Column(name = "EULA_REQUIRED", nullable = false)
-  private boolean eulaRequired;
-
   @Column(name = "EULA_ACCEPTED_AT")
   private LocalDateTime eulaAcceptedAt;
 

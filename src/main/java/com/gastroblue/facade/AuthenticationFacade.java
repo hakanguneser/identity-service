@@ -65,12 +65,11 @@ public class AuthenticationFacade {
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .eulaRequired(userEntity.isEulaRequired())
         .apiInfo(apiInfo)
         .build();
   }
 
-  public AuthLoginResponse refreshToken(RefreshTokenRequest request) {
+  public AuthRefreshTokenResponse refreshToken(RefreshTokenRequest request) {
     if (jwtService.isTokenExpired(request.refreshToken())) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
@@ -80,7 +79,7 @@ public class AuthenticationFacade {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
 
-    ApiInfoDto apiInfo = getApiInfo(userEntity, userEntity.getLastSuccessLoginProduct());
+    // ApiInfoDto apiInfo = getApiInfo(userEntity, userEntity.getLastSuccessLoginProduct());
 
     // Create a dummy login request to reuse the getExtraClaims logic or recreate it
     // Using channel from request if present, otherwise null or default
@@ -107,15 +106,9 @@ public class AuthenticationFacade {
     HashMap<String, Object> extraClaims = getExtraClaims(userEntity, product);
 
     String newToken = jwtService.generateToken(userEntity, extraClaims);
-    String newRefreshToken = jwtService.generateRefreshToken(userEntity);
+    // String newRefreshToken = jwtService.generateRefreshToken(userEntity);
 
-    return AuthLoginResponse.builder()
-        .token(newToken)
-        .refreshToken(newRefreshToken)
-        .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .eulaRequired(userEntity.isEulaRequired())
-        .apiInfo(apiInfo)
-        .build();
+    return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 
   public AuthUserInfoResponse findAuthenticatedUserInfo() {

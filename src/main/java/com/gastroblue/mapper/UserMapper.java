@@ -43,7 +43,6 @@ public class UserMapper {
         .surname(request.surname())
         .gender(request.gender())
         .zone(request.zone())
-        .eulaRequired(true)
         .passwordChangeRequired(true)
         .build();
   }

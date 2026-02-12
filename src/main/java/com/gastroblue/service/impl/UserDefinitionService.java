@@ -80,7 +80,6 @@ public class UserDefinitionService {
 
   public void signEula(String userId) {
     UserEntity entityToBeUpdated = findById(userId);
-    entityToBeUpdated.setEulaRequired(false);
     entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
     userRepository.save(entityToBeUpdated);
   }
