@@ -69,12 +69,6 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "ZONE", length = 10)
   private Zone zone;
 
-  @Column(name = "PASSWORD_CHANGE_REQUIRED", nullable = false)
-  private boolean passwordChangeRequired;
-
-  @Column(name = "PASSWORD_VALID_UNTIL")
-  private LocalDateTime passwordValidUntil;
-
   @Enumerated(EnumType.STRING)
   @Column(name = "LAST_SUCCESS_LOGIN_PRODUCT")
   private ApplicationProduct lastSuccessLoginProduct;
@@ -82,11 +76,17 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "LAST_SUCCESS_LOGIN")
   private LocalDateTime lastSuccessLogin;
 
-  @Column(name = "TERMS_ACCEPTANCE_REQUIRED", nullable = false)
-  private boolean termsAcceptanceRequired;
+  @Column(name = "EULA_REQUIRED", nullable = false)
+  private boolean eulaRequired;
 
-  @Column(name = "TERMS_ACCEPTED_DATE")
-  private LocalDateTime termsAcceptedDate;
+  @Column(name = "EULA_ACCEPTED_AT")
+  private LocalDateTime eulaAcceptedAt;
+
+  @Column(name = "PASSWORD_CHANGE_REQUIRED", nullable = false)
+  private boolean passwordChangeRequired;
+
+  @Column(name = "PASSWORD_EXPIRES_AT")
+  private LocalDateTime passwordExpiresAt;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

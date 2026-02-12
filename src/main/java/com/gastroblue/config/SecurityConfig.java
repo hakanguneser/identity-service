@@ -19,18 +19,17 @@ public class SecurityConfig {
   private final AuthenticationProvider authenticationProvider;
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) {
 
     http.csrf(AbstractHttpConfigurer::disable)
-        /*.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/v1/auth/authenticate/**").permitAll()
-                .requestMatchers("/api/v1/auth/register/byManager/**").hasAnyAuthority(UserRole.MANAGER.name())
-                .requestMatchers("/api/v1/auth/register/byAdmin/**").hasAnyAuthority(UserRole.ADMIN.name())
-                .requestMatchers("/api/v1/user/**").permitAll()
-                .requestMatchers("/api/v1/company/**").hasAnyAuthority(UserRole.EMPLOYEE.name())
-                .anyRequest().authenticated()
-        )*/
-        .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers(
+                        "/api/v1/auth/login", "/api/v1/auth/refresh", "/actuator/health/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
         .sessionManagement(
             sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

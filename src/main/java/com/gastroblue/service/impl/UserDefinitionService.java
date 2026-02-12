@@ -78,10 +78,10 @@ public class UserDefinitionService {
     return userRepository.save(entityToBeUpdated);
   }
 
-  public void signAgreement(String userId) {
+  public void signEula(String userId) {
     UserEntity entityToBeUpdated = findById(userId);
-    entityToBeUpdated.setTermsAcceptanceRequired(false);
-    entityToBeUpdated.setTermsAcceptedDate(LocalDateTime.now());
+    entityToBeUpdated.setEulaRequired(false);
+    entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
     userRepository.save(entityToBeUpdated);
   }
 }

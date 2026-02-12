@@ -51,9 +51,9 @@ public class AuthenticationController {
     return ResponseEntity.ok(authenticationFacade.getEula());
   }
 
-  @PatchMapping("/agreement")
-  public ResponseEntity<Void> signAgreement() {
-    authenticationFacade.signAgreement();
+  @PatchMapping("/eula")
+  public ResponseEntity<Void> signEula() {
+    authenticationFacade.signEula();
     return ResponseEntity.noContent().build();
   }
 }

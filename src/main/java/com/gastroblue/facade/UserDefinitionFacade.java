@@ -172,7 +172,7 @@ public class UserDefinitionFacade {
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);
-    userEntity.setPasswordValidUntil(LocalDateTime.now().plusMinutes(15));
+    userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMinutes(15));
     userService.updateUser(userEntity);
     // notifyNewPassword(generatedPassword, request.getEmail()); // TODO : kisi
     // forgat password
@@ -191,7 +191,7 @@ public class UserDefinitionFacade {
     if (userEntity.isPasswordChangeRequired()) {
       userEntity.setPasswordChangeRequired(false);
     }
-    userEntity.setPasswordValidUntil(LocalDateTime.now().plusMonths(12));
+    userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMonths(12));
 
     userService.updateUser(userEntity);
   }
