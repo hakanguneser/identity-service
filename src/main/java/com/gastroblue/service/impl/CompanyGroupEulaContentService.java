@@ -4,6 +4,7 @@ import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupEulaContentMapper;
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.repository.CompanyGroupEulaContentRepository;
@@ -105,14 +106,32 @@ public class CompanyGroupEulaContentService {
   }
 
   public String getActiveEulaContent(String companyGroupId) {
-    return findActiveEulaContent(companyGroupId)
-        .or(() -> findActiveEulaContent(CompanyGroupService.DEFAULT_COMPANY_GROUP_ID))
-        .map(CompanyGroupEulaContentEntity::getContent)
-        .orElse("");
+
+    Language language = IJwtService.getSessionLanguage();
+    LocalDateTime now = LocalDateTime.now();
+
+    return findActiveContent(companyGroupId, language, now)
+        .or(() -> findActiveContent(CompanyGroupService.DEFAULT_COMPANY_GROUP_ID, language, now))
+        .orElseGet(() -> createAndReturnDefault(language, now))
+        .getContent();
   }
 
-  private Optional<CompanyGroupEulaContentEntity> findActiveEulaContent(String companyGroupId) {
-    return eulaContentRepository.findActiveContent(
-        companyGroupId, IJwtService.getSessionLanguage(), LocalDateTime.now());
+  private Optional<CompanyGroupEulaContentEntity> findActiveContent(
+      String companyGroupId, Language language, LocalDateTime now) {
+    return eulaContentRepository.findActiveContent(companyGroupId, language, now);
+  }
+
+  private CompanyGroupEulaContentEntity createAndReturnDefault(
+      Language language, LocalDateTime now) {
+    CompanyGroupEulaContentEntity entity =
+        CompanyGroupEulaContentEntity.builder()
+            .companyGroupId(CompanyGroupService.DEFAULT_COMPANY_GROUP_ID)
+            .eulaVersion("v1.0")
+            .language(language)
+            .content(String.format("Default EULA Content [%s]", language.name()))
+            .startDate(now)
+            .build();
+
+    return eulaContentRepository.save(entity);
   }
 }

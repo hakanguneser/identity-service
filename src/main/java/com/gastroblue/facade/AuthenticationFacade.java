@@ -65,7 +65,7 @@ public class AuthenticationFacade {
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .termsAcceptanceRequired(userEntity.isTermsAcceptanceRequired())
+        .eulaRequired(userEntity.isEulaRequired())
         .apiInfo(apiInfo)
         .build();
   }
@@ -113,7 +113,7 @@ public class AuthenticationFacade {
         .token(newToken)
         .refreshToken(newRefreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .termsAcceptanceRequired(userEntity.isTermsAcceptanceRequired())
+        .eulaRequired(userEntity.isEulaRequired())
         .apiInfo(apiInfo)
         .build();
   }
@@ -155,8 +155,8 @@ public class AuthenticationFacade {
         .toList();
   }
 
-  public void signAgreement() {
-    userDefinitionService.signAgreement(IJwtService.findSessionUserOrThrow().userId());
+  public void signEula() {
+    userDefinitionService.signEula(IJwtService.findSessionUserOrThrow().userId());
   }
 
   public EulaResponse getEula() {
@@ -229,8 +229,8 @@ public class AuthenticationFacade {
   private void updateUserAfterSuccessfulLogin(UserEntity userEntity, ApplicationProduct product) {
     userEntity.setLastSuccessLogin(LocalDateTime.now());
     userEntity.setLastSuccessLoginProduct(product);
-    if (userEntity.getPasswordValidUntil() == null
-        || userEntity.getPasswordValidUntil().isBefore(LocalDateTime.now())) {
+    if (userEntity.getPasswordExpiresAt() == null
+        || userEntity.getPasswordExpiresAt().isBefore(LocalDateTime.now())) {
       userEntity.setPasswordChangeRequired(true);
     }
     userService.save(userEntity);
