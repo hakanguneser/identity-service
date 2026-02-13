@@ -54,13 +54,13 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     select u
     from UserEntity u
     where (:companyGroupId is null or u.companyGroupId = :companyGroupId)
-      and (:zoneId is null or u.zone = :zone)
+      and (:zone is null or u.zone = :zone)
       and (:companyId is null or u.companyId = :companyId)
       and (coalesce(:applicationRoleList, null) is null or u.applicationRole in :applicationRoleList)
     """)
   List<UserEntity> findByCompanyGroupIdAndZoneIdAndCompanyIdAndApplicationRoleIn(
       @Param("companyGroupId") String companyGroupId,
-      @Param("zoneId") Zone zone,
+      @Param("zone") Zone zone,
       @Param("companyId") String companyId,
       @Param("applicationRoleList") Set<ApplicationRole> applicationRoleList);
 }
