@@ -31,8 +31,8 @@ public class EnumConfigurationFacade {
   }
 
   public <T extends DefaultConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
-      Class<T> enumClass, String companyGroupId) {
-    String finalCompanyGroupId = getCompanyGroupId(enumClass, companyGroupId);
+      Class<T> enumClass) {
+    String finalCompanyGroupId = getCompanyGroupId(enumClass);
     return enumConfigurationService.getDropdownValues(enumClass, finalCompanyGroupId);
   }
 
@@ -77,13 +77,15 @@ public class EnumConfigurationFacade {
     }
   }
 
-  private <T extends DefaultConfigurableEnum> String getCompanyGroupId(
-      Class<T> enumClass, String companyGroupId) {
+  private <T extends DefaultConfigurableEnum> String getCompanyGroupId(Class<T> enumClass) {
     boolean defaultEnum = enumConfigurationService.isDefaultEnum(enumClass);
     if (defaultEnum) {
       return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
-    } else {
-      return companyGroupService.findByIdOrThrow(companyGroupId).getId();
     }
+    String sessionCompanyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
+    if (sessionCompanyGroupId == null) {
+      return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
+    }
+    return companyGroupService.findByIdOrThrow(sessionCompanyGroupId).getId();
   }
 }

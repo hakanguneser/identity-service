@@ -131,38 +131,37 @@ public class CompanyGroupDefinitionFacade {
     return CompanyGroupMapper.toResponse(companyEntity, enumConfigurationFacade);
   }
 
-  public List<ResolvedEnum<Zone>> findZones(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(Zone.class, companyGroupId);
+  public List<ResolvedEnum<Zone>> findZones() {
+    return enumConfigurationFacade.getDropdownValues(Zone.class);
   }
 
-  public List<ResolvedEnum<Country>> findCountries(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(Country.class, companyGroupId);
+  public List<ResolvedEnum<Country>> findCountries() {
+    return enumConfigurationFacade.getDropdownValues(Country.class);
   }
 
-  public List<ResolvedEnum<City>> findCities(String companyGroupId, final Country country) {
-    List<ResolvedEnum<City>> allCities =
-        enumConfigurationFacade.getDropdownValues(City.class, companyGroupId);
+  public List<ResolvedEnum<City>> findCities(final Country country) {
+    List<ResolvedEnum<City>> allCities = enumConfigurationFacade.getDropdownValues(City.class);
     return allCities.stream().filter(resolved -> resolved.getKey().country() == country).toList();
   }
 
-  public List<ResolvedEnum<CompanySegment1Values>> findSegment1(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment1Values.class, companyGroupId);
+  public List<ResolvedEnum<CompanySegment1Values>> findSegment1() {
+    return enumConfigurationFacade.getDropdownValues(CompanySegment1Values.class);
   }
 
-  public List<ResolvedEnum<CompanySegment2Values>> findSegment2(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment2Values.class, companyGroupId);
+  public List<ResolvedEnum<CompanySegment2Values>> findSegment2() {
+    return enumConfigurationFacade.getDropdownValues(CompanySegment2Values.class);
   }
 
-  public List<ResolvedEnum<CompanySegment3Values>> findSegment3(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment3Values.class, companyGroupId);
+  public List<ResolvedEnum<CompanySegment3Values>> findSegment3() {
+    return enumConfigurationFacade.getDropdownValues(CompanySegment3Values.class);
   }
 
-  public List<ResolvedEnum<CompanySegment4Values>> findSegment4(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment4Values.class, companyGroupId);
+  public List<ResolvedEnum<CompanySegment4Values>> findSegment4() {
+    return enumConfigurationFacade.getDropdownValues(CompanySegment4Values.class);
   }
 
-  public List<ResolvedEnum<CompanySegment5Values>> findSegment5(String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment5Values.class, companyGroupId);
+  public List<ResolvedEnum<CompanySegment5Values>> findSegment5() {
+    return enumConfigurationFacade.getDropdownValues(CompanySegment5Values.class);
   }
 
   public CompanyContextResponse findCompanyAndGroupContext(String groupCode, String companyCode) {

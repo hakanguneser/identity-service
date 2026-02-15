@@ -39,7 +39,7 @@ public class JwtService implements IJwtService {
 
   @Override
   public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    return buildToken(extraClaims, userDetails, 1000 * 60 * 15); // 15 minutes
+    return buildToken(extraClaims, userDetails, 1000 * 60 * 60); // 15 minutes
   }
 
   @Override

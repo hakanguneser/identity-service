@@ -6,6 +6,7 @@ import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -71,22 +72,22 @@ public class UserDefinitionController {
   }
 
   @GetMapping("dropdown/application-roles")
-  public ResponseEntity<List<ApplicationRole>> findAllApplicationRoles() {
+  public ResponseEntity<List<ResolvedEnum<ApplicationRole>>> findAllApplicationRoles() {
     return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")
-  public ResponseEntity<List<Department>> findAllDepartments() {
+  public ResponseEntity<List<ResolvedEnum<Department>>> findAllDepartments() {
     return ResponseEntity.ok(userFacade.findAllDepartments());
   }
 
   @GetMapping("dropdown/genders")
-  public ResponseEntity<List<Gender>> findAllGenders() {
+  public ResponseEntity<List<ResolvedEnum<Gender>>> findAllGenders() {
     return ResponseEntity.ok(userFacade.findAllGenders());
   }
 
   @GetMapping("dropdown/zones")
-  public ResponseEntity<List<Zone>> findAllZones() {
+  public ResponseEntity<List<ResolvedEnum<Zone>>> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
   }
 }

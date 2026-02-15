@@ -14,14 +14,13 @@ import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -196,35 +195,20 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  public List<ApplicationRole> findAllApplicationRoles() {
-    SessionUser sessionUser = IJwtService.findSessionUser();
-    ApplicationRole role = sessionUser != null ? sessionUser.applicationRole() : null;
+  public List<ResolvedEnum<ApplicationRole>> findAllApplicationRoles() {
 
-    if (role == null) {
-      return Collections.emptyList();
-    }
-
-    return Arrays.stream(ApplicationRole.values())
-        .filter(
-            item -> {
-              try {
-                return item.isVisibleFor(role);
-              } catch (IllegalArgumentException e) {
-                return false;
-              }
-            })
-        .toList();
+    return enumFacade.getDropdownValues(ApplicationRole.class);
   }
 
-  public List<Department> findAllDepartments() {
-    return Arrays.asList(Department.values());
+  public List<ResolvedEnum<Department>> findAllDepartments() {
+    return enumFacade.getDropdownValues(Department.class);
   }
 
-  public List<Zone> findAllZones() {
-    return Arrays.asList(Zone.values());
+  public List<ResolvedEnum<Zone>> findAllZones() {
+    return enumFacade.getDropdownValues(Zone.class);
   }
 
-  public List<Gender> findAllGenders() {
-    return Arrays.asList(Gender.values());
+  public List<ResolvedEnum<Gender>> findAllGenders() {
+    return enumFacade.getDropdownValues(Gender.class);
   }
 }
