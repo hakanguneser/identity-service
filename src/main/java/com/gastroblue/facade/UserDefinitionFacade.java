@@ -14,6 +14,7 @@ import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.model.shared.DropdownModel;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
@@ -210,5 +211,17 @@ public class UserDefinitionFacade {
 
   public List<ResolvedEnum<Gender>> findAllGenders() {
     return enumFacade.getDropdownValues(Gender.class);
+  }
+
+  public List<DropdownModel> findAllCompanies() {
+    return companyService.findAll().stream()
+        .map(company -> new DropdownModel(company.getId(), company.getCompanyName()))
+        .toList();
+  }
+
+  public List<DropdownModel> findAllCompanyGroups() {
+    return companyGroupService.findAll().stream()
+        .map(companyGroup -> new DropdownModel(companyGroup.getId(), companyGroup.getName()))
+        .toList();
   }
 }

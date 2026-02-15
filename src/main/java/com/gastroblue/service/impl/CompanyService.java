@@ -44,6 +44,10 @@ public class CompanyService {
     return companyRepository.findByCompanyGroupId(companyGroupId);
   }
 
+  public List<CompanyEntity> findAll() {
+    return companyRepository.findAll();
+  }
+
   public List<CompanyEntity> findByCompanyGroupIdAndZone(String companyGroupId, Zone zone) {
     return companyRepository.findByCompanyGroupIdAndZone(companyGroupId, zone);
   }

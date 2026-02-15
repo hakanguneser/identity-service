@@ -6,6 +6,7 @@ import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.model.shared.DropdownModel;
 import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -89,5 +90,15 @@ public class UserDefinitionController {
   @GetMapping("dropdown/zones")
   public ResponseEntity<List<ResolvedEnum<Zone>>> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
+  }
+
+  @GetMapping("dropdown/company-groups")
+  public ResponseEntity<List<DropdownModel>> findAllCompanyGroups() {
+    return ResponseEntity.ok(userFacade.findAllCompanyGroups());
+  }
+
+  @GetMapping("dropdown/companies")
+  public ResponseEntity<List<DropdownModel>> findAllCompanies() {
+    return ResponseEntity.ok(userFacade.findAllCompanies());
   }
 }
