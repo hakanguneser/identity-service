@@ -78,36 +78,8 @@ public class AuthenticationFacade {
     if (!jwtService.isTokenValid(request.refreshToken(), userEntity)) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
-
-    // ApiInfoDto apiInfo = getApiInfo(userEntity, userEntity.getLastSuccessLoginProduct());
-
-    // Create a dummy login request to reuse the getExtraClaims logic or recreate it
-    // Using channel from request if present, otherwise null or default
-    // We need to re-fetch or reconstruct context.
-    // Since getExtraClaims needs AuthLoginRequest, let's extract the logic or
-    // create a simpler version.
-    // However, existing getExtraClaims uses loginRequest.product() which we might
-    // not have in RefreshTokenRequest if we didn't store it in the claim.
-    // Ideally we should store product/aud in the token claims.
-
-    // Let's check getExtraClaims again. It puts "aud" -> loginRequest.product().
-    // So we can extract "aud" from the refresh token if we put it there?
-    // Wait, generateRefreshToken uses empty map for extraClaims.
-    // So the refresh token DOES NOT have "aud" or "companyGroupId" in it currently.
-    // We should probably add them to the refresh token too if we want to restore
-    // the session faithfully.
-
-    // For now, let's assume we can get it from the user's last success login
-    // product if available.
-    ApplicationProduct product = userEntity.getLastSuccessLoginProduct();
-    if (product == null) {
-      product = ApplicationProduct.ADMIN_PANEL; // Fallback? or throw?
-    }
-    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, product);
-
+    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, request.product());
     String newToken = jwtService.generateToken(userEntity, extraClaims);
-    // String newRefreshToken = jwtService.generateRefreshToken(userEntity);
-
     return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 

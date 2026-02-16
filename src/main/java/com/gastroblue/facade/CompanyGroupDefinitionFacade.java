@@ -5,7 +5,6 @@ import static com.gastroblue.util.DelimitedStringUtil.split;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.enums.*;
@@ -17,7 +16,6 @@ import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
-import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
@@ -119,18 +117,6 @@ public class CompanyGroupDefinitionFacade {
     return companyService.findByCompanyGroupIdAndZone(companyGroupId, zone).stream()
         .map(entity -> CompanyGroupMapper.toResponse(entity, enumConfigurationFacade))
         .toList();
-  }
-
-  public List<CompanyDefinitionResponse> findMyCompanies(String companyGroupId) {
-    SessionUser user = IJwtService.findSessionUserOrThrow();
-
-    return switch (user.applicationRole()) {
-      case ADMIN -> companyGroupId == null ? null : findByCompanyGroupId(companyGroupId);
-      case GROUP_MANAGER -> findByCompanyGroupId(user.companyGroupId());
-      case ZONE_MANAGER -> findByCompanyGroupAndZone(user.companyGroupId(), user.zone());
-      case COMPANY_MANAGER, SUPERVISOR -> List.of(findByCompanyId(user.companyId()));
-      default -> null;
-    };
   }
 
   public List<CompanyGroupDefinitionResponse> findMyCompanyGroups() {
