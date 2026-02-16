@@ -31,6 +31,11 @@ public class EnumConfigurationFacade {
   }
 
   public <T extends DefaultConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
+      Class<T> enumClass, String companyGroupId) {
+    return enumConfigurationService.getDropdownValues(enumClass, companyGroupId);
+  }
+
+  public <T extends DefaultConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
       Class<T> enumClass) {
     String finalCompanyGroupId = getCompanyGroupId(enumClass);
     return enumConfigurationService.getDropdownValues(enumClass, finalCompanyGroupId);
