@@ -9,7 +9,7 @@ import java.util.List;
 public record CompanyGroupSaveRequest(
     @NotBlank(message = "{validation.companyGroupName.check.blank}") String name,
     @NotBlank(message = "{validation.companyGroupCode.check.blank}")
-        @Pattern(regexp = "^[A-Z0-9_]+$", message = "{validation.companyGroupCode.uppercase}")
+        @Pattern(regexp = "^[A-Z0-9_]+$", message = "{validation.companyGroupCode.pattern}")
         String groupCode,
     @Valid
         List<

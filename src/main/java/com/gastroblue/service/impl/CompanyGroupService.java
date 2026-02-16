@@ -31,8 +31,9 @@ public class CompanyGroupService {
 
   public static final String DEFAULT_COMPANY_GROUP_ID = "*";
 
-  public CompanyGroupEntity save(final CompanyGroupSaveRequest companyGroupRequest) {
-    CompanyGroupEntity entityToBeSave = CompanyGroupMapper.toEntity(companyGroupRequest);
+  public CompanyGroupEntity save(final CompanyGroupSaveRequest request) {
+    checkCompanyAvailableMailDomains(request.mailDomains(), request.groupMails());
+    CompanyGroupEntity entityToBeSave = CompanyGroupMapper.toEntity(request);
     return companyGroupRepository.save(entityToBeSave);
   }
 
@@ -45,13 +46,8 @@ public class CompanyGroupService {
                   log.debug("Company Group not found for update with id: {}", companyGroupId);
                   return new DefinitionNotFoundException(ErrorCode.COMPANY_GROUP_NOT_FOUND);
                 });
-    List<String> mailDomains =
-        request.mailDomains().stream().map(String::trim).map(String::toLowerCase).toList();
-    List<String> mailGroupMails =
-        request.groupMails().stream().map(String::trim).map(String::toLowerCase).toList();
     entityToBeUpdate.setName(request.name());
-    entityToBeUpdate.setGroupCode(request.groupCode());
-    entityToBeUpdate.setGroupMail(join(mailGroupMails));
+    entityToBeUpdate.setGroupMail(join(request.groupMails()));
     entityToBeUpdate.setLogoUrl(request.logoUrl());
     if (request.thermometerTrackerEnabled() != null) {
       entityToBeUpdate.setThermometerTrackerEnabled(request.thermometerTrackerEnabled());
@@ -63,8 +59,8 @@ public class CompanyGroupService {
       entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
       entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
     }
-    entityToBeUpdate.setMailDomains(join(mailDomains));
-    checkCompanyAvailableMailDomains(mailDomains, mailGroupMails);
+    entityToBeUpdate.setMailDomains(join(request.mailDomains()));
+    checkCompanyAvailableMailDomains(request.mailDomains(), request.groupMails());
     return companyGroupRepository.save(entityToBeUpdate);
   }
 
@@ -127,11 +123,7 @@ public class CompanyGroupService {
     }
 
     Set<String> normalizedAllowedDomains =
-        allowedDomains.stream()
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .map(String::toLowerCase)
-            .collect(Collectors.toSet());
+        allowedDomains.stream().filter(Objects::nonNull).collect(Collectors.toSet());
 
     List<String> invalidMails =
         mailAddresses.stream()
