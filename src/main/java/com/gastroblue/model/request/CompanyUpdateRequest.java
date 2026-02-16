@@ -5,11 +5,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
 public record CompanyUpdateRequest(
     @NotNull(message = "{validation.companyName.check.null}") String companyName,
-    @NotNull(message = "{validation.companyCode.check.null}") String companyCode,
     Zone zone,
     Country country,
     City city,
@@ -21,5 +21,6 @@ public record CompanyUpdateRequest(
     @Valid
         List<
                 @NotBlank(message = "validation.email.check.blank")
-                @Email(message = "{validation.email}") String>
+                @Email(message = "{validation.email}")
+                @Pattern(regexp = "^[^A-Z\\s]+$", message = "{validation.email.lowercase}") String>
             companyMail) {}

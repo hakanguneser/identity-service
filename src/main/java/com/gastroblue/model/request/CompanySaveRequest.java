@@ -5,12 +5,14 @@ import com.gastroblue.model.enums.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
 public record CompanySaveRequest(
-    @NotNull(message = "{validation.companyName.check.null}") String companyName,
-    @NotNull(message = "{validation.companyCode.check.null}") String companyCode,
+    @NotBlank(message = "{validation.companyName.check.null}") String companyName,
+    @NotBlank(message = "{validation.companyCode.check.blank}")
+        @Pattern(regexp = "^[A-Z0-9_]+$", message = "{validation.companyCode.pattern}")
+        String companyCode,
     Zone zone,
     Country country,
     City city,
@@ -22,7 +24,8 @@ public record CompanySaveRequest(
     @Valid
         List<
                 @NotBlank(message = "validation.email.check.blank")
-                @Email(message = "{validation.email}") String>
+                @Email(message = "{validation.email}")
+                @Pattern(regexp = "^[^A-Z\\s]+$", message = "{validation.email.lowercase}") String>
             companyMail,
     @JsonIgnore Boolean isActive) {
   public CompanySaveRequest {

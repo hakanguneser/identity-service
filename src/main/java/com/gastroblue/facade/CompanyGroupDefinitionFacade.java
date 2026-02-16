@@ -1,6 +1,7 @@
 package com.gastroblue.facade;
 
 import static com.gastroblue.util.DelimitedStringUtil.join;
+import static com.gastroblue.util.DelimitedStringUtil.split;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
@@ -19,6 +20,7 @@ import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
+import com.gastroblue.util.EmailDomainValidator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +36,15 @@ public class CompanyGroupDefinitionFacade {
   private final EnumConfigurationFacade enumConfigurationFacade;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
+
+    EmailDomainValidator.validateAllowedDomains(request.mailDomains(), request.groupMails());
     return CompanyGroupMapper.toResponse(companyGroupService.save(request));
   }
 
   public CompanyGroupDefinitionResponse updateCompanyGroup(
       String companyGroupId, CompanyGroupUpdateRequest request) {
+
+    EmailDomainValidator.validateAllowedDomains(request.mailDomains(), request.groupMails());
     return CompanyGroupMapper.toResponse(companyGroupService.update(companyGroupId, request));
   }
 
@@ -62,30 +68,37 @@ public class CompanyGroupDefinitionFacade {
     return CompanyGroupMapper.toResponse(byId, enumConfigurationFacade);
   }
 
-  public CompanyDefinitionResponse saveCompany(
-      String companyGroupId, CompanySaveRequest companyRequest) {
-    companyGroupService.findByIdOrThrow(companyGroupId);
-    CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(companyRequest, companyGroupId);
+  public CompanyDefinitionResponse saveCompany(String companyGroupId, CompanySaveRequest request) {
+    CompanyGroupEntity companyGroup = companyGroupService.findByIdOrThrow(companyGroupId);
+    EmailDomainValidator.validateAllowedDomains(
+        split(companyGroup.getMailDomains()), request.companyMail());
+
+    CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(request, companyGroupId);
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
+    EmailDomainValidator.validateAllowedDomains(
+        split(companyGroup.getMailDomains()), request.companyMail());
     return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
   }
 
   public CompanyDefinitionResponse updateCompany(
-      String companyGroupId, String companyId, CompanyUpdateRequest companyRequest) {
+      String companyGroupId, String companyId, CompanyUpdateRequest request) {
+    CompanyGroupEntity companyGroup = companyGroupService.findByIdOrThrow(companyGroupId);
     CompanyEntity entityToBeUpdated =
         companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    entityToBeUpdated.setCompanyName(companyRequest.companyName());
-    entityToBeUpdated.setCompanyCode(companyRequest.companyCode());
+
+    EmailDomainValidator.validateAllowedDomains(
+        split(companyGroup.getMailDomains()), request.companyMail());
+    entityToBeUpdated.setCompanyName(request.companyName());
     entityToBeUpdated.setCompanyGroupId(companyGroupId);
-    entityToBeUpdated.setCompanyMail(join(companyRequest.companyMail()));
-    entityToBeUpdated.setCountry(companyRequest.country());
-    entityToBeUpdated.setCity(companyRequest.city());
-    entityToBeUpdated.setZone(companyRequest.zone());
-    entityToBeUpdated.setSegment1(companyRequest.segment1());
-    entityToBeUpdated.setSegment2(companyRequest.segment2());
-    entityToBeUpdated.setSegment3(companyRequest.segment3());
-    entityToBeUpdated.setSegment4(companyRequest.segment4());
-    entityToBeUpdated.setSegment5(companyRequest.segment5());
+    entityToBeUpdated.setCompanyMail(join(request.companyMail()));
+    entityToBeUpdated.setCountry(request.country());
+    entityToBeUpdated.setCity(request.city());
+    entityToBeUpdated.setZone(request.zone());
+    entityToBeUpdated.setSegment1(request.segment1());
+    entityToBeUpdated.setSegment2(request.segment2());
+    entityToBeUpdated.setSegment3(request.segment3());
+    entityToBeUpdated.setSegment4(request.segment4());
+    entityToBeUpdated.setSegment5(request.segment5());
     CompanyEntity savedCompany = companyService.save(entityToBeUpdated);
     return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
   }

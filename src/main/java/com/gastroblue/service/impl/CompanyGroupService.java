@@ -13,11 +13,7 @@ import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
 import com.gastroblue.service.IJwtService;
-import com.gastroblue.util.DelimitedStringUtil;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +28,6 @@ public class CompanyGroupService {
   public static final String DEFAULT_COMPANY_GROUP_ID = "*";
 
   public CompanyGroupEntity save(final CompanyGroupSaveRequest request) {
-    checkCompanyAvailableMailDomains(request.mailDomains(), request.groupMails());
     CompanyGroupEntity entityToBeSave = CompanyGroupMapper.toEntity(request);
     return companyGroupRepository.save(entityToBeSave);
   }
@@ -60,7 +55,6 @@ public class CompanyGroupService {
       entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
     }
     entityToBeUpdate.setMailDomains(join(request.mailDomains()));
-    checkCompanyAvailableMailDomains(request.mailDomains(), request.groupMails());
     return companyGroupRepository.save(entityToBeUpdate);
   }
 
@@ -112,39 +106,5 @@ public class CompanyGroupService {
               return new IllegalDefinitionException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Group not found: " + groupCode);
             });
-  }
-
-  public void checkCompanyAvailableMailDomains(
-      List<String> allowedDomains, List<String> mailAddresses) {
-
-    if (allowedDomains == null || allowedDomains.isEmpty()) {
-      throw new IllegalDefinitionException(
-          ErrorCode.INVALID_MAIL_DOMAINS, "At least one domain must be specified");
-    }
-
-    Set<String> normalizedAllowedDomains =
-        allowedDomains.stream().filter(Objects::nonNull).collect(Collectors.toSet());
-
-    List<String> invalidMails =
-        mailAddresses.stream()
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .filter(mail -> !isDomainAllowed(mail, normalizedAllowedDomains))
-            .toList();
-
-    if (!invalidMails.isEmpty()) {
-      throw new IllegalDefinitionException(
-          ErrorCode.INVALID_MAIL_DOMAINS, DelimitedStringUtil.join(invalidMails));
-    }
-  }
-
-  private boolean isDomainAllowed(String mail, Set<String> allowedDomains) {
-    int atIndex = mail.lastIndexOf('@');
-    if (atIndex < 0 || atIndex == mail.length() - 1) {
-      return false;
-    }
-
-    String domain = mail.substring(atIndex + 1).toLowerCase();
-    return allowedDomains.contains(domain);
   }
 }
