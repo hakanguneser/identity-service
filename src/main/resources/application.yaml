@@ -27,9 +27,6 @@ spring:
 server:
   port: ${SERVER_PORT:7102}
 
-admin:
-  registration:
-    enabled: true
 
 application:
   security:
@@ -41,3 +38,11 @@ management:
     web:
       exposure:
         include: health
+
+
+app:
+  swagger:
+    enabled: true
+  admin:
+    registration:
+      enabled: true

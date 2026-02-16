@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDefinitionFacade {
 
-  @Value("${admin.registration.enabled}")
+  @Value("${app.admin.registration.enabled}")
   private boolean adminRegistrationEnabled;
 
   private final UserDefinitionService userService;
