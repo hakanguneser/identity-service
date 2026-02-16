@@ -21,4 +21,5 @@ public class CompanyGroup {
   private String formflowApiUrl;
   private String formflowApiVersion;
   private boolean formflowEnabled;
+  private String mailDomains;
 }

@@ -38,8 +38,7 @@ public class CompanyGroupEntity extends Auditable {
   private String thermometerTrackerApiVersion;
 
   @Column(name = "THERMOMETER_TRACKER_ENABLED", nullable = false)
-  @Builder.Default
-  private Boolean thermometerTrackerEnabled = false;
+  private Boolean thermometerTrackerEnabled;
 
   @Column(name = "FORMFLOW_API_URL", length = 512)
   private String formflowApiUrl;
@@ -48,6 +47,8 @@ public class CompanyGroupEntity extends Auditable {
   private String formflowApiVersion;
 
   @Column(name = "FORMFLOW_ENABLED", nullable = false)
-  @Builder.Default
-  private Boolean formflowEnabled = false;
+  private Boolean formflowEnabled;
+
+  @Column(name = "MAIL_DOMAINS")
+  private String mailDomains;
 }

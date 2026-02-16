@@ -12,7 +12,11 @@ import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
 import com.gastroblue.service.IJwtService;
+import com.gastroblue.util.DelimitedStringUtil;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,20 +45,26 @@ public class CompanyGroupService {
                   return new IllegalDefinitionException(
                       ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
                 });
+    List<String> mailDomains =
+        request.mailDomains().stream().map(String::trim).map(String::toLowerCase).toList();
+    List<String> mailGroupMails =
+        request.groupMails().stream().map(String::trim).map(String::toLowerCase).toList();
     entityToBeUpdate.setName(request.name());
     entityToBeUpdate.setGroupCode(request.groupCode());
-    entityToBeUpdate.setGroupMail(join(request.groupMails()));
+    entityToBeUpdate.setGroupMail(join(mailGroupMails));
     entityToBeUpdate.setLogoUrl(request.logoUrl());
-    entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
-    entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
     if (request.thermometerTrackerEnabled() != null) {
       entityToBeUpdate.setThermometerTrackerEnabled(request.thermometerTrackerEnabled());
+      entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
+      entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
     }
-    entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
-    entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
     if (request.formflowEnabled() != null) {
       entityToBeUpdate.setFormflowEnabled(request.formflowEnabled());
+      entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
+      entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
     }
+    entityToBeUpdate.setMailDomains(join(mailDomains));
+    checkCompanyAvailableMailDomains(mailDomains, mailGroupMails);
     return companyGroupRepository.save(entityToBeUpdate);
   }
 
@@ -106,5 +116,43 @@ public class CompanyGroupService {
               return new IllegalDefinitionException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Group not found: " + groupCode);
             });
+  }
+
+  public void checkCompanyAvailableMailDomains(
+      List<String> allowedDomains, List<String> mailAddresses) {
+
+    if (allowedDomains == null || allowedDomains.isEmpty()) {
+      throw new IllegalDefinitionException(
+          ErrorCode.INVALID_MAIL_DOMAINS, "At least one domain must be specified");
+    }
+
+    Set<String> normalizedAllowedDomains =
+        allowedDomains.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
+
+    List<String> invalidMails =
+        mailAddresses.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .filter(mail -> !isDomainAllowed(mail, normalizedAllowedDomains))
+            .toList();
+
+    if (!invalidMails.isEmpty()) {
+      throw new IllegalDefinitionException(
+          ErrorCode.INVALID_MAIL_DOMAINS, DelimitedStringUtil.join(invalidMails));
+    }
+  }
+
+  private boolean isDomainAllowed(String mail, Set<String> allowedDomains) {
+    int atIndex = mail.lastIndexOf('@');
+    if (atIndex < 0 || atIndex == mail.length() - 1) {
+      return false;
+    }
+
+    String domain = mail.substring(atIndex + 1).toLowerCase();
+    return allowedDomains.contains(domain);
   }
 }

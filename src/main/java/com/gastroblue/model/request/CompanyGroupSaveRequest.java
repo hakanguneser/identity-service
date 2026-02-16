@@ -19,4 +19,5 @@ public record CompanyGroupSaveRequest(
     Boolean thermometerTrackerEnabled,
     String formflowApiUrl,
     String formflowApiVersion,
-    Boolean formflowEnabled) {}
+    Boolean formflowEnabled,
+    List<String> mailDomains) {}
