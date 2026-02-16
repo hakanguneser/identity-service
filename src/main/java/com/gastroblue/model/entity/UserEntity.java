@@ -87,7 +87,7 @@ public class UserEntity extends Auditable implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority(applicationRole.name()));
+    return List.of(new SimpleGrantedAuthority("ROLE_" + applicationRole.name()));
   }
 
   @Override

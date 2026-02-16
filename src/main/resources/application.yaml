@@ -42,7 +42,7 @@ management:
 
 app:
   swagger:
-    enabled: true
+    enabled: ${APP_SWAGGER_ENABLED:true}
   admin:
     registration:
-      enabled: true
+      enabled: ${APP_ADMIN_REGISTRATION_ENABLED:true}
