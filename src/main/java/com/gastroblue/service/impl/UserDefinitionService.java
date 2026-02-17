@@ -1,9 +1,7 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
-import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
-import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
@@ -56,10 +54,6 @@ public class UserDefinitionService {
                 new IllegalDefinitionException(
                     ErrorCode.USER_NOT_FOUND,
                     String.format("User not found (username=%s)", username)));
-  }
-
-  public List<User> findUserByCompanyId(final String companyId) {
-    return userRepository.findByCompanyId(companyId).stream().map(UserMapper::toBase).toList();
   }
 
   public List<UserEntity> findAccessibleUser(Set<ApplicationRole> applicationRole) {

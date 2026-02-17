@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,16 +46,22 @@ public class AuthenticationFacade {
   private String issuer;
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
+    Authentication authentication;
+    UserEntity userEntity = null;
     try {
-      authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(
-              loginRequest.username(), loginRequest.password()));
+      authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                  loginRequest.username(), loginRequest.password()));
+      userEntity = (UserEntity) authentication.getPrincipal();
     } catch (BadCredentialsException e) {
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     } catch (RuntimeException e) {
-      log.error("Authentication failed1: {}", e.getMessage());
+      log.error("Authentication failed: {}", e.getMessage());
     }
-    UserEntity userEntity = userService.findUserEntityByUserName(loginRequest.username());
+    if (userEntity == null) {
+      throw new BadCredentialsException("User not found");
+    }
     updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
     HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest.product());
