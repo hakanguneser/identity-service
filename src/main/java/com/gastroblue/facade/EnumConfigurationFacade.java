@@ -11,8 +11,10 @@ import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EnumConfigurationFacade {
@@ -36,9 +38,14 @@ public class EnumConfigurationFacade {
   }
 
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(Class<T> enumClass) {
-    String companyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
-    return enumConfigurationService.getDropdownValues(
-        enumClass, companyGroupId, IJwtService.getSessionLanguage());
+    try {
+      String companyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
+      return enumConfigurationService.getDropdownValues(
+          enumClass, companyGroupId, IJwtService.getSessionLanguage());
+    } catch (Exception e) {
+      log.error("Exception: {}", e.getMessage());
+      return null;
+    }
   }
 
   public EnumConfigurationResponse findById(String id, String companyGroupId) {
