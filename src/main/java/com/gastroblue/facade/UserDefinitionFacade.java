@@ -23,6 +23,7 @@ import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -197,7 +198,6 @@ public class UserDefinitionFacade {
   }
 
   public List<ResolvedEnum<ApplicationRole>> findAllApplicationRoles() {
-
     return enumFacade.getDropdownValues(ApplicationRole.class);
   }
 
@@ -213,14 +213,25 @@ public class UserDefinitionFacade {
     return enumFacade.getDropdownValues(Gender.class);
   }
 
-  public List<DropdownModel> findAllCompanies() {
-    return companyService.findAll().stream()
+  public List<DropdownModel> findAvailableCompanies() {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    return companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
+        .filter(CompanyEntity::isActive)
+        .filter(
+            c ->
+                sessionUser.companyId() == null
+                    || Objects.equals(sessionUser.companyId(), c.getId()))
         .map(company -> new DropdownModel(company.getId(), company.getCompanyName()))
         .toList();
   }
 
-  public List<DropdownModel> findAllCompanyGroups() {
+  public List<DropdownModel> findAvailableCompanyGroups() {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     return companyGroupService.findAll().stream()
+        .filter(
+            companyGroup ->
+                sessionUser.companyGroupId() == null
+                    || Objects.equals(sessionUser.companyGroupId(), companyGroup.getId()))
         .map(companyGroup -> new DropdownModel(companyGroup.getId(), companyGroup.getName()))
         .toList();
   }

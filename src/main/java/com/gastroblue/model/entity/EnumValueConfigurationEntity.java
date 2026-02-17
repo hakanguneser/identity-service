@@ -32,6 +32,7 @@ public class EnumValueConfigurationEntity extends Auditable {
   private String enumKey;
 
   @Column(name = "LANGUAGE", length = 5)
+  @Enumerated(EnumType.STRING)
   private Language language;
 
   @Column(name = "LABEL", length = 500)

@@ -93,12 +93,12 @@ public class UserDefinitionController {
   }
 
   @GetMapping("dropdown/company-groups")
-  public ResponseEntity<List<DropdownModel>> findAllCompanyGroups() {
-    return ResponseEntity.ok(userFacade.findAllCompanyGroups());
+  public ResponseEntity<List<DropdownModel>> findAvailableCompanyGroups() {
+    return ResponseEntity.ok(userFacade.findAvailableCompanyGroups());
   }
 
   @GetMapping("dropdown/companies")
-  public ResponseEntity<List<DropdownModel>> findAllCompanies() {
-    return ResponseEntity.ok(userFacade.findAllCompanies());
+  public ResponseEntity<List<DropdownModel>> findAvailableCompanies() {
+    return ResponseEntity.ok(userFacade.findAvailableCompanies());
   }
 }

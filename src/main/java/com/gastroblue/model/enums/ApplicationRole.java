@@ -1,13 +1,13 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.model.base.DefaultConfigurableEnum;
+import com.gastroblue.model.base.ConfigurableEnum;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRole implements DefaultConfigurableEnum {
+public enum ApplicationRole implements ConfigurableEnum {
   ADMIN(Set.of(), 1),
   APP_CLIENT(Set.of(), 1),
   GROUP_MANAGER(Set.of(ADMIN), 2),
@@ -18,10 +18,6 @@ public enum ApplicationRole implements DefaultConfigurableEnum {
 
   private final Set<ApplicationRole> visibleFor;
   private final int level;
-
-  public boolean isVisibleFor(ApplicationRole role) {
-    return visibleFor.contains(role);
-  }
 
   public boolean isAdministrator() {
     return this == ADMIN;
