@@ -38,14 +38,10 @@ public class EnumConfigurationFacade {
   }
 
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(Class<T> enumClass) {
-    try {
-      String companyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
-      return enumConfigurationService.getDropdownValues(
-          enumClass, companyGroupId, IJwtService.getSessionLanguage());
-    } catch (Exception e) {
-      log.error("Exception: {}", e.getMessage());
-      return null;
-    }
+
+    String companyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
+    return enumConfigurationService.getDropdownValues(
+        enumClass, companyGroupId, IJwtService.getSessionLanguage());
   }
 
   public EnumConfigurationResponse findById(String id, String companyGroupId) {
