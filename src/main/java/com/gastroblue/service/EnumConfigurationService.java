@@ -28,7 +28,7 @@ public class EnumConfigurationService {
   @Transactional
   @Cacheable(
       value = "enum_dropdown_configs",
-      key = "{#enumClass.getClass().getSimpleName(), #companyGroupId, #sessionLanguage}")
+      key = "{#enumClass.name, #companyGroupId, #sessionLanguage}")
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
       Class<T> enumClass, final String companyGroupId, Language sessionLanguage) {
     String enumType = enumClass.getSimpleName();
