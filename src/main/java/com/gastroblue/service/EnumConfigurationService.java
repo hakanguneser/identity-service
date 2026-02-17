@@ -26,13 +26,12 @@ public class EnumConfigurationService {
   private final EnumValueConfigurationRepository repository;
 
   @Transactional
+  @Cacheable(
+      value = "enum_dropdown_configs",
+      key = "{#enumClass.getClass().getSimpleName(), #companyGroupId, #sessionLanguage}")
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
-      Class<T> enumClass, final String companyGroupId) {
-
+      Class<T> enumClass, final String companyGroupId, Language sessionLanguage) {
     String enumType = enumClass.getSimpleName();
-    Language sessionLanguage = IJwtService.getSessionLanguage();
-
-    // 1. Fetch existing configs
     List<EnumValueConfigurationEntity> existingConfigs =
         repository.findByCompanyGroupIdAndEnumTypeAndLanguage(
             companyGroupId, enumType, sessionLanguage);
@@ -93,7 +92,7 @@ public class EnumConfigurationService {
 
   @Transactional
   @Cacheable(
-      value = "enum_configs",
+      value = "enum_resolved_configs",
       key = "{#enumValue.getClass().getSimpleName(), #companyGroupId, #language}")
   public <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
       T enumValue, final String companyGroupId, Language language) {

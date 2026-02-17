@@ -31,12 +31,14 @@ public class EnumConfigurationFacade {
 
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
       Class<T> enumClass, String companyGroupId) {
-    return enumConfigurationService.getDropdownValues(enumClass, companyGroupId);
+    return enumConfigurationService.getDropdownValues(
+        enumClass, companyGroupId, IJwtService.getSessionLanguage());
   }
 
   public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(Class<T> enumClass) {
     String companyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
-    return enumConfigurationService.getDropdownValues(enumClass, companyGroupId);
+    return enumConfigurationService.getDropdownValues(
+        enumClass, companyGroupId, IJwtService.getSessionLanguage());
   }
 
   public EnumConfigurationResponse findById(String id, String companyGroupId) {

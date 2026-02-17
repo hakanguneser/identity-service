@@ -5,6 +5,7 @@ import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.UserRepository;
@@ -16,6 +17,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +84,10 @@ public class UserDefinitionService {
     UserEntity entityToBeUpdated = findById(userId);
     entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
     userRepository.save(entityToBeUpdated);
+  }
+
+  @Transactional
+  public void updateLoginStats(String username, ApplicationProduct product) {
+    userRepository.updateUserAfterSuccessfulLogin(username, product, LocalDateTime.now());
   }
 }

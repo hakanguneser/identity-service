@@ -18,7 +18,6 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import java.time.LocalDateTime;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -192,12 +191,6 @@ public class AuthenticationFacade {
   }
 
   private void updateUserAfterSuccessfulLogin(UserEntity userEntity, ApplicationProduct product) {
-    userEntity.setLastSuccessLogin(LocalDateTime.now());
-    userEntity.setLastSuccessLoginProduct(product);
-    if (userEntity.getPasswordExpiresAt() == null
-        || userEntity.getPasswordExpiresAt().isBefore(LocalDateTime.now())) {
-      userEntity.setPasswordChangeRequired(true);
-    }
-    userService.save(userEntity);
+    userService.updateLoginStats(userEntity.getUsername(), product);
   }
 }
