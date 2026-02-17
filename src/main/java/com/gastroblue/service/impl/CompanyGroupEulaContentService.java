@@ -111,7 +111,7 @@ public class CompanyGroupEulaContentService {
     LocalDateTime now = LocalDateTime.now();
 
     return findActiveContent(companyGroupId, language, now)
-        .or(() -> findActiveContent(CompanyGroupService.DEFAULT_COMPANY_GROUP_ID, language, now))
+        .or(() -> findActiveContent(null, language, now))
         .orElseGet(() -> createAndReturnDefault(language, now))
         .getContent();
   }
@@ -125,7 +125,7 @@ public class CompanyGroupEulaContentService {
       Language language, LocalDateTime now) {
     CompanyGroupEulaContentEntity entity =
         CompanyGroupEulaContentEntity.builder()
-            .companyGroupId(CompanyGroupService.DEFAULT_COMPANY_GROUP_ID)
+            .companyGroupId(null)
             .eulaVersion("v1.0")
             .language(language)
             .content(String.format("Default EULA Content [%s]", language.name()))

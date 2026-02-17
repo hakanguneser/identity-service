@@ -8,4 +8,5 @@ import lombok.Data;
 public class DropdownModel {
   private String key;
   private String display;
+  private Integer displayOrder;
 }

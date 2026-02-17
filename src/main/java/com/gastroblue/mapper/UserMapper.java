@@ -3,7 +3,7 @@ package com.gastroblue.mapper;
 import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
-import com.gastroblue.model.base.DefaultConfigurableEnum;
+import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
@@ -13,7 +13,6 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
-import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.util.DelimitedStringUtil;
 import java.util.Collections;
 import java.util.List;
@@ -115,16 +114,13 @@ public class UserMapper {
       return null;
     }
 
-    String companyGroupId =
-        entity.getCompanyGroupId() == null
-            ? CompanyGroupService.DEFAULT_COMPANY_GROUP_ID
-            : entity.getCompanyGroupId();
-
     List<Department> departmentList = splitToEnumList(entity.getDepartments(), Department.class);
     List<ResolvedEnum<Department>> resolvedDepartmentList =
         departmentList == null
             ? Collections.emptyList()
-            : departmentList.stream().map(d -> facade.resolve(d, companyGroupId)).toList();
+            : departmentList.stream()
+                .map(d -> resolve(facade, d, entity.getCompanyGroupId()))
+                .toList();
 
     return UserDefinitionResponse.builder()
         .userId(entity.getId())
@@ -132,15 +128,15 @@ public class UserMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        .applicationRole(resolve(facade, entity.getApplicationRole(), companyGroupId))
-        .language(resolve(facade, entity.getLanguage(), companyGroupId))
+        .applicationRole(resolve(facade, entity.getApplicationRole(), entity.getCompanyGroupId()))
+        .language(resolve(facade, entity.getLanguage(), entity.getCompanyGroupId()))
         .email(entity.getEmail())
         .isActive(entity.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())
-        .gender(resolve(facade, entity.getGender(), companyGroupId))
-        .zone(resolve(facade, entity.getZone(), companyGroupId))
+        .gender(resolve(facade, entity.getGender(), entity.getCompanyGroupId()))
+        .zone(resolve(facade, entity.getZone(), entity.getCompanyGroupId()))
         .build();
   }
 
@@ -149,6 +145,7 @@ public class UserMapper {
     if (r.language() != null) e.setLanguage(r.language());
     if (r.phone() != null) e.setPhone(emptyToNull(r.phone()));
     if (r.mail() != null) e.setEmail(emptyToNull(r.mail()));
+
     if (r.zone() != null) e.setZone(r.zone());
     return e;
   }
@@ -158,7 +155,7 @@ public class UserMapper {
     return (s == null || s.isEmpty()) ? null : s;
   }
 
-  public static <T extends DefaultConfigurableEnum> ResolvedEnum<T> resolve(
+  private static <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
       EnumConfigurationFacade facade, T enumValue, String companyGroupId) {
     if (enumValue == null) {
       return null;

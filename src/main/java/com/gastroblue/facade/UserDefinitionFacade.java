@@ -22,9 +22,11 @@ import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -215,24 +217,43 @@ public class UserDefinitionFacade {
 
   public List<DropdownModel> findAvailableCompanies() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    AtomicInteger index = new AtomicInteger(0);
+
     return companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
         .filter(CompanyEntity::isActive)
         .filter(
             c ->
                 sessionUser.companyId() == null
                     || Objects.equals(sessionUser.companyId(), c.getId()))
-        .map(company -> new DropdownModel(company.getId(), company.getCompanyName()))
+        .sorted(
+            Comparator.comparing(
+                c -> c.getCompanyCode().toLowerCase() + " - " + c.getCompanyName().toLowerCase()))
+        .map(
+            company ->
+                new DropdownModel(
+                    company.getId(),
+                    company.getCompanyCode() + " - " + company.getCompanyName(),
+                    index.getAndIncrement()))
         .toList();
   }
 
   public List<DropdownModel> findAvailableCompanyGroups() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    AtomicInteger index = new AtomicInteger(0);
     return companyGroupService.findAll().stream()
         .filter(
             companyGroup ->
                 sessionUser.companyGroupId() == null
                     || Objects.equals(sessionUser.companyGroupId(), companyGroup.getId()))
-        .map(companyGroup -> new DropdownModel(companyGroup.getId(), companyGroup.getName()))
+        .sorted(
+            Comparator.comparing(
+                c -> c.getGroupCode().toLowerCase() + " - " + c.getName().toLowerCase()))
+        .map(
+            companyGroup ->
+                new DropdownModel(
+                    companyGroup.getId(),
+                    companyGroup.getGroupCode() + " - " + companyGroup.getName(),
+                    index.getAndIncrement()))
         .toList();
   }
 }

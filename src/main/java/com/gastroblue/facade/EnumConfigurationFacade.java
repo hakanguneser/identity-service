@@ -1,6 +1,6 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.model.base.DefaultConfigurableEnum;
+import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
@@ -10,7 +10,6 @@ import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +29,14 @@ public class EnumConfigurationFacade {
     return toResponse(enumConfigurationService.update(id, request, companyGroupId));
   }
 
-  public <T extends DefaultConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
+  public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
       Class<T> enumClass, String companyGroupId) {
     return enumConfigurationService.getDropdownValues(enumClass, companyGroupId);
   }
 
-  public <T extends DefaultConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
-      Class<T> enumClass) {
-    String finalCompanyGroupId = getCompanyGroupId(enumClass);
-    return enumConfigurationService.getDropdownValues(enumClass, finalCompanyGroupId);
+  public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(Class<T> enumClass) {
+    String companyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
+    return enumConfigurationService.getDropdownValues(enumClass, companyGroupId);
   }
 
   public EnumConfigurationResponse findById(String id, String companyGroupId) {
@@ -49,12 +47,15 @@ public class EnumConfigurationFacade {
     return enumConfigurationService.findAll(companyGroupId).stream().map(this::toResponse).toList();
   }
 
-  public <T extends DefaultConfigurableEnum> ResolvedEnum<T> resolve(
+  public <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
       T enumValue, final String companyGroupId) {
     if (enumValue == null) {
       return null;
     }
-    String finalCompanyGroupId = getCompanyGroupId(enumValue, companyGroupId);
+    String finalCompanyGroupId = companyGroupId;
+    if (finalCompanyGroupId == null) {
+      finalCompanyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
+    }
     return enumConfigurationService.resolve(
         enumValue, finalCompanyGroupId, IJwtService.getSessionLanguage());
   }
@@ -71,26 +72,7 @@ public class EnumConfigurationFacade {
         .build();
   }
 
-  private <T extends DefaultConfigurableEnum> String getCompanyGroupId(
-      T enumValue, String companyGroupId) {
-    boolean defaultEnum = enumValue.isDefault();
-    if (defaultEnum
-        || Objects.equals(companyGroupId, CompanyGroupService.DEFAULT_COMPANY_GROUP_ID)) {
-      return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
-    } else {
-      return companyGroupService.findByIdOrThrow(companyGroupId).getId();
-    }
-  }
-
-  private <T extends DefaultConfigurableEnum> String getCompanyGroupId(Class<T> enumClass) {
-    boolean defaultEnum = enumConfigurationService.isDefaultEnum(enumClass);
-    if (defaultEnum) {
-      return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
-    }
-    String sessionCompanyGroupId = IJwtService.findSessionUserOrThrow().companyGroupId();
-    if (sessionCompanyGroupId == null) {
-      return CompanyGroupService.DEFAULT_COMPANY_GROUP_ID;
-    }
-    return companyGroupService.findByIdOrThrow(sessionCompanyGroupId).getId();
+  public void copyConfigurations(String toCompanyGroupId) {
+    enumConfigurationService.copyConfigurations(toCompanyGroupId);
   }
 }

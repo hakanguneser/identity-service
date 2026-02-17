@@ -2,7 +2,13 @@ package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
 import com.gastroblue.model.enums.Language;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,4 +46,7 @@ public class EnumValueConfigurationEntity extends Auditable {
 
   @Column(name = "IS_ACTIVE")
   private boolean active;
+
+  @Column(name = "DISPLAY_ORDER")
+  private Integer displayOrder;
 }

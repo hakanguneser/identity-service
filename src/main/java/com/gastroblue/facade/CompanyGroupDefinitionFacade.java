@@ -23,6 +23,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -33,10 +34,12 @@ public class CompanyGroupDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final EnumConfigurationFacade enumConfigurationFacade;
 
+  @Transactional
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
-
     EmailDomainValidator.validateAllowedDomains(request.mailDomains(), request.groupMails());
-    return CompanyGroupMapper.toResponse(companyGroupService.save(request));
+    CompanyGroupEntity savedEntity = companyGroupService.save(request);
+    enumConfigurationFacade.copyConfigurations(savedEntity.getId());
+    return CompanyGroupMapper.toResponse(savedEntity);
   }
 
   public CompanyGroupDefinitionResponse updateCompanyGroup(
@@ -70,11 +73,8 @@ public class CompanyGroupDefinitionFacade {
     CompanyGroupEntity companyGroup = companyGroupService.findByIdOrThrow(companyGroupId);
     EmailDomainValidator.validateAllowedDomains(
         split(companyGroup.getMailDomains()), request.companyMail());
-
     CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(request, companyGroupId);
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
-    EmailDomainValidator.validateAllowedDomains(
-        split(companyGroup.getMailDomains()), request.companyMail());
     return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
   }
 
