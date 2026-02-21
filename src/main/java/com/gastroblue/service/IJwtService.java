@@ -56,6 +56,14 @@ public interface IJwtService {
     return UserMapper.toSessionUser(sessionUser);
   }
 
+  static String findSessionCompanyGroupId() {
+    UserEntity sessionUser = findUser();
+    if (sessionUser == null) {
+      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+    }
+    return UserMapper.toSessionUser(sessionUser).companyGroupId();
+  }
+
   static Language getSessionLanguage() {
     return Optional.ofNullable(findUser())
         .map(UserEntity::getLanguage)

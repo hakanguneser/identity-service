@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
     uniqueConstraints = {
       @UniqueConstraint(
           name = "UK_ENUM_VALUE_CONFIGURATIONS",
-          columnNames = {"COMPANY_GROUP_ID", "ENUM_TYPE", "ENUM_KEY", "LANGUAGE"})
+          columnNames = {"COMPANY_GROUP_ID", "ENUM_TYPE", "LANGUAGE", "ENUM_KEY"})
     },
     indexes = {@Index(name = "IDX_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")})
 public class EnumValueConfigurationEntity extends Auditable {

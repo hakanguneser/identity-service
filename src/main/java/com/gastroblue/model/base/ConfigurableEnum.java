@@ -6,8 +6,7 @@ import com.gastroblue.model.shared.ResolvedEnum;
 public interface ConfigurableEnum {
   String name();
 
-  @SuppressWarnings("unchecked")
-  default <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
+  default <T extends ConfigurableEnum> ResolvedEnum resolve(
       EnumConfigurationFacade facade, String companyGroupId) {
     return facade.resolve((T) this, companyGroupId);
   }

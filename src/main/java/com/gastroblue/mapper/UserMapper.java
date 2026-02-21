@@ -115,7 +115,7 @@ public class UserMapper {
     }
 
     List<Department> departmentList = splitToEnumList(entity.getDepartments(), Department.class);
-    List<ResolvedEnum<Department>> resolvedDepartmentList =
+    List<ResolvedEnum> resolvedDepartmentList =
         departmentList == null
             ? Collections.emptyList()
             : departmentList.stream()
@@ -155,7 +155,7 @@ public class UserMapper {
     return (s == null || s.isEmpty()) ? null : s;
   }
 
-  private static <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
+  private static <T extends ConfigurableEnum> ResolvedEnum resolve(
       EnumConfigurationFacade facade, T enumValue, String companyGroupId) {
     if (enumValue == null) {
       return null;

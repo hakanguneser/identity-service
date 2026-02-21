@@ -14,7 +14,6 @@ import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.DropdownModel;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.CompanyGroupService;
@@ -199,23 +198,23 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  public List<ResolvedEnum<ApplicationRole>> findAllApplicationRoles() {
+  public List<ResolvedEnum> findAllApplicationRoles() {
     return enumFacade.getDropdownValues(ApplicationRole.class);
   }
 
-  public List<ResolvedEnum<Department>> findAllDepartments() {
+  public List<ResolvedEnum> findAllDepartments() {
     return enumFacade.getDropdownValues(Department.class);
   }
 
-  public List<ResolvedEnum<Zone>> findAllZones() {
+  public List<ResolvedEnum> findAllZones() {
     return enumFacade.getDropdownValues(Zone.class);
   }
 
-  public List<ResolvedEnum<Gender>> findAllGenders() {
+  public List<ResolvedEnum> findAllGenders() {
     return enumFacade.getDropdownValues(Gender.class);
   }
 
-  public List<DropdownModel> findAvailableCompanies() {
+  public List<ResolvedEnum> findAvailableCompanies() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
 
@@ -230,14 +229,14 @@ public class UserDefinitionFacade {
                 c -> c.getCompanyCode().toLowerCase() + " - " + c.getCompanyName().toLowerCase()))
         .map(
             company ->
-                new DropdownModel(
+                new ResolvedEnum(
                     company.getId(),
                     company.getCompanyCode() + " - " + company.getCompanyName(),
                     index.getAndIncrement()))
         .toList();
   }
 
-  public List<DropdownModel> findAvailableCompanyGroups() {
+  public List<ResolvedEnum> findAvailableCompanyGroups() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
     return companyGroupService.findAll().stream()
@@ -250,7 +249,7 @@ public class UserDefinitionFacade {
                 c -> c.getGroupCode().toLowerCase() + " - " + c.getName().toLowerCase()))
         .map(
             companyGroup ->
-                new DropdownModel(
+                new ResolvedEnum(
                     companyGroup.getId(),
                     companyGroup.getGroupCode() + " - " + companyGroup.getName(),
                     index.getAndIncrement()))

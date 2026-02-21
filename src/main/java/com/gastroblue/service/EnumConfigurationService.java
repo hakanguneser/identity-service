@@ -9,10 +9,7 @@ import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,109 +22,22 @@ public class EnumConfigurationService {
 
   private final EnumValueConfigurationRepository repository;
 
-  @Transactional
   @Cacheable(
       value = "enum_dropdown_configs",
-      key = "{#enumClass.name, #companyGroupId, #sessionLanguage}")
-  public <T extends ConfigurableEnum> List<ResolvedEnum<T>> getDropdownValues(
-      Class<T> enumClass, final String companyGroupId, Language sessionLanguage) {
-    String enumType = enumClass.getSimpleName();
-    List<EnumValueConfigurationEntity> existingConfigs =
-        repository.findByCompanyGroupIdAndEnumTypeAndLanguage(
-            companyGroupId, enumType, sessionLanguage);
-    Map<String, EnumValueConfigurationEntity> configMap =
-        existingConfigs.stream()
-            .collect(Collectors.toMap(EnumValueConfigurationEntity::getEnumKey, config -> config));
-
-    List<ResolvedEnum<T>> options = new ArrayList<>();
-    T[] enumConstants = enumClass.getEnumConstants();
-
-    if (enumConstants == null) {
-      return options;
-    }
-
-    // 2. Iterate and resolve
-    for (T enumConstant : enumConstants) {
-      String key = enumConstant.name();
-      EnumValueConfigurationEntity config = configMap.get(key);
-
-      if (config == null) {
-        // 3. Create default if missing
-        String defaultLabel = String.format("%s-%s", key, sessionLanguage);
-        int displayOrder = (enumConstant instanceof Enum) ? ((Enum<?>) enumConstant).ordinal() : 0;
-        config =
-            EnumValueConfigurationEntity.builder()
-                .companyGroupId(companyGroupId)
-                .enumType(enumType)
-                .enumKey(key)
-                .language(sessionLanguage)
-                .label(defaultLabel)
-                .active(true)
-                .displayOrder(displayOrder)
-                .build();
-        config = repository.save(config);
-      }
-
-      // 4. Filter inactive
-      if (config.isActive()) {
-        options.add(
-            ResolvedEnum.<T>builder()
-                .key(enumConstant)
-                .display(config.getLabel())
-                .displayOrder(config.getDisplayOrder())
-                .build());
-      }
-    }
-
-    // 5. Sort by displayOrder
-    options.sort(
-        (o1, o2) -> {
-          int order1 = o1.getDisplayOrder() != null ? o1.getDisplayOrder() : Integer.MAX_VALUE;
-          int order2 = o2.getDisplayOrder() != null ? o2.getDisplayOrder() : Integer.MAX_VALUE;
-          return Integer.compare(order1, order2);
-        });
-
-    return options;
-  }
-
-  @Transactional
-  @Cacheable(
-      value = "enum_resolved_configs",
-      key = "{#enumValue.getClass().getSimpleName(), #companyGroupId, #language}")
-  public <T extends ConfigurableEnum> ResolvedEnum<T> resolve(
-      T enumValue, final String companyGroupId, Language language) {
-    String enumType = enumValue.getClass().getSimpleName();
-    String key = enumValue.name();
-
-    EnumValueConfigurationEntity config =
-        repository
-            .findByCompanyGroupIdAndEnumTypeAndLanguage(companyGroupId, enumType, language)
-            .stream()
-            .filter(c -> c.getEnumKey().equals(key))
-            .findFirst()
-            .orElse(null);
-
-    if (config == null) {
-      String defaultLabel = String.format("%s-%s", key, language);
-      int displayOrder = (enumValue instanceof Enum) ? ((Enum<?>) enumValue).ordinal() : 0;
-      config =
-          EnumValueConfigurationEntity.builder()
-              .companyGroupId(companyGroupId)
-              .enumType(enumType)
-              .enumKey(key)
-              .language(language)
-              .label(defaultLabel)
-              .active(true)
-              .displayOrder(displayOrder)
-              .build();
-      config = repository.save(config);
-    }
-
-    return ResolvedEnum.<T>builder()
-        .key(enumValue)
-        .display(config.getLabel())
-        .displayOrder(config.getDisplayOrder())
-        .build();
+      key = "{#enumType, #companyGroupId, #sessionLanguage}")
+  public List<ResolvedEnum> getDropdownValues(
+      String enumType, final String companyGroupId, Language sessionLanguage) {
+    return repository
+        .findByEnumTypeAndCompanyGroupIdAndLanguage(enumType, companyGroupId, sessionLanguage)
+        .stream()
+        .map(
+            e ->
+                ResolvedEnum.builder()
+                    .key(e.getEnumKey())
+                    .display(e.getLabel())
+                    .displayOrder(e.getDisplayOrder())
+                    .build())
+        .toList();
   }
 
   @Transactional(readOnly = true)

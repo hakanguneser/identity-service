@@ -1,12 +1,10 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.UserDefinitionFacade;
-import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.DropdownModel;
 import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -73,32 +71,32 @@ public class UserDefinitionController {
   }
 
   @GetMapping("dropdown/application-roles")
-  public ResponseEntity<List<ResolvedEnum<ApplicationRole>>> findAllApplicationRoles() {
+  public ResponseEntity<List<ResolvedEnum>> findAllApplicationRoles() {
     return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")
-  public ResponseEntity<List<ResolvedEnum<Department>>> findAllDepartments() {
+  public ResponseEntity<List<ResolvedEnum>> findAllDepartments() {
     return ResponseEntity.ok(userFacade.findAllDepartments());
   }
 
   @GetMapping("dropdown/genders")
-  public ResponseEntity<List<ResolvedEnum<Gender>>> findAllGenders() {
+  public ResponseEntity<List<ResolvedEnum>> findAllGenders() {
     return ResponseEntity.ok(userFacade.findAllGenders());
   }
 
   @GetMapping("dropdown/zones")
-  public ResponseEntity<List<ResolvedEnum<Zone>>> findAllZones() {
+  public ResponseEntity<List<ResolvedEnum>> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
   }
 
   @GetMapping("dropdown/company-groups")
-  public ResponseEntity<List<DropdownModel>> findAvailableCompanyGroups() {
+  public ResponseEntity<List<ResolvedEnum>> findAvailableCompanyGroups() {
     return ResponseEntity.ok(userFacade.findAvailableCompanyGroups());
   }
 
   @GetMapping("dropdown/companies")
-  public ResponseEntity<List<DropdownModel>> findAvailableCompanies() {
+  public ResponseEntity<List<ResolvedEnum>> findAvailableCompanies() {
     return ResponseEntity.ok(userFacade.findAvailableCompanies());
   }
 }

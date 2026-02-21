@@ -1,6 +1,5 @@
 package com.gastroblue.model.shared;
 
-import com.gastroblue.model.base.ConfigurableEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +11,8 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResolvedEnum<T extends ConfigurableEnum> {
-  private T key;
+public class ResolvedEnum {
+  private String key;
   private String display;
   private Integer displayOrder;
 }
