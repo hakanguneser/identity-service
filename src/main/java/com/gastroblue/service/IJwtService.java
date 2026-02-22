@@ -14,6 +14,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 public interface IJwtService {
   String ANONYMOUS_USER = "anonymousUser";
 
+  String JWT_ROLE = "role";
+  String JWT_COMPANY_GROUP_ID = "cgId";
+  String JWT_LANGUAGE = "lang";
+  String JWT_COMPANY_IDS = "cIds";
+  String JWT_APPLICATION_PRODUCT = "aud";
+
   String extractUsername(String token);
 
   <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
@@ -24,11 +30,13 @@ public interface IJwtService {
 
   String generateRefreshToken(UserDetails userDetails);
 
-  boolean isTokenValid(String token, String username, Date tokenExpireDate);
+  boolean isTokenValid(String username, Date tokenExpireDate);
 
   boolean isTokenExpired(Date tokenExpireDate);
 
   boolean isTokenExpired(String token);
+
+  SessionUser extractSessionUser(String token);
 
   static SessionUser findSessionUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

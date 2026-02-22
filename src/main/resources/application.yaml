@@ -32,6 +32,8 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
+      refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
 
 management:
   endpoints:

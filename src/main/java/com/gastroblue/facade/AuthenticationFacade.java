@@ -3,6 +3,7 @@ package com.gastroblue.facade;
 import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
 import static com.gastroblue.model.enums.ApplicationProduct.THERMOMETER_TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
+import static com.gastroblue.service.IJwtService.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
@@ -79,9 +80,7 @@ public class AuthenticationFacade {
     String username = jwtService.extractUsername(request.refreshToken());
     UserEntity userEntity = userService.findUserEntityByUserName(username);
     if (!jwtService.isTokenValid(
-        request.refreshToken(),
-        userEntity.getUsername(),
-        DateTimeUtil.toDate(userEntity.getPasswordExpiresAt()))) {
+        userEntity.getUsername(), DateTimeUtil.toDate(userEntity.getPasswordExpiresAt()))) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
     HashMap<String, Object> extraClaims = setExtraClaims(userEntity, request.product());
@@ -186,11 +185,11 @@ public class AuthenticationFacade {
   private HashMap<String, Object> setExtraClaims(
       UserEntity userEntity, ApplicationProduct product) {
     HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put("cgId", userEntity.getCompanyGroupId());
-    extraClaims.put("role", userEntity.getApplicationRole());
-    extraClaims.put("cIds", getResponsibleCompanyIds(userEntity));
-    extraClaims.put("aud", product);
-    extraClaims.put("lang", userEntity.getLanguage().name());
+    extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
+    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
+    extraClaims.put(JWT_COMPANY_IDS, getResponsibleCompanyIds(userEntity));
+    extraClaims.put(JWT_APPLICATION_PRODUCT, product);
+    extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
     return extraClaims;
   }
 
