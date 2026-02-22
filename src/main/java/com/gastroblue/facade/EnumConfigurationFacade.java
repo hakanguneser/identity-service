@@ -37,7 +37,7 @@ public class EnumConfigurationFacade {
   }
 
   public <T extends ConfigurableEnum> List<ResolvedEnum> getDropdownValues(Class<T> enumClass) {
-    return getDropdownValues(enumClass, IJwtService.findSessionCompanyGroupId());
+    return getDropdownValues(enumClass, IJwtService.findSessionUserOrThrow().companyGroupId());
   }
 
   public EnumConfigurationResponse findById(String id, String companyGroupId) {

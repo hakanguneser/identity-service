@@ -50,4 +50,16 @@ public enum ApplicationRole implements ConfigurableEnum {
   public boolean isSupervisorAndAbove() {
     return Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR).contains(this);
   }
+
+  public static ApplicationRole fromString(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+
+    try {
+      return ApplicationRole.valueOf(value.trim().toUpperCase(Locale.ROOT));
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
+  }
 }

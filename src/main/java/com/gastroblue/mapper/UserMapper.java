@@ -4,7 +4,6 @@ import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.base.ConfigurableEnum;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.Department;
@@ -63,48 +62,6 @@ public class UserMapper {
         .phone(entity.getPhone())
         .gender(entity.getGender())
         .zone(entity.getZone())
-        .build();
-  }
-
-  public static SessionUser toSessionUser(final UserEntity entity) {
-    return entity == null
-        ? null
-        : SessionUser.builder()
-            .userId(entity.getId())
-            .companyId(entity.getCompanyId())
-            .companyGroupId(entity.getCompanyGroupId())
-            .username(entity.getUsername())
-            .password(entity.getPassword())
-            .departments(splitToEnumList(entity.getDepartments(), Department.class))
-            .applicationRole(entity.getApplicationRole())
-            .email(entity.getEmail())
-            .language(entity.getLanguage())
-            .isActive(entity.isActive())
-            .name(entity.getName())
-            .surname(entity.getSurname())
-            .phone(entity.getPhone())
-            .gender(entity.getGender())
-            .zone(entity.getZone())
-            .build();
-  }
-
-  public static User toBase(final SessionUser sessionUser) {
-    return User.builder()
-        .userId(sessionUser.userId())
-        .companyId(sessionUser.companyId())
-        .companyGroupId(sessionUser.companyGroupId())
-        .username(sessionUser.username())
-        .password(sessionUser.password())
-        .departments(sessionUser.departments())
-        .applicationRole(sessionUser.applicationRole())
-        .language(sessionUser.language())
-        .email(sessionUser.email())
-        .isActive(sessionUser.isActive())
-        .name(sessionUser.name())
-        .surname(sessionUser.surname())
-        .phone(sessionUser.phone())
-        .gender(sessionUser.gender())
-        .zone(sessionUser.zone())
         .build();
   }
 

@@ -1,11 +1,8 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
-import com.gastroblue.mapper.CompanyGroupMapper;
-import com.gastroblue.model.base.Company;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.Zone;
 import com.gastroblue.repository.CompanyRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +16,8 @@ public class CompanyService {
 
   private final CompanyRepository companyRepository;
 
-  public Company findByBaseId(String id) {
-    return companyRepository
-        .findById(id)
-        .map(CompanyGroupMapper::toBase)
-        .orElseThrow(
-            () ->
-                new IllegalDefinitionException(
-                    ErrorCode.COMPANY_NOT_FOUND,
-                    String.format("Company not found (companyId=%s)", id)));
+  public List<CompanyEntity> findByBaseId(List<String> idList) {
+    return companyRepository.findByIdIn(idList);
   }
 
   public CompanyEntity findOrThrow(String id) {
@@ -46,10 +36,6 @@ public class CompanyService {
 
   public List<CompanyEntity> findAll() {
     return companyRepository.findAll();
-  }
-
-  public List<CompanyEntity> findByCompanyGroupIdAndZone(String companyGroupId, Zone zone) {
-    return companyRepository.findByCompanyGroupIdAndZone(companyGroupId, zone);
   }
 
   public CompanyEntity save(CompanyEntity companyEntity) {

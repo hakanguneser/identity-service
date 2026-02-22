@@ -61,8 +61,8 @@ public class UserDefinitionService {
     return userRepository
         .findByCompanyGroupIdAndZoneIdAndCompanyIdAndApplicationRoleIn(
             sessionUser.companyGroupId(),
-            sessionUser.zone(),
-            sessionUser.companyId(),
+            null, // sessionUser.zone(),
+            null, // sessionUser.companyId(),
             applicationRole)
         .stream()
         .toList();
@@ -74,8 +74,8 @@ public class UserDefinitionService {
     return userRepository.save(entityToBeUpdated);
   }
 
-  public void signEula(String userId) {
-    UserEntity entityToBeUpdated = findById(userId);
+  public void signEula(String username) {
+    UserEntity entityToBeUpdated = findUserEntityByUserName(username);
     entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
     userRepository.save(entityToBeUpdated);
   }

@@ -6,7 +6,6 @@ import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.exception.base.AbstractRuntimeException;
 import com.gastroblue.model.entity.ErrorMessageEntity;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.model.exception.ValidationError;
 import com.gastroblue.service.IJwtService;
@@ -34,9 +33,9 @@ public class GlobalExceptionHelper {
   @ExceptionHandler({IllegalDefinitionException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Object> handleGlobalException(final IllegalDefinitionException exception) {
-    Language sessionLanguage = sessionLanguage();
     ErrorMessageEntity errorProp =
-        errorMessageService.findOrCreatePropertyValue(exception.getErrorCode(), sessionLanguage);
+        errorMessageService.findOrCreatePropertyValue(
+            exception.getErrorCode(), IJwtService.getSessionLanguage());
     ApplicationError applicationError =
         ApplicationError.builder()
             .errorMessage(errorProp.getMessage())
@@ -55,7 +54,8 @@ public class GlobalExceptionHelper {
   public ResponseEntity<Object> handleGlobalException(final AbstractRuntimeException exception) {
 
     ErrorMessageEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(exception.getErrorCode(), sessionLanguage());
+        errorMessageService.findOrCreatePropertyValue(
+            exception.getErrorCode(), IJwtService.getSessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
@@ -76,7 +76,8 @@ public class GlobalExceptionHelper {
       final BadCredentialsException exception) {
 
     ErrorMessageEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(UNAUTHORIZED_USER, sessionLanguage());
+        errorMessageService.findOrCreatePropertyValue(
+            UNAUTHORIZED_USER, IJwtService.getSessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
@@ -108,7 +109,8 @@ public class GlobalExceptionHelper {
             .toList();
 
     ErrorMessageEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(INVALID_REQUEST_BODY, sessionLanguage());
+        errorMessageService.findOrCreatePropertyValue(
+            INVALID_REQUEST_BODY, IJwtService.getSessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
@@ -130,7 +132,8 @@ public class GlobalExceptionHelper {
       final DataIntegrityViolationException exception) {
 
     ErrorMessageEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(DATA_INTEGRITY_VIOLATION, sessionLanguage());
+        errorMessageService.findOrCreatePropertyValue(
+            DATA_INTEGRITY_VIOLATION, IJwtService.getSessionLanguage());
 
     log.error("Database exception: ", exception);
     ApplicationError applicationError =
@@ -152,7 +155,8 @@ public class GlobalExceptionHelper {
       final HttpMessageNotReadableException exception) {
 
     ErrorMessageEntity propertyEntity =
-        errorMessageService.findOrCreatePropertyValue(INVALID_ENUM_VALUE, sessionLanguage());
+        errorMessageService.findOrCreatePropertyValue(
+            INVALID_ENUM_VALUE, IJwtService.getSessionLanguage());
 
     ApplicationError applicationError =
         ApplicationError.builder()
@@ -166,11 +170,5 @@ public class GlobalExceptionHelper {
 
     log.warn("Json parse exception: ", exception);
     return new ResponseEntity<>(applicationError, HttpStatus.BAD_REQUEST);
-  }
-
-  private Language sessionLanguage() {
-    return IJwtService.findSessionUser() == null
-        ? Language.defaultLang()
-        : IJwtService.findSessionUser().getSessionLanguage();
   }
 }

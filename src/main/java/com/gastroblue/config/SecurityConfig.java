@@ -47,7 +47,10 @@ public class SecurityConfig {
               authorize
                   .requestMatchers(
                       "/api/v1/definition/company-groups", "/api/v1/definition/company-groups/**")
-                  .hasRole(ApplicationRole.ADMIN.name());
+                  .hasAnyRole(
+                      ApplicationRole.ADMIN.name(),
+                      ApplicationRole.GROUP_MANAGER.name(),
+                      ApplicationRole.ZONE_MANAGER.name());
 
               // 🔒 Everything else
               authorize.anyRequest().authenticated();

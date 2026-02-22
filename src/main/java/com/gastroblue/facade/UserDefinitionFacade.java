@@ -66,7 +66,7 @@ public class UserDefinitionFacade {
 
     if (includeAll) {
       targetRoles =
-          switch (user.applicationRole()) {
+          switch (user.getApplicationRole()) {
             case ADMIN -> Set.of(GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
             case GROUP_MANAGER -> Set.of(ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
             case ZONE_MANAGER -> Set.of(COMPANY_MANAGER, SUPERVISOR, STAFF);
@@ -76,7 +76,7 @@ public class UserDefinitionFacade {
           };
     } else {
       targetRoles =
-          switch (user.applicationRole()) {
+          switch (user.getApplicationRole()) {
             case ADMIN -> Set.of(GROUP_MANAGER);
             case GROUP_MANAGER -> Set.of(COMPANY_MANAGER, ZONE_MANAGER);
             case ZONE_MANAGER -> Set.of(COMPANY_MANAGER);
@@ -116,7 +116,7 @@ public class UserDefinitionFacade {
           request.departments().contains(Department.ALL)
               && request.applicationRole().isAdministrator();
     } else {
-      isAuthorized = sessionUser.applicationRole().isSupervisorAndAbove();
+      isAuthorized = sessionUser.getApplicationRole().isSupervisorAndAbove();
     }
 
     if (!isAuthorized) {
@@ -131,11 +131,11 @@ public class UserDefinitionFacade {
       return new CompanyEntity();
     }
 
-    if (sessionUser.applicationRole().isCompanyManagerAndAbove()) {
+    if (sessionUser.getApplicationRole().isCompanyManagerAndAbove()) {
       return companyService.findOrThrow(request.companyId());
     }
 
-    return companyService.findOrThrow(sessionUser.companyId());
+    return companyService.findOrThrow(sessionUser.companyIds().get(0));
   }
 
   private CompanyGroupEntity getRegistrationCompanyGroup(UserSaveRequest request) {
@@ -222,8 +222,8 @@ public class UserDefinitionFacade {
         .filter(CompanyEntity::isActive)
         .filter(
             c ->
-                sessionUser.companyId() == null
-                    || Objects.equals(sessionUser.companyId(), c.getId()))
+                sessionUser.companyIds() == null
+                    || Objects.equals(sessionUser.companyIds().get(0), c.getId()))
         .sorted(
             Comparator.comparing(
                 c -> c.getCompanyCode().toLowerCase() + " - " + c.getCompanyName().toLowerCase()))

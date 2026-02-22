@@ -13,6 +13,9 @@ public class EmailDomainValidator {
       List<String> allowedDomains, List<String> mailAddresses) {
 
     if (allowedDomains == null || allowedDomains.isEmpty()) {
+      if (mailAddresses == null || mailAddresses.isEmpty()) {
+        return;
+      }
       throw new IllegalDefinitionException(
           ErrorCode.INVALID_MAIL_DOMAINS, "At least one domain must be specified");
     }

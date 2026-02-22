@@ -2,7 +2,9 @@ package com.gastroblue.util;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -37,5 +39,12 @@ public class DateTimeUtil {
    */
   public static LocalTime getOrDefault(LocalTime time, LocalTime defaultValue) {
     return time != null ? time : defaultValue;
+  }
+
+  public static Date toDate(LocalDateTime time) {
+    if (time == null) {
+      return null;
+    }
+    return Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
   }
 }

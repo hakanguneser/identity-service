@@ -18,10 +18,10 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
+import com.gastroblue.util.DateTimeUtil;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,9 +42,6 @@ public class AuthenticationFacade {
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
 
-  @Value("${spring.application.name}")
-  private String issuer;
-
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
     Authentication authentication;
     UserEntity userEntity = null;
@@ -64,7 +61,7 @@ public class AuthenticationFacade {
     }
     updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
-    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest.product());
+    HashMap<String, Object> extraClaims = setExtraClaims(userEntity, loginRequest.product());
     String token = jwtService.generateToken(userEntity, extraClaims);
     String refreshToken = jwtService.generateRefreshToken(userEntity);
     return AuthLoginResponse.builder()
@@ -81,10 +78,13 @@ public class AuthenticationFacade {
     }
     String username = jwtService.extractUsername(request.refreshToken());
     UserEntity userEntity = userService.findUserEntityByUserName(username);
-    if (!jwtService.isTokenValid(request.refreshToken(), userEntity)) {
+    if (!jwtService.isTokenValid(
+        request.refreshToken(),
+        userEntity.getUsername(),
+        DateTimeUtil.toDate(userEntity.getPasswordExpiresAt()))) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
-    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, request.product());
+    HashMap<String, Object> extraClaims = setExtraClaims(userEntity, request.product());
     String newToken = jwtService.generateToken(userEntity, extraClaims);
     return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
@@ -92,7 +92,8 @@ public class AuthenticationFacade {
   public AuthUserInfoResponse findAuthenticatedUserInfo() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AuthUserInfoResponse response = new AuthUserInfoResponse();
-    response.setUser(UserMapper.toBase(sessionUser));
+    UserEntity userEntityByUserName = userService.findUserEntityByUserName(sessionUser.username());
+    response.setUser(UserMapper.toBase(userEntityByUserName));
     if (sessionUser.companyGroupId() != null) {
       try {
         CompanyGroup companyGroup = companyGroupService.findById(sessionUser.companyGroupId());
@@ -100,15 +101,22 @@ public class AuthenticationFacade {
       } catch (IllegalDefinitionException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
       }
-    }
-    if (sessionUser.companyId() != null) {
-      try {
-        Company company = companyService.findByBaseId(sessionUser.companyId());
-        response.setCompany(company);
-      } catch (IllegalDefinitionException exception) {
-        log.info("Company not found: {}", sessionUser.companyGroupId());
+      List<Company> companyList = null;
+      if (sessionUser.companyIds() != null) {
+        companyList =
+            companyService.findByBaseId(sessionUser.companyIds()).stream()
+                .map(CompanyGroupMapper::toBase)
+                .toList();
+      } else {
+        companyList =
+            companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
+                .map(CompanyGroupMapper::toBase)
+                .toList();
       }
+
+      response.setCompany(companyList);
     }
+
     return response;
   }
 
@@ -127,7 +135,7 @@ public class AuthenticationFacade {
   }
 
   public void signEula() {
-    userDefinitionService.signEula(IJwtService.findSessionUserOrThrow().userId());
+    userDefinitionService.signEula(IJwtService.findSessionUserOrThrow().username());
   }
 
   public EulaResponse getEula() {
@@ -175,14 +183,14 @@ public class AuthenticationFacade {
     return ApiInfoDto.builder().url(url).version(version).build();
   }
 
-  private HashMap<String, Object> getExtraClaims(
-      UserEntity sessionUser, ApplicationProduct product) {
+  private HashMap<String, Object> setExtraClaims(
+      UserEntity userEntity, ApplicationProduct product) {
     HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put("cgId", sessionUser.getCompanyGroupId());
-    extraClaims.put("role", sessionUser.getApplicationRole());
-    extraClaims.put("cIds", getResponsibleCompanyIds(sessionUser));
-    extraClaims.put("iss", issuer);
+    extraClaims.put("cgId", userEntity.getCompanyGroupId());
+    extraClaims.put("role", userEntity.getApplicationRole());
+    extraClaims.put("cIds", getResponsibleCompanyIds(userEntity));
     extraClaims.put("aud", product);
+    extraClaims.put("lang", userEntity.getLanguage().name());
     return extraClaims;
   }
 

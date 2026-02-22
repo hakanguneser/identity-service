@@ -75,7 +75,7 @@ public class CompanyGroupService {
 
   public List<CompanyGroupEntity> findMyCompanyGroups() {
     SessionUser user = IJwtService.findSessionUserOrThrow();
-    return switch (user.applicationRole()) {
+    return switch (user.getApplicationRole()) {
       case ADMIN -> findAll();
       case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR ->
           List.of(findByIdOrThrow(user.companyGroupId()));
