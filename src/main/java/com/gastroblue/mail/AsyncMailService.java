@@ -117,6 +117,7 @@ public class AsyncMailService implements IMailService {
   private String resolveSubject(MailTemplate template) {
     return switch (template) {
       case WELCOME -> "Welcome to GastroBlue!";
+      case INITIAL_PASSWORD -> "GastroBlue – Hesabınız Oluşturuldu";
     };
   }
 
