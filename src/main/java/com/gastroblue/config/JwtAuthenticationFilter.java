@@ -5,7 +5,7 @@ import static com.gastroblue.model.enums.ErrorCode.EXPIRED_JWT_TOKEN;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.service.IJwtService;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -26,39 +28,54 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final IJwtService jwtService;
-
   private static final String BEARER = "Bearer ";
+
+  private final IJwtService jwtService;
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain)
       throws ServletException, IOException {
-    final String authHeader = request.getHeader("Authorization");
-    final String jwt;
-    final String username;
+
+    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
     if (authHeader == null || !authHeader.startsWith(BEARER)) {
       filterChain.doFilter(request, response);
       return;
     }
+
     try {
-      jwt = authHeader.substring(BEARER.length());
-      username = jwtService.extractUsername(jwt);
-      if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      String jwt = authHeader.substring(BEARER.length());
+
+      if (SecurityContextHolder.getContext().getAuthentication() == null) {
+
         SessionUser sessionUser = jwtService.extractSessionUser(jwt);
-        if (jwtService.isTokenValid(sessionUser.username(), sessionUser.expiresAt())) {
-          UsernamePasswordAuthenticationToken authToken =
-              new UsernamePasswordAuthenticationToken(sessionUser, null, sessionUser.authorities());
-          authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContext context = SecurityContextHolder.createEmptyContext();
-          context.setAuthentication(authToken);
-          SecurityContextHolder.setContext(context);
-        }
+
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(sessionUser, null, sessionUser.authorities());
+
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
       }
-      filterChain.doFilter(request, response);
-    } catch (MalformedJwtException | ExpiredJwtException e) {
-      response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
+
+    } catch (ExpiredJwtException e) {
+      log.debug("Expired JWT token", e);
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
       response.getWriter().print(EXPIRED_JWT_TOKEN.name());
+      return;
+
+    } catch (JwtException | IllegalArgumentException e) {
+      log.debug("Invalid JWT token", e);
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      response.getWriter().print("INVALID_JWT_TOKEN");
+      return;
     }
+
+    filterChain.doFilter(request, response);
   }
 }

@@ -26,15 +26,15 @@ public interface IJwtService {
 
   String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims);
 
-  String generateToken(Map<String, Object> extraClaims, UserDetails userDetails);
+  String generateRefreshToken(UserDetails userDetails, HashMap<String, Object> extraClaims);
 
-  String generateRefreshToken(UserDetails userDetails);
-
-  boolean isTokenValid(String username, Date tokenExpireDate);
+  boolean validateToken(String username, Date tokenExpireDate);
 
   boolean isTokenExpired(Date tokenExpireDate);
 
   boolean isTokenExpired(String token);
+
+  void validateToken(String token);
 
   SessionUser extractSessionUser(String token);
 

@@ -64,7 +64,7 @@ public class AuthenticationFacade {
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
     HashMap<String, Object> extraClaims = setExtraClaims(userEntity, loginRequest.product());
     String token = jwtService.generateToken(userEntity, extraClaims);
-    String refreshToken = jwtService.generateRefreshToken(userEntity);
+    String refreshToken = jwtService.generateRefreshToken(userEntity, extraClaims);
     return AuthLoginResponse.builder()
         .token(token)
         .refreshToken(refreshToken)
@@ -79,7 +79,7 @@ public class AuthenticationFacade {
     }
     String username = jwtService.extractUsername(request.refreshToken());
     UserEntity userEntity = userService.findUserEntityByUserName(username);
-    if (!jwtService.isTokenValid(
+    if (!jwtService.validateToken(
         userEntity.getUsername(), DateTimeUtil.toDate(userEntity.getPasswordExpiresAt()))) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }

@@ -5,6 +5,7 @@ import static io.jsonwebtoken.Claims.*;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.service.IJwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -42,16 +43,12 @@ public class JwtService implements IJwtService {
 
   @Override
   public String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims) {
-    return generateToken(extraClaims, userDetails);
+    return buildToken(
+        new HashMap<>(), userDetails, TimeUnit.MINUTES.toMillis(tokenValidityInMinutes));
   }
 
   @Override
-  public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    return buildToken(extraClaims, userDetails, TimeUnit.MINUTES.toMillis(tokenValidityInMinutes));
-  }
-
-  @Override
-  public String generateRefreshToken(UserDetails userDetails) {
+  public String generateRefreshToken(UserDetails userDetails, HashMap<String, Object> extraClaims) {
     return buildToken(
         new HashMap<>(), userDetails, TimeUnit.DAYS.toMillis(refreshTokenValidityInDays));
   }
@@ -73,13 +70,26 @@ public class JwtService implements IJwtService {
   }
 
   @Override
-  public boolean isTokenValid(String username, Date tokenExpireDate) {
+  public boolean validateToken(String username, Date tokenExpireDate) {
     return (username != null && !isTokenExpired(tokenExpireDate));
   }
 
   @Override
   public boolean isTokenExpired(String token) {
     return isTokenExpired(extractExpiration(token));
+  }
+
+  @Override
+  public void validateToken(String token) {
+    Claims claims = extractAllClaims(token);
+
+    if (!"gastroblue-api".equals(claims.getIssuer())) {
+      throw new JwtException("Invalid issuer");
+    }
+
+    if (!claims.getAudience().contains("gastroblue-client")) {
+      throw new JwtException("Invalid audience");
+    }
   }
 
   @Override
