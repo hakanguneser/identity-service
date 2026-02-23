@@ -51,9 +51,9 @@ app:
 
 mail:
   enabled: ${MAIL_ENABLED:true}
-  from: ${MAIL_FROM:no-reply@gastroblue.com}
+  from: ${MAIL_FROM}
   smtp:
     host: ${MAIL_SMTP_HOST:smtp.gmail.com}
     port: ${MAIL_SMTP_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    username: ${MAIL_FROM}
+    password: ${MAIL_PASSWORD}

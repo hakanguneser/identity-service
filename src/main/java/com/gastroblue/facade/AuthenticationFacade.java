@@ -7,6 +7,7 @@ import static com.gastroblue.service.IJwtService.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.mail.IMailService;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.*;
@@ -43,6 +44,7 @@ public class AuthenticationFacade {
   private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
+  private final IMailService mailService;
 
   @Value("${application.security.jwt.token-validity-in-minutes}")
   private Long jwtTokenValidityMinutes;
@@ -51,6 +53,8 @@ public class AuthenticationFacade {
   private Long jwtRefreshTokenValidityDays;
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
+    // mailService.sendMail(List.of("hakan.guneser@gmail.com"), List.of("test@test.com"), null,
+    // WELCOME, null);
     Authentication authentication;
     UserEntity userEntity = null;
     try {

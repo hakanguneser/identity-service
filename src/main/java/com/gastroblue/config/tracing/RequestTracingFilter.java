@@ -91,10 +91,6 @@ public class RequestTracingFilter extends OncePerRequestFilter {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
   private String resolveTraceId(HttpServletRequest request) {
     String incomingTraceId = request.getHeader(TRACE_ID_HEADER);
     return (incomingTraceId != null && !incomingTraceId.isBlank())
