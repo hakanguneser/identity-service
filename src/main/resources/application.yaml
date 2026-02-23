@@ -39,7 +39,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, prometheus, metrics
 
 
 app:
@@ -48,3 +48,12 @@ app:
   admin:
     registration:
       enabled: ${APP_ADMIN_REGISTRATION_ENABLED:true}
+
+mail:
+  enabled: ${MAIL_ENABLED:true}
+  from: ${MAIL_FROM:no-reply@gastroblue.com}
+  smtp:
+    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
+    port: ${MAIL_SMTP_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
