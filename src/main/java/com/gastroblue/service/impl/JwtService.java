@@ -2,20 +2,18 @@ package com.gastroblue.service.impl;
 
 import static io.jsonwebtoken.Claims.*;
 
+import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.service.IJwtService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,76 +22,39 @@ public class JwtService implements IJwtService {
   @Value("${application.security.jwt.secret-key}")
   private String secretKey;
 
-  @Value("${application.security.jwt.token-validity-in-minutes}")
-  private Long tokenValidityInMinutes;
-
-  @Value("${application.security.jwt.refresh-token-validity-in-days}")
-  private Long refreshTokenValidityInDays;
-
   @Override
-  public String extractUsername(String token) {
-    return extractClaim(token, Claims::getSubject);
+  public String generateToken(
+      String username, HashMap<String, Object> extraClaims, long expiration) {
+    return buildToken(username, extraClaims, expiration);
   }
 
-  @Override
-  public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-    final Claims claims = extractAllClaims(token);
-    return claimsResolver.apply(claims);
+  public SessionUser validateAndExtractToken(String token) throws AccessDeniedException {
+    SessionUser sessionUser = extractSessionUser(token);
+    validateToken(sessionUser);
+    return sessionUser;
   }
 
-  @Override
-  public String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims) {
-    return buildToken(
-        new HashMap<>(), userDetails, TimeUnit.MINUTES.toMillis(tokenValidityInMinutes));
+  private void validateToken(SessionUser sessionUser) {
+    isTokenExpired(sessionUser.expiresAt());
   }
 
-  @Override
-  public String generateRefreshToken(UserDetails userDetails, HashMap<String, Object> extraClaims) {
-    return buildToken(
-        new HashMap<>(), userDetails, TimeUnit.DAYS.toMillis(refreshTokenValidityInDays));
+  private void isTokenExpired(Date tokenExpireDate) {
+    if (tokenExpireDate.before(new Date())) {
+      throw new AccessDeniedException(ErrorCode.EXPIRED_JWT_TOKEN);
+    }
   }
 
-  private String buildToken(
-      Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+  private String buildToken(String username, Map<String, Object> extraClaims, long expiration) {
     return Jwts.builder()
         .setClaims(extraClaims)
-        .setSubject(userDetails.getUsername())
+        .setSubject(username)
         .setIssuedAt(new Date(System.currentTimeMillis()))
         .setExpiration(new Date(System.currentTimeMillis() + expiration))
         .signWith(getSignInKey(), SignatureAlgorithm.HS256)
         .compact();
   }
 
-  @Override
-  public boolean isTokenExpired(Date tokenExpireDate) {
-    return tokenExpireDate.before(new Date());
-  }
-
-  @Override
-  public boolean validateToken(String username, Date tokenExpireDate) {
-    return (username != null && !isTokenExpired(tokenExpireDate));
-  }
-
-  @Override
-  public boolean isTokenExpired(String token) {
-    return isTokenExpired(extractExpiration(token));
-  }
-
-  @Override
-  public void validateToken(String token) {
-    Claims claims = extractAllClaims(token);
-
-    if (!"gastroblue-api".equals(claims.getIssuer())) {
-      throw new JwtException("Invalid issuer");
-    }
-
-    if (!claims.getAudience().contains("gastroblue-client")) {
-      throw new JwtException("Invalid audience");
-    }
-  }
-
-  @Override
-  public SessionUser extractSessionUser(String token) {
+  private SessionUser extractSessionUser(String token) {
     Claims claims = extractAllClaims(token);
     return new SessionUser(
         claims.get(JWT_APPLICATION_PRODUCT, String.class),
@@ -113,10 +74,6 @@ public class JwtService implements IJwtService {
       return list.stream().filter(Objects::nonNull).map(Object::toString).toList();
     }
     return List.of();
-  }
-
-  private Date extractExpiration(String token) {
-    return extractClaim(token, Claims::getExpiration);
   }
 
   private Claims extractAllClaims(String token) {

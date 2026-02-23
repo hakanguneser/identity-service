@@ -47,11 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     try {
-      String jwt = authHeader.substring(BEARER.length());
+      String jwtToken = authHeader.substring(BEARER.length());
 
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        SessionUser sessionUser = jwtService.extractSessionUser(jwt);
+        SessionUser sessionUser = jwtService.validateAndExtractToken(jwtToken);
 
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(sessionUser, null, sessionUser.authorities());

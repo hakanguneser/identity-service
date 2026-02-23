@@ -19,10 +19,11 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import com.gastroblue.util.DateTimeUtil;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,6 +44,12 @@ public class AuthenticationFacade {
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
 
+  @Value("${application.security.jwt.token-validity-in-minutes}")
+  private Long jwtTokenValidityMinutes;
+
+  @Value("${application.security.jwt.refresh-token-validity-in-days}")
+  private Long jwtRefreshTokenValidityDays;
+
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
     Authentication authentication;
     UserEntity userEntity = null;
@@ -62,9 +69,17 @@ public class AuthenticationFacade {
     }
     updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
-    HashMap<String, Object> extraClaims = setExtraClaims(userEntity, loginRequest.product());
-    String token = jwtService.generateToken(userEntity, extraClaims);
-    String refreshToken = jwtService.generateRefreshToken(userEntity, extraClaims);
+    HashMap<String, Object> extraClaims = toExtraClaims(userEntity, loginRequest.product());
+    String token =
+        jwtService.generateToken(
+            userEntity.getUsername(),
+            extraClaims,
+            TimeUnit.MINUTES.toMillis(jwtTokenValidityMinutes));
+    String refreshToken =
+        jwtService.generateToken(
+            userEntity.getUsername(),
+            extraClaims,
+            TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
     return AuthLoginResponse.builder()
         .token(token)
         .refreshToken(refreshToken)
@@ -74,17 +89,13 @@ public class AuthenticationFacade {
   }
 
   public AuthRefreshTokenResponse refreshToken(RefreshTokenRequest request) {
-    if (jwtService.isTokenExpired(request.refreshToken())) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-    }
-    String username = jwtService.extractUsername(request.refreshToken());
-    UserEntity userEntity = userService.findUserEntityByUserName(username);
-    if (!jwtService.validateToken(
-        userEntity.getUsername(), DateTimeUtil.toDate(userEntity.getPasswordExpiresAt()))) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-    }
-    HashMap<String, Object> extraClaims = setExtraClaims(userEntity, request.product());
-    String newToken = jwtService.generateToken(userEntity, extraClaims);
+    SessionUser sessionUser = jwtService.validateAndExtractToken(request.refreshToken());
+    HashMap<String, Object> extraClaims = IJwtService.toExtraClaims(sessionUser);
+    String newToken =
+        jwtService.generateToken(
+            sessionUser.username(),
+            extraClaims,
+            TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
     return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 
@@ -182,15 +193,8 @@ public class AuthenticationFacade {
     return ApiInfoDto.builder().url(url).version(version).build();
   }
 
-  private HashMap<String, Object> setExtraClaims(
-      UserEntity userEntity, ApplicationProduct product) {
-    HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
-    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
-    extraClaims.put(JWT_COMPANY_IDS, getResponsibleCompanyIds(userEntity));
-    extraClaims.put(JWT_APPLICATION_PRODUCT, product);
-    extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
-    return extraClaims;
+  private HashMap<String, Object> toExtraClaims(UserEntity userEntity, ApplicationProduct product) {
+    return IJwtService.toExtraClaims(userEntity, product, getResponsibleCompanyIds(userEntity));
   }
 
   private List<String> getResponsibleCompanyIds(UserEntity sessionUser) {

@@ -2,14 +2,13 @@ package com.gastroblue.service;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
-import io.jsonwebtoken.Claims;
 import java.util.*;
-import java.util.function.Function;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IJwtService {
   String ANONYMOUS_USER = "anonymousUser";
@@ -20,23 +19,30 @@ public interface IJwtService {
   String JWT_COMPANY_IDS = "cIds";
   String JWT_APPLICATION_PRODUCT = "aud";
 
-  String extractUsername(String token);
+  String generateToken(String username, HashMap<String, Object> extraClaims, long expiration);
 
-  <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
+  SessionUser validateAndExtractToken(String token) throws AccessDeniedException;
 
-  String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims);
+  static HashMap<String, Object> toExtraClaims(SessionUser sessionUser) {
+    HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(JWT_COMPANY_GROUP_ID, sessionUser.companyGroupId());
+    extraClaims.put(JWT_ROLE, sessionUser.getApplicationRole());
+    extraClaims.put(JWT_COMPANY_IDS, sessionUser.companyIds());
+    extraClaims.put(JWT_APPLICATION_PRODUCT, sessionUser.applicationProduct());
+    extraClaims.put(JWT_LANGUAGE, sessionUser.language());
+    return extraClaims;
+  }
 
-  String generateRefreshToken(UserDetails userDetails, HashMap<String, Object> extraClaims);
-
-  boolean validateToken(String username, Date tokenExpireDate);
-
-  boolean isTokenExpired(Date tokenExpireDate);
-
-  boolean isTokenExpired(String token);
-
-  void validateToken(String token);
-
-  SessionUser extractSessionUser(String token);
+  static HashMap<String, Object> toExtraClaims(
+      UserEntity userEntity, ApplicationProduct product, List<String> companyIds) {
+    HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
+    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
+    extraClaims.put(JWT_COMPANY_IDS, companyIds);
+    extraClaims.put(JWT_APPLICATION_PRODUCT, product);
+    extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
+    return extraClaims;
+  }
 
   static SessionUser findSessionUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
