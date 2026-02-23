@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApplicationError {
   private String errorMessage;
   private String debugContext;
@@ -18,6 +19,8 @@ public class ApplicationError {
   private HttpStatus httpStatus;
   private LocalDateTime timeStamp;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
+  /** Correlation handle that maps this error response to the server log entry. */
+  private String traceId;
+
   private List<ValidationError> errorDetails;
 }

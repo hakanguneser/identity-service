@@ -53,6 +53,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         SessionUser sessionUser = jwtService.validateAndExtractToken(jwtToken);
 
+        // Log parsed, non-sensitive claims only — the raw token is never emitted
+        log.debug(
+            "JWT validated | subject={} | roles={}",
+            sessionUser.username(),
+            sessionUser.authorities());
+
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(sessionUser, null, sessionUser.authorities());
 
