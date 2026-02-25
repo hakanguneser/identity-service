@@ -4,6 +4,7 @@ import static com.gastroblue.model.enums.ApplicationRole.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
+import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -13,6 +14,9 @@ import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
+import com.gastroblue.model.response.CompanyContextResponse;
+import com.gastroblue.model.response.CompanyDefinitionResponse;
+import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
@@ -132,10 +136,10 @@ public class UserDefinitionFacade {
     }
 
     if (sessionUser.getApplicationRole().isCompanyManagerAndAbove()) {
-      return companyService.findOrThrow(request.companyId());
+      return companyService.findByIdOrThrow(request.companyId());
     }
 
-    return companyService.findOrThrow(sessionUser.companyIds().get(0));
+    return companyService.findByIdOrThrow(sessionUser.companyIds().get(0));
   }
 
   private CompanyGroupEntity getRegistrationCompanyGroup(UserSaveRequest request) {
@@ -254,5 +258,25 @@ public class UserDefinitionFacade {
                     companyGroup.getGroupCode() + " - " + companyGroup.getName(),
                     index.getAndIncrement()))
         .toList();
+  }
+
+  public CompanyContextResponse findUserCompanyContext(String userId) {
+    UserEntity user = userService.findById(userId);
+    if (user == null) {
+      return CompanyContextResponse.builder().build();
+    }
+    CompanyGroupDefinitionResponse companyGroup = null;
+    CompanyDefinitionResponse company = null;
+    if (user.getCompanyGroupId() != null) {
+      CompanyGroupEntity companyGroupEntity =
+          companyGroupService.findByIdOrThrow(user.getCompanyGroupId());
+      companyGroup = CompanyGroupMapper.toResponse(companyGroupEntity);
+    }
+    if (user.getCompanyId() != null) {
+      CompanyEntity companyEntity = companyService.findByIdOrThrow(user.getCompanyId());
+      company = CompanyGroupMapper.toResponse(companyEntity, enumFacade);
+    }
+
+    return CompanyContextResponse.builder().companyGroup(companyGroup).company(company).build();
   }
 }

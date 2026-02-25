@@ -20,7 +20,7 @@ public class CompanyService {
     return companyRepository.findByIdIn(idList);
   }
 
-  public CompanyEntity findOrThrow(String id) {
+  public CompanyEntity findByIdOrThrow(String id) {
     return companyRepository
         .findById(id)
         .orElseThrow(

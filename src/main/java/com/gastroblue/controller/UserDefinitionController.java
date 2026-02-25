@@ -4,6 +4,7 @@ import com.gastroblue.facade.UserDefinitionFacade;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
+import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
@@ -35,6 +36,12 @@ public class UserDefinitionController {
   @GetMapping("/{userId}")
   ResponseEntity<UserDefinitionResponse> findById(@PathVariable("userId") final String userId) {
     return ResponseEntity.ok(userFacade.findUserById(userId));
+  }
+
+  @GetMapping("/{userId}/company-context")
+  ResponseEntity<CompanyContextResponse> findUserCompanyContext(
+      @PathVariable("userId") final String userId) {
+    return ResponseEntity.ok(userFacade.findUserCompanyContext(userId));
   }
 
   @PutMapping("/{userId}")

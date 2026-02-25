@@ -118,7 +118,7 @@ public class AuthenticationFacade {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AuthUserInfoResponse response = new AuthUserInfoResponse();
     UserEntity userEntityByUserName = userService.findUserEntityByUserName(sessionUser.username());
-    response.setUser(UserMapper.toBase(userEntityByUserName));
+    response.setUser(UserMapper.toResponse(userEntityByUserName, enumConfigurationFacade));
     if (sessionUser.companyGroupId() != null) {
       try {
         CompanyGroup companyGroup = companyGroupService.findById(sessionUser.companyGroupId());

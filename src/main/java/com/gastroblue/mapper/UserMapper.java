@@ -4,7 +4,6 @@ import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.base.ConfigurableEnum;
-import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.Language;
@@ -42,26 +41,6 @@ public class UserMapper {
         .gender(request.gender())
         .zone(request.zone())
         .passwordChangeRequired(true)
-        .build();
-  }
-
-  public static User toBase(final UserEntity entity) {
-    return User.builder()
-        .userId(entity.getId())
-        .companyId(entity.getCompanyId())
-        .companyGroupId(entity.getCompanyGroupId())
-        .username(entity.getUsername())
-        .password(entity.getPassword())
-        .departments(splitToEnumList(entity.getDepartments(), Department.class))
-        .applicationRole(entity.getApplicationRole())
-        .language(entity.getLanguage())
-        .email(entity.getEmail())
-        .isActive(entity.isActive())
-        .name(entity.getName())
-        .surname(entity.getSurname())
-        .phone(entity.getPhone())
-        .gender(entity.getGender())
-        .zone(entity.getZone())
         .build();
   }
 
