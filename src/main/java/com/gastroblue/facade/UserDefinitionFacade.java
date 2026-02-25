@@ -1,6 +1,8 @@
 package com.gastroblue.facade;
 
 import static com.gastroblue.model.enums.ApplicationRole.*;
+import static com.gastroblue.model.enums.MailParameters.*;
+import static com.gastroblue.model.enums.MailTemplate.INITIAL_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
@@ -20,15 +22,13 @@ import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
+import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +50,7 @@ public class UserDefinitionFacade {
   private final CompanyService companyService;
   private final PasswordEncoder passwordEncoder;
   private final EnumConfigurationFacade enumFacade;
+  private final IMailService mailService;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
@@ -95,23 +96,56 @@ public class UserDefinitionFacade {
   }
 
   public UserDefinitionResponse saveUser(UserSaveRequest request) {
-    checkRegisteredUserRole(request);
+    UserEntity createdUserEntity = checkRegisteredUserRole(request);
     CompanyGroupEntity companyGroup = getRegistrationCompanyGroup(request);
     CompanyEntity company = getRegistrationCompany(request);
-    String otp = PasswordGenerator.generate();
+    String generatedPassword = PasswordGenerator.generate();
     UserEntity entityToBeSaved =
         UserMapper.toEntity(
-            companyGroup.getId(), company.getId(), request, passwordEncoder.encode(otp));
-    UserEntity savedEntity = userService.save(entityToBeSaved);
-    // TODO : notifyNewPassword(savedEntity, generatedPassword); buradaki stratejiyi
-    // konusmamiz
-    // lazim
-    return UserMapper.toResponse(savedEntity, enumFacade);
+            companyGroup.getId(),
+            company.getId(),
+            request,
+            passwordEncoder.encode(generatedPassword));
+    UserEntity savedUserEntity = userService.save(entityToBeSaved);
+    notifyNewPassword(createdUserEntity, savedUserEntity, generatedPassword);
+    return UserMapper.toResponse(savedUserEntity, enumFacade);
   }
 
-  private void checkRegisteredUserRole(UserSaveRequest request) {
+  private void notifyNewPassword(
+      UserEntity createdUserEntity, UserEntity userEntity, String generatedPassword) {
+    List<String> toAddress = new ArrayList<>();
+    List<String> ccAddress = new ArrayList<>();
+    List<String> bccAddress = new ArrayList<>();
+    boolean activateManagerNote = false;
+
+    if (userEntity.getEmail() == null || userEntity.getEmail().isBlank()) {
+      toAddress.add(createdUserEntity.getEmail());
+      activateManagerNote = true;
+    } else {
+      toAddress.add(userEntity.getEmail());
+      ccAddress.add(createdUserEntity.getEmail());
+    }
+
+    mailService.sendMail(
+        toAddress,
+        ccAddress,
+        bccAddress,
+        INITIAL_PASSWORD,
+        Map.of(
+            FULL_NAME,
+            userEntity.getFullName(),
+            USERNAME,
+            userEntity.getUsername(),
+            TEMPORARY_PASSWORD,
+            generatedPassword,
+            ACTIVATE_MANAGER_NOTE,
+            activateManagerNote));
+  }
+
+  private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
     boolean isAuthorized;
-    SessionUser sessionUser = IJwtService.findSessionUser();
+    String username = IJwtService.findSessionUserOrThrow().username();
+    UserEntity sessionUser = userService.findUserEntityByUserName(username);
     if (sessionUser == null) {
       if (!adminRegistrationEnabled) {
         throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
@@ -126,6 +160,11 @@ public class UserDefinitionFacade {
     if (!isAuthorized) {
       throw new AccessDeniedException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
     }
+    if (sessionUser == null || sessionUser.getEmail() == null || sessionUser.getEmail().isBlank()) {
+      throw new ValidationException(
+          ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION, "User email is required");
+    }
+    return sessionUser;
   }
 
   private CompanyEntity getRegistrationCompany(UserSaveRequest request) {

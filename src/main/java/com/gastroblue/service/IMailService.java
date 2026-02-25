@@ -1,5 +1,6 @@
 package com.gastroblue.service;
 
+import com.gastroblue.model.enums.MailParameters;
 import com.gastroblue.model.enums.MailTemplate;
 import java.util.List;
 import java.util.Map;
@@ -32,5 +33,5 @@ public interface IMailService {
       List<String> cc,
       List<String> bcc,
       MailTemplate template,
-      Map<String, Object> params);
+      Map<MailParameters, Object> params);
 }

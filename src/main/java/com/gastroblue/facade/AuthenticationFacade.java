@@ -52,19 +52,6 @@ public class AuthenticationFacade {
   private Long jwtRefreshTokenValidityDays;
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
-    /*mailService.sendMail(
-    List.of("hakan.guneser@gmail.com"),
-    null,
-    null,
-    MailTemplate.INITIAL_PASSWORD,
-    Map.of(
-        "fullName", "Hakan Guneser",
-        "usernameOrEmail", "hkngnsr",
-        "temporaryPassword", "123",
-        "loginUrl", "https://app.gastroblue.com/login",
-        "companyName", "GastroBlue321",
-        "supportEmail", "destek@gastroblue.com",
-        "year", "2026"));*/
     Authentication authentication;
     UserEntity userEntity = null;
     try {

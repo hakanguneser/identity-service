@@ -3,6 +3,7 @@ package com.gastroblue.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gastroblue.model.entity.OutgoingMailLogEntity;
+import com.gastroblue.model.enums.MailParameters;
 import com.gastroblue.model.enums.MailStatus;
 import com.gastroblue.model.enums.MailTemplate;
 import com.gastroblue.model.properties.MailProperties;
@@ -10,7 +11,6 @@ import com.gastroblue.repository.OutgoingMailLogRepository;
 import com.gastroblue.service.IMailService;
 import com.gastroblue.util.DelimitedStringUtil;
 import com.gastroblue.util.MailTemplateRenderer;
-import io.micrometer.core.instrument.Timer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
@@ -59,7 +59,7 @@ public class MailService implements IMailService {
       List<String> cc,
       List<String> bcc,
       MailTemplate template,
-      Map<String, Object> params) {
+      Map<MailParameters, Object> params) {
 
     log.debug(
         "mail.send requested [template={}, to.count={}]",
@@ -77,7 +77,6 @@ public class MailService implements IMailService {
       updateLog(mailLog, MailStatus.SKIPPED, null);
       return;
     }
-    Timer.Sample sample = Timer.start();
     try {
       String body = MailTemplateRenderer.render(template, params);
       doSend(to, cc, bcc, template, body);
@@ -115,7 +114,6 @@ public class MailService implements IMailService {
 
   private String resolveSubject(MailTemplate template) {
     return switch (template) {
-      case WELCOME -> "Welcome to GastroBlue!";
       case INITIAL_PASSWORD -> "GastroBlue – Hesabınız Oluşturuldu";
     };
   }
@@ -125,13 +123,13 @@ public class MailService implements IMailService {
       List<String> cc,
       List<String> bcc,
       MailTemplate template,
-      Map<String, Object> params) {
+      Map<MailParameters, Object> params) {
     return OutgoingMailLogEntity.builder()
         .toAddresses(DelimitedStringUtil.join(to))
         .ccAddresses(DelimitedStringUtil.join(cc))
         .bccAddresses(DelimitedStringUtil.join(bcc))
         .templateName(template.getTemplateName())
-        .templateParams(DelimitedStringUtil.join(params))
+        .templateParams(toJson(params))
         .status(MailStatus.PENDING)
         .build();
   }
