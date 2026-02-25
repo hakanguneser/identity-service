@@ -14,10 +14,12 @@ import com.gastroblue.util.MailTemplateRenderer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -49,7 +51,14 @@ public class MailService implements IMailService {
   private final MailProperties mailProperties;
   private final JavaMailSender mailSender;
   private final OutgoingMailLogRepository outgoingMailLogRepository;
+  private final Environment environment;
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  /** {@code true} when the "prod" Spring profile is NOT active. */
+  private boolean isNonProd() {
+    return Arrays.stream(environment.getActiveProfiles())
+        .noneMatch(p -> p.equalsIgnoreCase("prod"));
+  }
 
   @Override
   @Async("mailTaskExecutor")
@@ -93,6 +102,20 @@ public class MailService implements IMailService {
   private void doSend(
       List<String> to, List<String> cc, List<String> bcc, MailTemplate template, String body)
       throws MessagingException {
+
+    String adminAddress = mailProperties.getAdminRedirectAddress();
+    boolean intercept = isNonProd() && adminAddress != null && !adminAddress.isBlank();
+    if (intercept) {
+      log.warn(
+          "mail.intercept [profile=non-prod, redirectTo={}, originalTo={}, originalCc={}]",
+          adminAddress,
+          to,
+          cc);
+      to = List.of(adminAddress);
+      cc = List.of();
+      bcc = List.of();
+    }
+
     MimeMessage message = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -106,7 +129,8 @@ public class MailService implements IMailService {
       helper.setBcc(bcc.toArray(new String[0]));
     }
 
-    helper.setSubject(resolveSubject(template));
+    String subject = resolveSubject(template);
+    helper.setSubject(intercept ? "[TEST] " + subject : subject);
     helper.setText(body, true);
 
     mailSender.send(message);
@@ -115,6 +139,7 @@ public class MailService implements IMailService {
   private String resolveSubject(MailTemplate template) {
     return switch (template) {
       case INITIAL_PASSWORD -> "GastroBlue – Hesabınız Oluşturuldu";
+      case RESET_PASSWORD -> "GastroBlue – Şifreniz Yenilendi";
     };
   }
 

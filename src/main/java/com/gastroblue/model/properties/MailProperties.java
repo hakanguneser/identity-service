@@ -17,6 +17,13 @@ public class MailProperties {
   /** The sender address that appears in the From header. */
   private String from;
 
+  /**
+   * When set, all outgoing emails are redirected to this address instead of the real recipients.
+   * Intended for non-production environments only. Configure via {@code
+   * mail.admin-redirect-address}.
+   */
+  private String adminRedirectAddress;
+
   private Smtp smtp = new Smtp();
 
   @Getter

@@ -3,6 +3,7 @@ package com.gastroblue.facade;
 import static com.gastroblue.model.enums.ApplicationRole.*;
 import static com.gastroblue.model.enums.MailParameters.*;
 import static com.gastroblue.model.enums.MailTemplate.INITIAL_PASSWORD;
+import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
@@ -107,12 +108,15 @@ public class UserDefinitionFacade {
             request,
             passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
-    notifyNewPassword(createdUserEntity, savedUserEntity, generatedPassword);
+    notifyNewPassword(INITIAL_PASSWORD, createdUserEntity, savedUserEntity, generatedPassword);
     return UserMapper.toResponse(savedUserEntity, enumFacade);
   }
 
   private void notifyNewPassword(
-      UserEntity createdUserEntity, UserEntity userEntity, String generatedPassword) {
+      MailTemplate mailTemplate,
+      UserEntity createdUserEntity,
+      UserEntity userEntity,
+      String generatedPassword) {
     List<String> toAddress = new ArrayList<>();
     List<String> ccAddress = new ArrayList<>();
     List<String> bccAddress = new ArrayList<>();
@@ -130,7 +134,7 @@ public class UserDefinitionFacade {
         toAddress,
         ccAddress,
         bccAddress,
-        INITIAL_PASSWORD,
+        mailTemplate,
         Map.of(
             FULL_NAME,
             userEntity.getFullName(),
@@ -210,18 +214,15 @@ public class UserDefinitionFacade {
   }
 
   public void sendOtp(final String userId) {
+    UserEntity createdUserEntity =
+        userService.findUserEntityByUserName(IJwtService.findSessionUserOrThrow().username());
     UserEntity userEntity = userService.findById(userId);
-    // TODO : check session user otp icin gelinen userin amiri mi ? daha once otp
-    // gonderilmis mi ?
-    // 120 saniye sayaci ?
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);
     userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMinutes(15));
     userService.updateUser(userEntity);
-    // notifyNewPassword(generatedPassword, request.getEmail()); // TODO : kisi
-    // forgat password
-    // yapamaz, bir ustu bunu yapabilir ona mail atacaz
+    notifyNewPassword(RESET_PASSWORD, createdUserEntity, userEntity, generatedPassword);
   }
 
   public void changePassword(final String userId, final PasswordChangeRequest request) {

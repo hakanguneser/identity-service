@@ -16,7 +16,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MailTemplate {
-  INITIAL_PASSWORD("initial-password");
+  INITIAL_PASSWORD("initial-password"),
+  RESET_PASSWORD("reset-password");
 
   /** File name (without extension) relative to {@code resources/templates/mail/}. */
   private final String templateName;

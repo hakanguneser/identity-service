@@ -52,6 +52,7 @@ app:
 mail:
   enabled: ${MAIL_ENABLED:true}
   from: ${MAIL_FROM}
+  admin-redirect-address: ${MAIL_ADMIN_REDIRECT_ADDRESS:hakan.guneser@gmail.com}
   smtp:
     host: ${MAIL_SMTP_HOST:smtp.gmail.com}
     port: ${MAIL_SMTP_PORT:587}
