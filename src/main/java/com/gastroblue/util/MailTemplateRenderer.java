@@ -1,11 +1,13 @@
-package com.gastroblue.mail;
+package com.gastroblue.util;
 
+import com.gastroblue.model.enums.MailTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
 
 /**
  * Renders HTML email templates stored under {@code resources/templates/mail/}.
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Component;
  * <p>To switch to a more powerful engine (e.g. Thymeleaf or FreeMarker) in the future, replace only
  * this class – the rest of the mail infrastructure is unaffected.
  */
-@Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MailTemplateRenderer {
 
   private static final String TEMPLATE_BASE_PATH = "templates/mail/";
@@ -34,13 +36,13 @@ public class MailTemplateRenderer {
    * @return rendered HTML string
    * @throws MailTemplateException if the template file cannot be read
    */
-  public String render(MailTemplate template, Map<String, Object> params) {
+  public static String render(MailTemplate template, Map<String, Object> params) {
     String path = TEMPLATE_BASE_PATH + template.getTemplateName() + TEMPLATE_EXTENSION;
     String content = loadTemplate(path);
     return substitute(content, params);
   }
 
-  private String loadTemplate(String path) {
+  private static String loadTemplate(String path) {
     try {
       ClassPathResource resource = new ClassPathResource(path);
       try (InputStream is = resource.getInputStream()) {
@@ -51,7 +53,7 @@ public class MailTemplateRenderer {
     }
   }
 
-  private String substitute(String template, Map<String, Object> params) {
+  private static String substitute(String template, Map<String, Object> params) {
     if (params == null || params.isEmpty()) {
       return template;
     }

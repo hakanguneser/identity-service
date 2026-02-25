@@ -1,8 +1,15 @@
-package com.gastroblue.mail;
+package com.gastroblue.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gastroblue.model.entity.OutgoingMailLogEntity;
 import com.gastroblue.model.enums.MailStatus;
+import com.gastroblue.model.enums.MailTemplate;
+import com.gastroblue.model.properties.MailProperties;
+import com.gastroblue.repository.OutgoingMailLogRepository;
+import com.gastroblue.service.IMailService;
+import com.gastroblue.util.DelimitedStringUtil;
+import com.gastroblue.util.MailTemplateRenderer;
 import io.micrometer.core.instrument.Timer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -37,13 +44,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AsyncMailService implements IMailService {
+public class MailService implements IMailService {
 
   private final MailProperties mailProperties;
   private final JavaMailSender mailSender;
   private final OutgoingMailLogRepository outgoingMailLogRepository;
-  private final MailTemplateRenderer templateRenderer;
-  private final MailMetrics mailMetrics;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
@@ -62,7 +67,6 @@ public class AsyncMailService implements IMailService {
         to != null ? to.size() : 0);
     if (to == null || to.isEmpty()) {
       log.info("mail.skipped [reason=empty-to-address, template={}]", template.name());
-      mailMetrics.incrementSent(template, MailStatus.SKIPPED);
       return;
     }
     OutgoingMailLogEntity mailLog = buildPendingLog(to, cc, bcc, template, params);
@@ -71,24 +75,19 @@ public class AsyncMailService implements IMailService {
     if (!mailProperties.isEnabled()) {
       log.info("mail.skipped [reason=mail-disabled, template={}]", template.name());
       updateLog(mailLog, MailStatus.SKIPPED, null);
-      mailMetrics.incrementSent(template, MailStatus.SKIPPED);
       return;
     }
     Timer.Sample sample = Timer.start();
     try {
-      String body = templateRenderer.render(template, params);
+      String body = MailTemplateRenderer.render(template, params);
       doSend(to, cc, bcc, template, body);
-      sample.stop(mailMetrics.getSendTimer(template));
 
-      log.info("mail.sent [key={}, template={}, to.count={}]", template.name(), to.size());
+      log.info("mail.sent [template={}, to.count={}]", template.name(), to.size());
       updateLog(mailLog, MailStatus.SUCCESS, null);
-      mailMetrics.incrementSent(template, MailStatus.SUCCESS);
 
     } catch (Exception ex) {
-      sample.stop(mailMetrics.getSendTimer(template));
-      log.error("mail.failed [key={}, template={}, error={}]", template.name(), ex.getMessage());
+      log.error("mail.failed [template={}, error={}]", template.name(), ex.getMessage());
       updateLog(mailLog, MailStatus.FAILED, truncate(ex.getMessage(), 2000));
-      mailMetrics.incrementSent(template, MailStatus.FAILED);
     }
   }
 
@@ -128,11 +127,11 @@ public class AsyncMailService implements IMailService {
       MailTemplate template,
       Map<String, Object> params) {
     return OutgoingMailLogEntity.builder()
-        .toAddresses(toJson(to))
-        .ccAddresses(toJson(cc))
-        .bccAddresses(toJson(bcc))
+        .toAddresses(DelimitedStringUtil.join(to))
+        .ccAddresses(DelimitedStringUtil.join(cc))
+        .bccAddresses(DelimitedStringUtil.join(bcc))
         .templateName(template.getTemplateName())
-        .templateParams(toJson(params))
+        .templateParams(DelimitedStringUtil.join(params))
         .status(MailStatus.PENDING)
         .build();
   }

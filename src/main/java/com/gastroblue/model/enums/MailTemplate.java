@@ -1,4 +1,4 @@
-package com.gastroblue.mail;
+package com.gastroblue.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

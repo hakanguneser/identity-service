@@ -1,5 +1,6 @@
-package com.gastroblue.mail;
+package com.gastroblue.config;
 
+import com.gastroblue.model.properties.MailProperties;
 import java.util.Properties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

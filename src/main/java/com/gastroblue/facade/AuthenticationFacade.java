@@ -6,7 +6,6 @@ import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
-import com.gastroblue.mail.IMailService;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.*;
@@ -18,6 +17,7 @@ import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
+import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -62,7 +62,7 @@ public class AuthenticationFacade {
         "usernameOrEmail", "hkngnsr",
         "temporaryPassword", "123",
         "loginUrl", "https://app.gastroblue.com/login",
-        "companyName", "GastroBlue",
+        "companyName", "GastroBlue321",
         "supportEmail", "destek@gastroblue.com",
         "year", "2026"));*/
     Authentication authentication;

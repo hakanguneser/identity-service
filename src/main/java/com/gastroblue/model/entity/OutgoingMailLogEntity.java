@@ -1,4 +1,4 @@
-package com.gastroblue.mail;
+package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
 import com.gastroblue.model.enums.MailStatus;

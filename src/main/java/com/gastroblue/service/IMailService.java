@@ -1,5 +1,6 @@
-package com.gastroblue.mail;
+package com.gastroblue.service;
 
+import com.gastroblue.model.enums.MailTemplate;
 import java.util.List;
 import java.util.Map;
 
