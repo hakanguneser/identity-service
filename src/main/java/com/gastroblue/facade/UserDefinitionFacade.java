@@ -221,16 +221,16 @@ public class UserDefinitionFacade {
   public List<ResolvedEnum> findAvailableCompanies() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
-
     return companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
         .filter(CompanyEntity::isActive)
         .filter(
-            c ->
+            company ->
                 sessionUser.companyIds() == null
-                    || Objects.equals(sessionUser.companyIds().get(0), c.getId()))
+                    || sessionUser.companyIds().isEmpty()
+                    || sessionUser.companyIds().contains(company.getId()))
         .sorted(
             Comparator.comparing(
-                c -> c.getCompanyCode().toLowerCase() + " - " + c.getCompanyName().toLowerCase()))
+                c -> (c.getCompanyCode() + " - " + c.getCompanyName()).toLowerCase()))
         .map(
             company ->
                 new ResolvedEnum(

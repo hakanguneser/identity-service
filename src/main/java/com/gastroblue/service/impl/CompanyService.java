@@ -16,7 +16,7 @@ public class CompanyService {
 
   private final CompanyRepository companyRepository;
 
-  public List<CompanyEntity> findByBaseId(List<String> idList) {
+  public List<CompanyEntity> findByBaseIdIn(List<String> idList) {
     return companyRepository.findByIdIn(idList);
   }
 

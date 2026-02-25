@@ -18,9 +18,6 @@ public class ApplicationError {
   private String referenceId;
   private HttpStatus httpStatus;
   private LocalDateTime timeStamp;
-
-  /** Correlation handle that maps this error response to the server log entry. */
   private String traceId;
-
   private List<ValidationError> errorDetails;
 }

@@ -3,7 +3,6 @@ package com.gastroblue.facade;
 import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
 import static com.gastroblue.model.enums.ApplicationProduct.THERMOMETER_TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
-import static com.gastroblue.service.IJwtService.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
@@ -129,7 +128,7 @@ public class AuthenticationFacade {
       List<Company> companyList = null;
       if (sessionUser.companyIds() != null) {
         companyList =
-            companyService.findByBaseId(sessionUser.companyIds()).stream()
+            companyService.findByBaseIdIn(sessionUser.companyIds()).stream()
                 .map(CompanyGroupMapper::toBase)
                 .toList();
       } else {
