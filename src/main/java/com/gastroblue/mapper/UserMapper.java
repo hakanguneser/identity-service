@@ -78,8 +78,6 @@ public class UserMapper {
 
   public static UserEntity updateEntity(final UserEntity e, final UserUpdateRequest r) {
     if (r.departments() != null) e.setDepartments(DelimitedStringUtil.join(r.departments()));
-    if (r.language() != null) e.setLanguage(r.language());
-    if (r.phone() != null) e.setPhone(emptyToNull(r.phone()));
     if (r.mail() != null) e.setEmail(emptyToNull(r.mail()));
 
     if (r.zone() != null) e.setZone(r.zone());
