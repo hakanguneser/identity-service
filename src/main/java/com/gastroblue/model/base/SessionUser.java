@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public record SessionUser(
     String applicationProduct,
     String applicationRole,
+    List<String> departments,
     String companyGroupId,
     List<String> companyIds,
     String language,

@@ -3,7 +3,6 @@ package com.gastroblue.repository;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
-import com.gastroblue.model.enums.Zone;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,15 +20,13 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
       """
                     select u
                     from UserEntity u
-                    where (:companyGroupId is null or u.companyGroupId = :companyGroupId)
-                      and (:zone is null or u.zone = :zone)
-                      and (:companyId is null or u.companyId = :companyId)
+                    where u.companyGroupId = :companyGroupId
+                      and (coalesce(:companyIdList, null) is null  or u.companyId in :companyIdList)
                       and (coalesce(:applicationRoleList, null) is null or u.applicationRole in :applicationRoleList)
                     """)
-  List<UserEntity> findByCompanyGroupIdAndZoneIdAndCompanyIdAndApplicationRoleIn(
+  List<UserEntity> findAccessibleUsers(
       @Param("companyGroupId") String companyGroupId,
-      @Param("zone") Zone zone,
-      @Param("companyId") String companyId,
+      @Param("companyIdList") List<String> companyIdList,
       @Param("applicationRoleList") Set<ApplicationRole> applicationRoleList);
 
   @Modifying

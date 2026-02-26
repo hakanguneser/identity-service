@@ -58,12 +58,17 @@ public class UserDefinitionService {
 
   public List<UserEntity> findAccessibleUser(Set<ApplicationRole> applicationRole) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+
+    List<String> normalizedCompanyIds =
+        (sessionUser.companyIds() == null || sessionUser.companyIds().isEmpty())
+            ? null
+            : sessionUser.companyIds();
+
+    Set<ApplicationRole> normalizedRoles =
+        (applicationRole == null || applicationRole.isEmpty()) ? null : applicationRole;
+
     return userRepository
-        .findByCompanyGroupIdAndZoneIdAndCompanyIdAndApplicationRoleIn(
-            sessionUser.companyGroupId(),
-            null, // sessionUser.zone(),
-            null, // sessionUser.companyId(),
-            applicationRole)
+        .findAccessibleUsers(sessionUser.companyGroupId(), normalizedCompanyIds, normalizedRoles)
         .stream()
         .toList();
   }

@@ -59,8 +59,9 @@ public class JwtService implements IJwtService {
     return new SessionUser(
         claims.get(JWT_APPLICATION_PRODUCT, String.class),
         claims.get(JWT_ROLE, String.class),
+        getClaimList(claims, JWT_DEPARTMENTS),
         claims.get(JWT_COMPANY_GROUP_ID, String.class),
-        getCompanyIds(claims),
+        getClaimList(claims, JWT_COMPANY_IDS),
         claims.get(JWT_LANGUAGE, String.class),
         claims.get(SUBJECT, String.class),
         claims.get(ISSUED_AT, Date.class),
@@ -68,8 +69,8 @@ public class JwtService implements IJwtService {
   }
 
   @SuppressWarnings("unchecked")
-  private List<String> getCompanyIds(Claims claims) {
-    Object value = claims.get(JWT_COMPANY_IDS);
+  private List<String> getClaimList(Claims claims, String key) {
+    Object value = claims.get(key);
     if (value instanceof List<?> list) {
       return list.stream().filter(Objects::nonNull).map(Object::toString).toList();
     }

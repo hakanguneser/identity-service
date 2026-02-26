@@ -1,9 +1,12 @@
 package com.gastroblue.service;
 
+import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
+
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import java.util.*;
@@ -18,6 +21,7 @@ public interface IJwtService {
   String JWT_LANGUAGE = "lang";
   String JWT_COMPANY_IDS = "cIds";
   String JWT_APPLICATION_PRODUCT = "aud";
+  String JWT_DEPARTMENTS = "dpts";
 
   String generateToken(String username, HashMap<String, Object> extraClaims, long expiration);
 
@@ -30,6 +34,7 @@ public interface IJwtService {
     extraClaims.put(JWT_COMPANY_IDS, sessionUser.companyIds());
     extraClaims.put(JWT_APPLICATION_PRODUCT, sessionUser.applicationProduct());
     extraClaims.put(JWT_LANGUAGE, sessionUser.language());
+    extraClaims.put(JWT_DEPARTMENTS, sessionUser.departments());
     return extraClaims;
   }
 
@@ -41,6 +46,8 @@ public interface IJwtService {
     extraClaims.put(JWT_COMPANY_IDS, companyIds);
     extraClaims.put(JWT_APPLICATION_PRODUCT, product);
     extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
+    extraClaims.put(
+        JWT_DEPARTMENTS, splitToEnumList(userEntity.getDepartments(), Department.class));
     return extraClaims;
   }
 
