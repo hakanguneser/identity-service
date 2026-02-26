@@ -3,6 +3,7 @@ package com.gastroblue.model.properties;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
@@ -29,6 +30,7 @@ public class MailProperties {
 
   @Getter
   @Setter
+  @ToString
   public static class Smtp {
     private String host = "smtp.gmail.com";
     private int port = 587;
