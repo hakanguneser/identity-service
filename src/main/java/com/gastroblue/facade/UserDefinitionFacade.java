@@ -143,7 +143,9 @@ public class UserDefinitionFacade {
             TEMPORARY_PASSWORD,
             generatedPassword,
             ACTIVATE_MANAGER_NOTE,
-            activateManagerNote));
+            activateManagerNote,
+            MANAGER_FULL_NAME,
+            createdUserEntity.getFullName()));
   }
 
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
