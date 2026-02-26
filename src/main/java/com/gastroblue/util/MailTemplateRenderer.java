@@ -55,14 +55,44 @@ public class MailTemplateRenderer {
   }
 
   private static String substitute(String template, Map<MailParameters, Object> params) {
-    if (params == null || params.isEmpty()) {
+    if (template == null || template.isBlank()) {
       return template;
     }
     String result = template;
-    for (Map.Entry<MailParameters, Object> entry : params.entrySet()) {
-      String placeholder = "{{" + entry.getKey().getKey() + "}}";
-      String value = entry.getValue() != null ? entry.getValue().toString() : "";
-      result = result.replace(placeholder, value);
+
+    // 1. Handle Mustache-style conditional blocks: {{#key}}...{{/key}}
+    if (params != null) {
+      for (Map.Entry<MailParameters, Object> entry : params.entrySet()) {
+        String key = entry.getKey().getKey();
+        Object val = entry.getValue();
+        boolean isActive = (val instanceof Boolean b && b);
+
+        String blockRegex = "\\{\\{#" + key + "\\}\\}(.*?)\\{\\{/" + key + "\\}\\}";
+        java.util.regex.Pattern pattern =
+            java.util.regex.Pattern.compile(blockRegex, java.util.regex.Pattern.DOTALL);
+        java.util.regex.Matcher matcher = pattern.matcher(result);
+
+        if (isActive) {
+          result = matcher.replaceAll("$1");
+        } else {
+          result = matcher.replaceAll("");
+        }
+      }
+    }
+
+    // 2. Clear any remaining conditional blocks for keys not present in params
+    String remainingBlocksRegex = "\\{\\{#.*?\\}\\}(.*?)\\{\\{/.*?\\}\\}";
+    java.util.regex.Pattern p =
+        java.util.regex.Pattern.compile(remainingBlocksRegex, java.util.regex.Pattern.DOTALL);
+    result = p.matcher(result).replaceAll("");
+
+    // 3. Handle simple variable substitutions: {{key}}
+    if (params != null) {
+      for (Map.Entry<MailParameters, Object> entry : params.entrySet()) {
+        String placeholder = "{{" + entry.getKey().getKey() + "}}";
+        String value = entry.getValue() != null ? entry.getValue().toString() : "";
+        result = result.replace(placeholder, value);
+      }
     }
     return result;
   }
