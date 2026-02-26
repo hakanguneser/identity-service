@@ -67,13 +67,13 @@ public class UserDefinitionFacade {
   }
 
   public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
-    // TODO : burada department eklemek gerekecek
+
     Set<ApplicationRole> targetRoles;
-    SessionUser user = IJwtService.findSessionUserOrThrow();
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
 
     if (includeAll) {
       targetRoles =
-          switch (user.getApplicationRole()) {
+          switch (sessionUser.getApplicationRole()) {
             case ADMIN -> Set.of(GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
             case GROUP_MANAGER -> Set.of(ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
             case ZONE_MANAGER -> Set.of(COMPANY_MANAGER, SUPERVISOR, STAFF);
@@ -83,7 +83,7 @@ public class UserDefinitionFacade {
           };
     } else {
       targetRoles =
-          switch (user.getApplicationRole()) {
+          switch (sessionUser.getApplicationRole()) {
             case ADMIN -> Set.of(GROUP_MANAGER);
             case GROUP_MANAGER -> Set.of(COMPANY_MANAGER, ZONE_MANAGER);
             case ZONE_MANAGER -> Set.of(COMPANY_MANAGER);
@@ -94,6 +94,14 @@ public class UserDefinitionFacade {
     }
     return userService.findAccessibleUser(targetRoles).stream()
         .map(u -> UserMapper.toResponse(u, enumFacade))
+        .filter(
+            user -> {
+              List<Department> sessionDepartments = sessionUser.getDepartments();
+              if (sessionDepartments.contains(Department.ALL)) {
+                return true;
+              }
+              return user.getDepartmentsList().stream().anyMatch(sessionDepartments::contains);
+            })
         .toList();
   }
 
@@ -107,7 +115,8 @@ public class UserDefinitionFacade {
             companyGroup.getId(),
             company.getId(),
             request,
-            passwordEncoder.encode(generatedPassword));
+            passwordEncoder.encode(generatedPassword),
+            getDepartments(request));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
     notifyNewPassword(
         INITIAL_PASSWORD,
@@ -117,6 +126,14 @@ public class UserDefinitionFacade {
         companyGroup.getName(),
         company.getCompanyName());
     return UserMapper.toResponse(savedUserEntity, enumFacade);
+  }
+
+  private List<Department> getDepartments(UserSaveRequest request) {
+    List<Department> departments = Optional.ofNullable(request.departments()).orElse(List.of());
+    if (departments.contains(Department.ALL)) {
+      return List.of(Department.ALL);
+    }
+    return departments.stream().distinct().toList();
   }
 
   private void notifyNewPassword(
@@ -148,7 +165,9 @@ public class UserDefinitionFacade {
     mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
     mailParams.put(
         DEPARTMENT, createdUser.getDepartments().stream().map(ResolvedEnum::getDisplay).toList());
-    mailParams.put(ZONE, createdUser.getZone().getDisplay());
+    if (createdUser.getZone() != null) {
+      mailParams.put(ZONE, createdUser.getZone().getDisplay());
+    }
     mailParams.put(COMPANY_NAME, companyName);
     mailParams.put(COMPANY_GROUP_NAME, companyGroupName);
     mailService.sendMail(toAddress, ccAddress, bccAddress, mailTemplate, mailParams);

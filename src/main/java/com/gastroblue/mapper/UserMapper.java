@@ -24,13 +24,14 @@ public class UserMapper {
       final String companyGroupId,
       final String companyId,
       final UserSaveRequest request,
-      final String password) {
+      final String password,
+      final List<Department> departmentList) {
     return UserEntity.builder()
         .companyGroupId(companyGroupId)
         .companyId(companyId)
         .username(request.username().toLowerCase(Locale.ENGLISH))
         .password(password)
-        .departments(DelimitedStringUtil.join(request.departments()))
+        .departments(DelimitedStringUtil.join(departmentList))
         .applicationRole(request.applicationRole())
         .language(Language.defaultLang())
         .email(request.email())
@@ -60,6 +61,7 @@ public class UserMapper {
 
     return UserDefinitionResponse.builder()
         .userId(entity.getId())
+        .departmentsList(departmentList)
         .companyId(entity.getCompanyId())
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())

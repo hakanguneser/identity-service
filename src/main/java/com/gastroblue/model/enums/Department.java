@@ -26,4 +26,16 @@ public enum Department implements ConfigurableEnum {
   QUALITY_CONTROL,
   RECEPTION,
   GARDEN_LANDSCAPE;
+
+  public static Department fromString(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+
+    try {
+      return Department.valueOf(value.trim().toUpperCase());
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
+  }
 }
