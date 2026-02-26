@@ -103,15 +103,15 @@ public class MailService implements IMailService {
       List<String> to, List<String> cc, List<String> bcc, MailTemplate template, String body)
       throws MessagingException {
 
-    String adminAddress = mailProperties.getAdminRedirectAddress();
-    boolean intercept = isNonProd() && adminAddress != null && !adminAddress.isBlank();
+    List<String> adminAddress = mailProperties.getAdminRedirectAddress();
+    boolean intercept = isNonProd() && adminAddress != null && !adminAddress.isEmpty();
     if (intercept) {
       log.warn(
           "mail.intercept [profile=non-prod, redirectTo={}, originalTo={}, originalCc={}]",
           adminAddress,
           to,
           cc);
-      to = List.of(adminAddress);
+      to = adminAddress;
       cc = List.of();
       bcc = List.of();
     }

@@ -1,5 +1,6 @@
 package com.gastroblue.model.properties;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,7 +23,7 @@ public class MailProperties {
    * Intended for non-production environments only. Configure via {@code
    * mail.admin-redirect-address}.
    */
-  private String adminRedirectAddress;
+  private List<String> adminRedirectAddress;
 
   private Smtp smtp = new Smtp();
 
