@@ -1,6 +1,7 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.UserDefinitionFacade;
+import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
@@ -54,6 +55,14 @@ public class UserDefinitionController {
   @PatchMapping("/{userId}/status")
   ResponseEntity<UserDefinitionResponse> updateStatus(@PathVariable("userId") final String userId) {
     return ResponseEntity.ok(userFacade.toggleUser(userId));
+  }
+
+  @PatchMapping("/{userId}/language")
+  ResponseEntity<Void> updateLanguage(
+      @PathVariable("userId") final String userId,
+      @RequestBody final LanguageUpdateRequest request) {
+    userFacade.updateLanguage(userId, request);
+    return ResponseEntity.noContent().build();
   }
 
   @PutMapping(value = "/{userId}/password")

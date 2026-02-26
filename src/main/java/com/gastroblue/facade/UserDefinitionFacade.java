@@ -14,6 +14,7 @@ import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.*;
+import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
@@ -267,7 +268,16 @@ public class UserDefinitionFacade {
   }
 
   public List<ResolvedEnum> findAllApplicationRoles() {
-    return enumFacade.getDropdownValues(ApplicationRole.class);
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    ApplicationRole sessionRole = sessionUser.getApplicationRole();
+
+    return enumFacade.getDropdownValues(ApplicationRole.class).stream()
+        .filter(
+            resolved -> {
+              ApplicationRole role = ApplicationRole.fromString(resolved.getKey());
+              return role != null && role.getLevel() > sessionRole.getLevel();
+            })
+        .toList();
   }
 
   public List<ResolvedEnum> findAllDepartments() {
@@ -342,5 +352,11 @@ public class UserDefinitionFacade {
     }
 
     return CompanyContextResponse.builder().companyGroup(companyGroup).company(company).build();
+  }
+
+  public void updateLanguage(String userId, LanguageUpdateRequest request) {
+    UserEntity userEntity = userService.findById(userId);
+    userEntity.setLanguage(request.language());
+    userService.updateUser(userEntity);
   }
 }
