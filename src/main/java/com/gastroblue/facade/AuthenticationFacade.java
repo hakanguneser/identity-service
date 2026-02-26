@@ -3,7 +3,6 @@ package com.gastroblue.facade;
 import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
 import static com.gastroblue.model.enums.ApplicationProduct.THERMOMETER_TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
-import static com.gastroblue.model.enums.MailParameters.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
@@ -106,7 +105,8 @@ public class AuthenticationFacade {
     response.setUser(UserMapper.toResponse(userEntityByUserName, enumConfigurationFacade));
     if (sessionUser.companyGroupId() != null) {
       try {
-        CompanyGroup companyGroup = companyGroupService.findById(sessionUser.companyGroupId());
+        CompanyGroup companyGroup =
+            companyGroupService.findCompanyByIdOrThrow(sessionUser.companyGroupId());
         response.setCompanyGroup(companyGroup);
       } catch (IllegalDefinitionException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
@@ -159,7 +159,8 @@ public class AuthenticationFacade {
     if (userEntity.getApplicationRole().isAdministrator()) {
       return ApiInfoDto.builder().build();
     }
-    CompanyGroup companyGroup = companyGroupService.findById(userEntity.getCompanyGroupId());
+    CompanyGroup companyGroup =
+        companyGroupService.findCompanyByIdOrThrow(userEntity.getCompanyGroupId());
     return switch (product) {
       case THERMOMETER_TRACKER ->
           buildApiInfo(

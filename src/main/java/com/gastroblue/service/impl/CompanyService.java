@@ -5,6 +5,7 @@ import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.CompanyRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,7 @@ public class CompanyService {
   }
 
   public CompanyEntity findByIdOrThrow(String id) {
-    return companyRepository
-        .findById(id)
+    return findById(id)
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
@@ -43,8 +43,7 @@ public class CompanyService {
   }
 
   public CompanyEntity findByCompanyGroupIdAndId(String companyGroupId, String companyId) {
-    return companyRepository
-        .findById(companyId)
+    return findById(companyId)
         .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
         .orElseThrow(
             () ->
@@ -57,8 +56,7 @@ public class CompanyService {
 
   public CompanyEntity toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity entity =
-        companyRepository
-            .findById(companyId)
+        findById(companyId)
             .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
             .orElseThrow(
                 () ->
@@ -72,7 +70,11 @@ public class CompanyService {
     return companyRepository.save(entity);
   }
 
-  public java.util.Optional<CompanyEntity> findByCompanyCode(String companyCode) {
+  public Optional<CompanyEntity> findById(String companyId) {
+    return companyRepository.findById(companyId);
+  }
+
+  public Optional<CompanyEntity> findByCompanyCode(String companyCode) {
     return companyRepository.findByCompanyCode(companyCode);
   }
 }

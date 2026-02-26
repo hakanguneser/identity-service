@@ -229,7 +229,24 @@ public class UserDefinitionFacade {
     userEntity.setPasswordChangeRequired(true);
     userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMinutes(15));
     userService.updateUser(userEntity);
-    notifyNewPassword(RESET_PASSWORD, userEntity, managerUser, generatedPassword, "", "");
+    String companyGroupName = "";
+    if (userEntity.getCompanyGroupId() != null) {
+      companyGroupName =
+          companyGroupService
+              .findById(userEntity.getCompanyGroupId())
+              .map(CompanyGroupEntity::getName)
+              .orElse("");
+    }
+    String companyName = "";
+    if (userEntity.getCompanyId() != null) {
+      companyName =
+          companyService
+              .findById(userEntity.getCompanyId())
+              .map(CompanyEntity::getCompanyName)
+              .orElse("");
+    }
+    notifyNewPassword(
+        RESET_PASSWORD, userEntity, managerUser, generatedPassword, companyGroupName, companyName);
   }
 
   public void changePassword(final String userId, final PasswordChangeRequest request) {

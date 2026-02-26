@@ -65,7 +65,16 @@ public class MailTemplateRenderer {
       for (Map.Entry<MailParameters, Object> entry : params.entrySet()) {
         String key = entry.getKey().getKey();
         Object val = entry.getValue();
-        boolean isActive = (val instanceof Boolean b && b);
+        boolean isActive = false;
+        if (val instanceof Boolean b) {
+          isActive = b;
+        } else if (val instanceof String s) {
+          isActive = !s.isBlank();
+        } else if (val instanceof java.util.Collection<?> c) {
+          isActive = !c.isEmpty();
+        } else {
+          isActive = (val != null);
+        }
 
         String blockRegex = "\\{\\{#" + key + "\\}\\}(.*?)\\{\\{/" + key + "\\}\\}";
         java.util.regex.Pattern pattern =

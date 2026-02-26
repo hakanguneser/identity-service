@@ -14,6 +14,7 @@ import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
 import com.gastroblue.service.IJwtService;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -83,7 +84,7 @@ public class CompanyGroupService {
     };
   }
 
-  public CompanyGroup findById(String companyGroupId) {
+  public CompanyGroup findCompanyByIdOrThrow(String companyGroupId) {
     return companyGroupRepository
         .findById(companyGroupId)
         .map(CompanyGroupMapper::toBase)
@@ -104,5 +105,9 @@ public class CompanyGroupService {
               return new IllegalDefinitionException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Group not found: " + groupCode);
             });
+  }
+
+  public Optional<CompanyGroupEntity> findById(String companyGroupId) {
+    return companyGroupRepository.findById(companyGroupId);
   }
 }
