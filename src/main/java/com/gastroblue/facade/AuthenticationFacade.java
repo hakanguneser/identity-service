@@ -3,6 +3,7 @@ package com.gastroblue.facade;
 import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
 import static com.gastroblue.model.enums.ApplicationProduct.THERMOMETER_TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
+import static com.gastroblue.model.enums.MailParameters.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
@@ -17,7 +18,6 @@ import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
-import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +43,6 @@ public class AuthenticationFacade {
   private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
-  private final IMailService mailService;
 
   @Value("${application.security.jwt.token-validity-in-minutes}")
   private Long jwtTokenValidityMinutes;

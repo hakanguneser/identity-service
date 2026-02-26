@@ -97,7 +97,7 @@ public class UserDefinitionFacade {
   }
 
   public UserDefinitionResponse saveUser(UserSaveRequest request) {
-    UserEntity createdUserEntity = checkRegisteredUserRole(request);
+    UserEntity managerUser = checkRegisteredUserRole(request);
     CompanyGroupEntity companyGroup = getRegistrationCompanyGroup(request);
     CompanyEntity company = getRegistrationCompany(request);
     String generatedPassword = PasswordGenerator.generate();
@@ -108,44 +108,49 @@ public class UserDefinitionFacade {
             request,
             passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
-    notifyNewPassword(INITIAL_PASSWORD, createdUserEntity, savedUserEntity, generatedPassword);
+    notifyNewPassword(
+        INITIAL_PASSWORD,
+        savedUserEntity,
+        managerUser,
+        generatedPassword,
+        companyGroup.getName(),
+        company.getCompanyName());
     return UserMapper.toResponse(savedUserEntity, enumFacade);
   }
 
   private void notifyNewPassword(
       MailTemplate mailTemplate,
       UserEntity createdUserEntity,
-      UserEntity userEntity,
-      String generatedPassword) {
+      UserEntity managerUserEntity,
+      String generatedPassword,
+      String companyGroupName,
+      String companyName) {
     List<String> toAddress = new ArrayList<>();
     List<String> ccAddress = new ArrayList<>();
     List<String> bccAddress = new ArrayList<>();
     boolean activateManagerNote = false;
-
-    if (userEntity.getEmail() == null || userEntity.getEmail().isBlank()) {
-      toAddress.add(createdUserEntity.getEmail());
+    UserDefinitionResponse createdUser = UserMapper.toResponse(createdUserEntity, enumFacade);
+    if (createdUserEntity.getEmail() == null || createdUserEntity.getEmail().isBlank()) {
+      toAddress.add(managerUserEntity.getEmail());
       activateManagerNote = true;
     } else {
-      toAddress.add(userEntity.getEmail());
-      ccAddress.add(createdUserEntity.getEmail());
+      toAddress.add(createdUserEntity.getEmail());
+      ccAddress.add(managerUserEntity.getEmail());
     }
+    Map<MailParameters, Object> mailParams = new HashMap<>();
 
-    mailService.sendMail(
-        toAddress,
-        ccAddress,
-        bccAddress,
-        mailTemplate,
-        Map.of(
-            FULL_NAME,
-            userEntity.getFullName(),
-            USERNAME,
-            userEntity.getUsername(),
-            TEMPORARY_PASSWORD,
-            generatedPassword,
-            ACTIVATE_MANAGER_NOTE,
-            activateManagerNote,
-            MANAGER_FULL_NAME,
-            createdUserEntity.getFullName()));
+    mailParams.put(FULL_NAME, createdUserEntity.getFullName());
+    mailParams.put(USERNAME, createdUserEntity.getUsername());
+    mailParams.put(TEMPORARY_PASSWORD, generatedPassword);
+    mailParams.put(ACTIVATE_MANAGER_NOTE, activateManagerNote);
+    mailParams.put(MANAGER_FULL_NAME, managerUserEntity.getFullName());
+    mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
+    mailParams.put(
+        DEPARTMENT, createdUser.getDepartments().stream().map(ResolvedEnum::getDisplay).toList());
+    mailParams.put(ZONE, createdUser.getZone().getDisplay());
+    mailParams.put(COMPANY_NAME, companyName);
+    mailParams.put(COMPANY_GROUP_NAME, companyGroupName);
+    mailService.sendMail(toAddress, ccAddress, bccAddress, mailTemplate, mailParams);
   }
 
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
@@ -216,7 +221,7 @@ public class UserDefinitionFacade {
   }
 
   public void sendOtp(final String userId) {
-    UserEntity createdUserEntity =
+    UserEntity managerUser =
         userService.findUserEntityByUserName(IJwtService.findSessionUserOrThrow().username());
     UserEntity userEntity = userService.findById(userId);
     String generatedPassword = PasswordGenerator.generate();
@@ -224,7 +229,7 @@ public class UserDefinitionFacade {
     userEntity.setPasswordChangeRequired(true);
     userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMinutes(15));
     userService.updateUser(userEntity);
-    notifyNewPassword(RESET_PASSWORD, createdUserEntity, userEntity, generatedPassword);
+    notifyNewPassword(RESET_PASSWORD, userEntity, managerUser, generatedPassword, "", "");
   }
 
   public void changePassword(final String userId, final PasswordChangeRequest request) {
