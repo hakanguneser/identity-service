@@ -94,7 +94,7 @@ public class MailService implements IMailService {
       updateLog(mailLog, MailStatus.SUCCESS, null);
 
     } catch (Exception ex) {
-      log.error("mail.failed [template={}, error={}]", template.name(), ex.getMessage());
+      log.error("mail.failed [template={}, error={}]", template.name(), ex.getMessage(), ex);
       updateLog(mailLog, MailStatus.FAILED, truncate(ex.getMessage(), 2000));
     }
   }
