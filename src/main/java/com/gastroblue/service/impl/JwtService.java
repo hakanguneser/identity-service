@@ -1,5 +1,10 @@
 package com.gastroblue.service.impl;
 
+import static io.jsonwebtoken.Claims.*;
+
+import com.gastroblue.exception.AccessDeniedException;
+import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.service.IJwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -7,12 +12,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,55 +23,58 @@ public class JwtService implements IJwtService {
   private String secretKey;
 
   @Override
-  public String extractUsername(String token) {
-    return extractClaim(token, Claims::getSubject);
+  public String generateToken(
+      String username, HashMap<String, Object> extraClaims, long expiration) {
+    return buildToken(username, extraClaims, expiration);
   }
 
-  @Override
-  public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-    final Claims claims = extractAllClaims(token);
-    return claimsResolver.apply(claims);
+  public SessionUser validateAndExtractToken(String token) throws AccessDeniedException {
+    SessionUser sessionUser = extractSessionUser(token);
+    validateToken(sessionUser);
+    return sessionUser;
   }
 
-  @Override
-  public String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims) {
-    return generateToken(extraClaims, userDetails);
+  private void validateToken(SessionUser sessionUser) {
+    isTokenExpired(sessionUser.expiresAt());
   }
 
-  @Override
-  public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    return buildToken(extraClaims, userDetails, 1000 * 60 * 15); // 15 minutes
+  private void isTokenExpired(Date tokenExpireDate) {
+    if (tokenExpireDate.before(new Date())) {
+      throw new AccessDeniedException(ErrorCode.EXPIRED_JWT_TOKEN);
+    }
   }
 
-  @Override
-  public String generateRefreshToken(UserDetails userDetails) {
-    return buildToken(new HashMap<>(), userDetails, 1000 * 60 * 60 * 24 * 7); // 7 days
-  }
-
-  private String buildToken(
-      Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+  private String buildToken(String username, Map<String, Object> extraClaims, long expiration) {
     return Jwts.builder()
         .setClaims(extraClaims)
-        .setSubject(userDetails.getUsername())
+        .setSubject(username)
         .setIssuedAt(new Date(System.currentTimeMillis()))
         .setExpiration(new Date(System.currentTimeMillis() + expiration))
         .signWith(getSignInKey(), SignatureAlgorithm.HS256)
         .compact();
   }
 
-  @Override
-  public boolean isTokenValid(String token, UserDetails userDetails) {
-    final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+  private SessionUser extractSessionUser(String token) {
+    Claims claims = extractAllClaims(token);
+    return new SessionUser(
+        claims.get(JWT_APPLICATION_PRODUCT, String.class),
+        claims.get(JWT_ROLE, String.class),
+        getClaimList(claims, JWT_DEPARTMENTS),
+        claims.get(JWT_COMPANY_GROUP_ID, String.class),
+        getClaimList(claims, JWT_COMPANY_IDS),
+        claims.get(JWT_LANGUAGE, String.class),
+        claims.get(SUBJECT, String.class),
+        claims.get(ISSUED_AT, Date.class),
+        claims.get(EXPIRATION, Date.class));
   }
 
-  @Override
-  public boolean isTokenExpired(String token) {
-    return extractExpiration(token).before(new Date());
-  }
-
-  private Date extractExpiration(String token) {
-    return extractClaim(token, Claims::getExpiration);
+  @SuppressWarnings("unchecked")
+  private List<String> getClaimList(Claims claims, String key) {
+    Object value = claims.get(key);
+    if (value instanceof List<?> list) {
+      return list.stream().filter(Objects::nonNull).map(Object::toString).toList();
+    }
+    return List.of();
   }
 
   private Claims extractAllClaims(String token) {

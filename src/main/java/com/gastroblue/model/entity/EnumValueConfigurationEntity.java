@@ -2,7 +2,13 @@ package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
 import com.gastroblue.model.enums.Language;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +24,7 @@ import lombok.NoArgsConstructor;
     uniqueConstraints = {
       @UniqueConstraint(
           name = "UK_ENUM_VALUE_CONFIGURATIONS",
-          columnNames = {"COMPANY_GROUP_ID", "ENUM_TYPE", "ENUM_KEY", "LANGUAGE"})
+          columnNames = {"COMPANY_GROUP_ID", "ENUM_TYPE", "LANGUAGE", "ENUM_KEY"})
     },
     indexes = {@Index(name = "IDX_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")})
 public class EnumValueConfigurationEntity extends Auditable {
@@ -32,6 +38,7 @@ public class EnumValueConfigurationEntity extends Auditable {
   private String enumKey;
 
   @Column(name = "LANGUAGE", length = 5)
+  @Enumerated(EnumType.STRING)
   private Language language;
 
   @Column(name = "LABEL", length = 500)
@@ -39,4 +46,7 @@ public class EnumValueConfigurationEntity extends Auditable {
 
   @Column(name = "IS_ACTIVE")
   private boolean active;
+
+  @Column(name = "DISPLAY_ORDER")
+  private Integer displayOrder;
 }

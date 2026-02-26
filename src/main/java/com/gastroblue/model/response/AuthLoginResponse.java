@@ -12,6 +12,6 @@ public class AuthLoginResponse {
   private String token;
   private String refreshToken;
   private boolean passwordChangeRequired;
-  private boolean termsAcceptanceRequired;
+  private boolean eulaRequired;
   private ApiInfoDto apiInfo;
 }

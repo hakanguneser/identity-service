@@ -18,14 +18,15 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,102 +43,90 @@ public class AuthenticationFacade {
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
 
-  @Value("${spring.application.name}")
-  private String issuer;
+  @Value("${application.security.jwt.token-validity-in-minutes}")
+  private Long jwtTokenValidityMinutes;
+
+  @Value("${application.security.jwt.refresh-token-validity-in-days}")
+  private Long jwtRefreshTokenValidityDays;
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
+    Authentication authentication;
+    UserEntity userEntity = null;
     try {
-      authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(
-              loginRequest.username(), loginRequest.password()));
+      authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                  loginRequest.username(), loginRequest.password()));
+      userEntity = (UserEntity) authentication.getPrincipal();
     } catch (BadCredentialsException e) {
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     } catch (RuntimeException e) {
-      log.error("Authentication failed1: {}", e.getMessage());
+      log.error("Authentication failed: {}", e.getMessage());
     }
-    UserEntity userEntity = userService.findUserEntityByUserName(loginRequest.username());
+    if (userEntity == null) {
+      throw new BadCredentialsException("User not found");
+    }
     updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
-    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, loginRequest.product());
-    String token = jwtService.generateToken(userEntity, extraClaims);
-    String refreshToken = jwtService.generateRefreshToken(userEntity);
+    HashMap<String, Object> extraClaims = toExtraClaims(userEntity, loginRequest.product());
+    String token =
+        jwtService.generateToken(
+            userEntity.getUsername(),
+            extraClaims,
+            TimeUnit.MINUTES.toMillis(jwtTokenValidityMinutes));
+    String refreshToken =
+        jwtService.generateToken(
+            userEntity.getUsername(),
+            extraClaims,
+            TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
     return AuthLoginResponse.builder()
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .termsAcceptanceRequired(userEntity.isTermsAcceptanceRequired())
         .apiInfo(apiInfo)
         .build();
   }
 
-  public AuthLoginResponse refreshToken(RefreshTokenRequest request) {
-    if (jwtService.isTokenExpired(request.refreshToken())) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-    }
-    String username = jwtService.extractUsername(request.refreshToken());
-    UserEntity userEntity = userService.findUserEntityByUserName(username);
-    if (!jwtService.isTokenValid(request.refreshToken(), userEntity)) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-    }
-
-    ApiInfoDto apiInfo = getApiInfo(userEntity, userEntity.getLastSuccessLoginProduct());
-
-    // Create a dummy login request to reuse the getExtraClaims logic or recreate it
-    // Using channel from request if present, otherwise null or default
-    // We need to re-fetch or reconstruct context.
-    // Since getExtraClaims needs AuthLoginRequest, let's extract the logic or
-    // create a simpler version.
-    // However, existing getExtraClaims uses loginRequest.product() which we might
-    // not have in RefreshTokenRequest if we didn't store it in the claim.
-    // Ideally we should store product/aud in the token claims.
-
-    // Let's check getExtraClaims again. It puts "aud" -> loginRequest.product().
-    // So we can extract "aud" from the refresh token if we put it there?
-    // Wait, generateRefreshToken uses empty map for extraClaims.
-    // So the refresh token DOES NOT have "aud" or "companyGroupId" in it currently.
-    // We should probably add them to the refresh token too if we want to restore
-    // the session faithfully.
-
-    // For now, let's assume we can get it from the user's last success login
-    // product if available.
-    ApplicationProduct product = userEntity.getLastSuccessLoginProduct();
-    if (product == null) {
-      product = ApplicationProduct.ADMIN_PANEL; // Fallback? or throw?
-    }
-    HashMap<String, Object> extraClaims = getExtraClaims(userEntity, product);
-
-    String newToken = jwtService.generateToken(userEntity, extraClaims);
-    String newRefreshToken = jwtService.generateRefreshToken(userEntity);
-
-    return AuthLoginResponse.builder()
-        .token(newToken)
-        .refreshToken(newRefreshToken)
-        .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .termsAcceptanceRequired(userEntity.isTermsAcceptanceRequired())
-        .apiInfo(apiInfo)
-        .build();
+  public AuthRefreshTokenResponse refreshToken(RefreshTokenRequest request) {
+    SessionUser sessionUser = jwtService.validateAndExtractToken(request.refreshToken());
+    HashMap<String, Object> extraClaims = IJwtService.toExtraClaims(sessionUser);
+    String newToken =
+        jwtService.generateToken(
+            sessionUser.username(),
+            extraClaims,
+            TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
+    return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 
   public AuthUserInfoResponse findAuthenticatedUserInfo() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AuthUserInfoResponse response = new AuthUserInfoResponse();
-    response.setUser(UserMapper.toBase(sessionUser));
+    UserEntity userEntityByUserName = userService.findUserEntityByUserName(sessionUser.username());
+    response.setUser(UserMapper.toResponse(userEntityByUserName, enumConfigurationFacade));
     if (sessionUser.companyGroupId() != null) {
       try {
-        CompanyGroup companyGroup = companyGroupService.findById(sessionUser.companyGroupId());
+        CompanyGroup companyGroup =
+            companyGroupService.findCompanyByIdOrThrow(sessionUser.companyGroupId());
         response.setCompanyGroup(companyGroup);
       } catch (IllegalDefinitionException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
       }
-    }
-    if (sessionUser.companyId() != null) {
-      try {
-        Company company = companyService.findByBaseId(sessionUser.companyId());
-        response.setCompany(company);
-      } catch (IllegalDefinitionException exception) {
-        log.info("Company not found: {}", sessionUser.companyGroupId());
+      List<Company> companyList = null;
+      if (sessionUser.companyIds() != null) {
+        companyList =
+            companyService.findByBaseIdIn(sessionUser.companyIds()).stream()
+                .map(CompanyGroupMapper::toBase)
+                .toList();
+      } else {
+        companyList =
+            companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
+                .map(CompanyGroupMapper::toBase)
+                .toList();
       }
+
+      response.setCompany(companyList);
     }
+
     return response;
   }
 
@@ -155,8 +144,8 @@ public class AuthenticationFacade {
         .toList();
   }
 
-  public void signAgreement() {
-    userDefinitionService.signAgreement(IJwtService.findSessionUserOrThrow().userId());
+  public void signEula() {
+    userDefinitionService.signEula(IJwtService.findSessionUserOrThrow().username());
   }
 
   public EulaResponse getEula() {
@@ -170,7 +159,8 @@ public class AuthenticationFacade {
     if (userEntity.getApplicationRole().isAdministrator()) {
       return ApiInfoDto.builder().build();
     }
-    CompanyGroup companyGroup = companyGroupService.findById(userEntity.getCompanyGroupId());
+    CompanyGroup companyGroup =
+        companyGroupService.findCompanyByIdOrThrow(userEntity.getCompanyGroupId());
     return switch (product) {
       case THERMOMETER_TRACKER ->
           buildApiInfo(
@@ -204,15 +194,8 @@ public class AuthenticationFacade {
     return ApiInfoDto.builder().url(url).version(version).build();
   }
 
-  private HashMap<String, Object> getExtraClaims(
-      UserEntity sessionUser, ApplicationProduct product) {
-    HashMap<String, Object> extraClaims = new HashMap<>();
-    extraClaims.put("cgId", sessionUser.getCompanyGroupId());
-    extraClaims.put("role", sessionUser.getApplicationRole());
-    extraClaims.put("cIds", getResponsibleCompanyIds(sessionUser));
-    extraClaims.put("iss", issuer);
-    extraClaims.put("aud", product);
-    return extraClaims;
+  private HashMap<String, Object> toExtraClaims(UserEntity userEntity, ApplicationProduct product) {
+    return IJwtService.toExtraClaims(userEntity, product, getResponsibleCompanyIds(userEntity));
   }
 
   private List<String> getResponsibleCompanyIds(UserEntity sessionUser) {
@@ -227,12 +210,6 @@ public class AuthenticationFacade {
   }
 
   private void updateUserAfterSuccessfulLogin(UserEntity userEntity, ApplicationProduct product) {
-    userEntity.setLastSuccessLogin(LocalDateTime.now());
-    userEntity.setLastSuccessLoginProduct(product);
-    if (userEntity.getPasswordValidUntil() == null
-        || userEntity.getPasswordValidUntil().isBefore(LocalDateTime.now())) {
-      userEntity.setPasswordChangeRequired(true);
-    }
-    userService.save(userEntity);
+    userService.updateLoginStats(userEntity.getUsername(), product);
   }
 }

@@ -1,27 +1,23 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.model.base.DefaultConfigurableEnum;
+import com.gastroblue.model.base.ConfigurableEnum;
+import java.util.Locale;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRole implements DefaultConfigurableEnum {
-  ADMIN(Set.of(), 1),
-  APP_CLIENT(Set.of(), 1),
-  GROUP_MANAGER(Set.of(ADMIN), 2),
-  ZONE_MANAGER(Set.of(ADMIN, GROUP_MANAGER), 3),
-  COMPANY_MANAGER(Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER), 4),
-  SUPERVISOR(Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER), 5),
-  STAFF(Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR), 6);
+public enum ApplicationRole implements ConfigurableEnum {
+  ADMIN(1),
+  APP_CLIENT(1),
+  GROUP_MANAGER(2),
+  ZONE_MANAGER(3),
+  COMPANY_MANAGER(4),
+  SUPERVISOR(5),
+  STAFF(6);
 
-  private final Set<ApplicationRole> visibleFor;
   private final int level;
-
-  public boolean isVisibleFor(ApplicationRole role) {
-    return visibleFor.contains(role);
-  }
 
   public boolean isAdministrator() {
     return this == ADMIN;
@@ -53,5 +49,17 @@ public enum ApplicationRole implements DefaultConfigurableEnum {
 
   public boolean isSupervisorAndAbove() {
     return Set.of(ADMIN, GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR).contains(this);
+  }
+
+  public static ApplicationRole fromString(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+
+    try {
+      return ApplicationRole.valueOf(value.trim().toUpperCase(Locale.ROOT));
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
   }
 }

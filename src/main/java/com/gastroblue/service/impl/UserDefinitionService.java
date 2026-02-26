@@ -1,10 +1,9 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
-import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
-import com.gastroblue.model.base.User;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.UserRepository;
@@ -16,6 +15,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,18 +56,19 @@ public class UserDefinitionService {
                     String.format("User not found (username=%s)", username)));
   }
 
-  public List<User> findUserByCompanyId(final String companyId) {
-    return userRepository.findByCompanyId(companyId).stream().map(UserMapper::toBase).toList();
-  }
-
   public List<UserEntity> findAccessibleUser(Set<ApplicationRole> applicationRole) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+
+    List<String> normalizedCompanyIds =
+        (sessionUser.companyIds() == null || sessionUser.companyIds().isEmpty())
+            ? null
+            : sessionUser.companyIds();
+
+    Set<ApplicationRole> normalizedRoles =
+        (applicationRole == null || applicationRole.isEmpty()) ? null : applicationRole;
+
     return userRepository
-        .findByCompanyGroupIdAndZoneIdAndCompanyIdAndApplicationRoleIn(
-            sessionUser.companyGroupId(),
-            sessionUser.zone(),
-            sessionUser.companyId(),
-            applicationRole)
+        .findAccessibleUsers(sessionUser.companyGroupId(), normalizedCompanyIds, normalizedRoles)
         .stream()
         .toList();
   }
@@ -78,10 +79,14 @@ public class UserDefinitionService {
     return userRepository.save(entityToBeUpdated);
   }
 
-  public void signAgreement(String userId) {
-    UserEntity entityToBeUpdated = findById(userId);
-    entityToBeUpdated.setTermsAcceptanceRequired(false);
-    entityToBeUpdated.setTermsAcceptedDate(LocalDateTime.now());
+  public void signEula(String username) {
+    UserEntity entityToBeUpdated = findUserEntityByUserName(username);
+    entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
     userRepository.save(entityToBeUpdated);
+  }
+
+  @Transactional
+  public void updateLoginStats(String username, ApplicationProduct product) {
+    userRepository.updateUserAfterSuccessfulLogin(username, product, LocalDateTime.now());
   }
 }

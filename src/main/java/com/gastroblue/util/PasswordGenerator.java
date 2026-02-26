@@ -5,12 +5,15 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PasswordGenerator {
+
   private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
   public static String generate() {
-    String s = generate5DigitCode();
-    System.out.println(s);
-    return "123";
+    String profile = System.getProperty("spring.profiles.active", "");
+    if (!profile.contains("prod")) {
+      return "12345";
+    }
+    return generate5DigitCode();
   }
 
   public static String generate5DigitCode() {

@@ -23,24 +23,38 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: ${SERVER_PORT:7102}
 
-admin:
-  registration:
-    enabled: true
 
 application:
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
+      refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, prometheus, metrics
+
+
+app:
+  swagger:
+    enabled: ${APP_SWAGGER_ENABLED:true}
+  admin:
+    registration:
+      enabled: ${APP_ADMIN_REGISTRATION_ENABLED:true}
+
+mail:
+  enabled: ${MAIL_ENABLED:true}
+  from: ${MAIL_FROM}
+  admin-redirect-address: ${MAIL_ADMIN_REDIRECT_ADDRESS:hakan.guneser@gmail.com}
+  smtp:
+    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
+    port: ${MAIL_SMTP_PORT:587}
+    username: ${MAIL_FROM}
+    password: ${MAIL_PASSWORD}

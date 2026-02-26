@@ -22,5 +22,5 @@ public class CompanyGroupDefinitionResponse {
   private String formflowApiUrl;
   private String formflowApiVersion;
   private Boolean formflowEnabled;
-  private String environment;
+  private List<String> mailDomains;
 }

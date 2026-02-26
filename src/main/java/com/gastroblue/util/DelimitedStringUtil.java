@@ -1,9 +1,6 @@
 package com.gastroblue.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -28,6 +25,16 @@ public final class DelimitedStringUtil {
         .map(String::trim)
         .filter(s -> !s.isEmpty())
         .collect(toUnmodifiableList());
+  }
+
+  public static String join(Map<String, Object> params) {
+    if (params == null || params.isEmpty()) {
+      return "";
+    }
+
+    return params.entrySet().stream()
+        .map(e -> e.getKey() + ":" + e.getValue())
+        .collect(Collectors.joining(System.lineSeparator()));
   }
 
   public static String join(Collection<?> items) {

@@ -12,7 +12,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
   @Override
   public @NonNull Optional<String> getCurrentAuditor() {
     return Optional.ofNullable(IJwtService.findSessionUser())
-        .map(SessionUser::getSessionUsername)
+        .map(SessionUser::username)
         .filter(username -> !username.isBlank())
         .or(() -> Optional.of(ANONYMOUS_USER));
   }

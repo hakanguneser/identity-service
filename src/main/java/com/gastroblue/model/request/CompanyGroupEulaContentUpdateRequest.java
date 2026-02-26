@@ -1,11 +1,11 @@
 package com.gastroblue.model.request;
 
 import com.gastroblue.model.enums.Language;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record CompanyGroupEulaContentUpdateRequest(
     String eulaVersion,
     Language language,
     String content,
-    LocalDateTime startDate,
-    LocalDateTime endDate) {}
+    LocalDate startDate,
+    LocalDate endDate) {}

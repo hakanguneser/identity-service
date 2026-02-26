@@ -18,13 +18,13 @@ public class CompanyDefinitionResponse {
   private String companyCode;
   private String companyName;
   private List<String> companyMail;
-  private ResolvedEnum<Country> country;
-  private ResolvedEnum<City> city;
-  private ResolvedEnum<Zone> zone;
-  private ResolvedEnum<CompanySegment1Values> segment1;
-  private ResolvedEnum<CompanySegment2Values> segment2;
-  private ResolvedEnum<CompanySegment3Values> segment3;
-  private ResolvedEnum<CompanySegment4Values> segment4;
-  private ResolvedEnum<CompanySegment5Values> segment5;
+  private ResolvedEnum country;
+  private ResolvedEnum city;
+  private ResolvedEnum zone;
+  private ResolvedEnum segment1;
+  private ResolvedEnum segment2;
+  private ResolvedEnum segment3;
+  private ResolvedEnum segment4;
+  private ResolvedEnum segment5;
   private Boolean isActive;
 }

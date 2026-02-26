@@ -1,6 +1,8 @@
 package com.gastroblue.config;
 
+import com.gastroblue.model.enums.ApplicationRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -15,22 +17,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final AuthenticationProvider authenticationProvider;
 
+  @Value("${app.swagger.enabled}")
+  private boolean swaggerEnabled;
+
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) {
 
     http.csrf(AbstractHttpConfigurer::disable)
-        /*.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/v1/auth/authenticate/**").permitAll()
-                .requestMatchers("/api/v1/auth/register/byManager/**").hasAnyAuthority(UserRole.MANAGER.name())
-                .requestMatchers("/api/v1/auth/register/byAdmin/**").hasAnyAuthority(UserRole.ADMIN.name())
-                .requestMatchers("/api/v1/user/**").permitAll()
-                .requestMatchers("/api/v1/company/**").hasAnyAuthority(UserRole.EMPLOYEE.name())
-                .anyRequest().authenticated()
-        )*/
-        .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+        .authorizeHttpRequests(
+            authorize -> {
+
+              // 🔓 Public endpoints
+              authorize
+                  .requestMatchers(
+                      "/api/v1/auth/login", "/api/v1/auth/refresh", "/actuator/health/**")
+                  .permitAll();
+
+              // 📘 Swagger (env controlled)
+              if (swaggerEnabled) {
+                authorize
+                    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+                    .permitAll();
+              }
+              // 🔐 ADMIN only
+              authorize
+                  .requestMatchers(
+                      "/api/v1/definition/company-groups", "/api/v1/definition/company-groups/**")
+                  .hasAnyRole(
+                      ApplicationRole.ADMIN.name(),
+                      ApplicationRole.GROUP_MANAGER.name(),
+                      ApplicationRole.ZONE_MANAGER.name());
+
+              // 🔒 Everything else
+              authorize.anyRequest().authenticated();
+            })
         .sessionManagement(
             sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
