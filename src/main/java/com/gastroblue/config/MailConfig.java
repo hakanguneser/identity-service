@@ -49,7 +49,6 @@ public class MailConfig {
     sender.setPort(props.getSmtp().getPort());
     sender.setUsername(props.getSmtp().getUsername());
     sender.setPassword(props.getSmtp().getPassword());
-    System.out.println(props.getSmtp().toString());
     Properties javaMailProps = sender.getJavaMailProperties();
     javaMailProps.put("mail.transport.protocol", "smtp");
     javaMailProps.put("mail.smtp.auth", "true");
