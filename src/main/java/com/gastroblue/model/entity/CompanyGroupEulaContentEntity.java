@@ -1,9 +1,10 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Language;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.*;
 
 @Setter
@@ -14,28 +15,39 @@ import lombok.*;
 @Builder
 @Entity
 @Table(
-    name = "company_group_eula_content",
+    name = "COMPANY_GROUP_EULA_CONTENT",
     indexes = {
       @Index(
-          name = "idx_cg_eula_active_range",
-          columnList = "company_group_id, language, start_date, end_date")
+          name = "İDX_CG_EULA_ACTİVE_RANGE",
+          columnList = "COMPANY_GROUP_ID,PRODUCT, LANGUAGE, START_DATE, END_DATE")
+    },
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "UK_CG_EULA_CONTENT",
+          columnNames = {"COMPANY_GROUP_ID", "PRODUCT"})
     })
 public class CompanyGroupEulaContentEntity extends Auditable {
-  @Column(name = "company_group_id", nullable = false, length = 36)
+
+  @Column(name = "COMPANY_GROUP_ID", length = 36)
   private String companyGroupId;
 
-  @Column(nullable = false, length = 36)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "PRODUCT", nullable = false, length = 36)
+  private ApplicationProduct product;
+
+  @Column(name = "EULA_VERSION", nullable = false, length = 36)
   private String eulaVersion;
 
-  @Column(nullable = false, length = 5)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "LANGUAGE", nullable = false, length = 5)
   private Language language;
 
-  @Column(nullable = false)
+  @Column(name = "CONTENT", nullable = false, columnDefinition = "TEXT")
   private String content;
 
-  @Column(name = "start_date", nullable = false)
-  private LocalDateTime startDate;
+  @Column(name = "START_DATE", nullable = false)
+  private LocalDate startDate;
 
-  @Column(name = "end_date")
-  private LocalDateTime endDate;
+  @Column(name = "END_DATE")
+  private LocalDate endDate;
 }

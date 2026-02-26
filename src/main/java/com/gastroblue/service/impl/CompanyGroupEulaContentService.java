@@ -2,16 +2,15 @@ package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupEulaContentMapper;
+import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.repository.CompanyGroupEulaContentRepository;
 import com.gastroblue.service.IJwtService;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -101,37 +100,18 @@ public class CompanyGroupEulaContentService {
           ErrorCode.EULA_CONTENT_NOT_FOUND,
           "EULA Content does not belong to the specified Company Group");
     }
-
     eulaContentRepository.delete(entity);
   }
 
-  public String getActiveEulaContent(String companyGroupId) {
-
-    Language language = IJwtService.getSessionLanguage();
-    LocalDateTime now = LocalDateTime.now();
-
-    return findActiveContent(companyGroupId, language, now)
-        .or(() -> findActiveContent(null, language, now))
-        .orElseGet(() -> createAndReturnDefault(language, now))
+  public String getActiveEulaContent(final String companyGroupId) {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    return eulaContentRepository
+        .findActiveContent(
+            companyGroupId,
+            sessionUser.getApplicationProduct(),
+            sessionUser.getLanguage(),
+            LocalDate.now())
+        .orElseThrow()
         .getContent();
-  }
-
-  private Optional<CompanyGroupEulaContentEntity> findActiveContent(
-      String companyGroupId, Language language, LocalDateTime now) {
-    return eulaContentRepository.findActiveContent(companyGroupId, language, now);
-  }
-
-  private CompanyGroupEulaContentEntity createAndReturnDefault(
-      Language language, LocalDateTime now) {
-    CompanyGroupEulaContentEntity entity =
-        CompanyGroupEulaContentEntity.builder()
-            .companyGroupId(null)
-            .eulaVersion("v1.0")
-            .language(language)
-            .content(String.format("Default EULA Content [%s]", language.name()))
-            .startDate(now)
-            .build();
-
-    return eulaContentRepository.save(entity);
   }
 }

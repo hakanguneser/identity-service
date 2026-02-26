@@ -1,5 +1,6 @@
 package com.gastroblue.model.base;
 
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.Language;
 import java.util.Collection;
@@ -28,6 +29,10 @@ public record SessionUser(
 
   public ApplicationRole getApplicationRole() {
     return ApplicationRole.fromString(applicationRole);
+  }
+
+  public ApplicationProduct getApplicationProduct() {
+    return ApplicationProduct.fromString(applicationProduct);
   }
 
   public String getCompanyId() {

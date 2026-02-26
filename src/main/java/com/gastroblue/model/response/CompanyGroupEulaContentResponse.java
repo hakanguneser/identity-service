@@ -1,6 +1,7 @@
 package com.gastroblue.model.response;
 
 import com.gastroblue.model.enums.Language;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,8 +16,8 @@ public class CompanyGroupEulaContentResponse {
   private String eulaVersion;
   private Language language;
   private String content;
-  private LocalDateTime startDate;
-  private LocalDateTime endDate;
+  private LocalDate startDate;
+  private LocalDate endDate;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 }
