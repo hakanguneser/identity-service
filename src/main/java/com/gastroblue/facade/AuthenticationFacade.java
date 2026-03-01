@@ -51,7 +51,7 @@ public class AuthenticationFacade {
   private Long jwtRefreshTokenValidityDays;
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
-    log.debug("Login request: {}", loginRequest.toString());
+    log.info("Login request: {}", loginRequest.toString());
     Authentication authentication;
     UserEntity userEntity = null;
     try {

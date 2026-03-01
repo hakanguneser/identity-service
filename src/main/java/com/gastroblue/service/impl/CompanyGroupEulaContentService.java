@@ -103,7 +103,7 @@ public class CompanyGroupEulaContentService {
   }
 
   public String getActiveEulaContent(final SessionUser sessionUser) {
-    log.debug("SessionUser when get Active Eula: {}", sessionUser.toString());
+    log.info("SessionUser when get Active Eula: {}", sessionUser.toString());
     return eulaContentRepository
         .findActiveContent(
             sessionUser.companyGroupId(),
