@@ -8,7 +8,6 @@ import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.repository.CompanyGroupEulaContentRepository;
-import com.gastroblue.service.IJwtService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -103,11 +102,11 @@ public class CompanyGroupEulaContentService {
     eulaContentRepository.delete(entity);
   }
 
-  public String getActiveEulaContent(final String companyGroupId) {
-    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+  public String getActiveEulaContent(final SessionUser sessionUser) {
+    System.out.println(sessionUser.toString());
     return eulaContentRepository
         .findActiveContent(
-            companyGroupId,
+            sessionUser.companyGroupId(),
             sessionUser.getApplicationProduct(),
             sessionUser.getLanguage(),
             LocalDate.now())

@@ -154,8 +154,7 @@ public class AuthenticationFacade {
 
   public EulaResponse getEula() {
     String activeEulaContent =
-        eulaContentService.getActiveEulaContent(
-            IJwtService.findSessionUserOrThrow().companyGroupId());
+        eulaContentService.getActiveEulaContent(IJwtService.findSessionUserOrThrow());
     return new EulaResponse(activeEulaContent);
   }
 
