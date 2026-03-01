@@ -18,6 +18,7 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +84,9 @@ public class AuthenticationFacade {
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
+        .eulaRequired(
+            userEntity.getEulaAcceptedAt() == null
+                || userEntity.getEulaAcceptedAt().isBefore(LocalDateTime.now()))
         .apiInfo(apiInfo)
         .build();
   }
