@@ -46,7 +46,7 @@ public class UserDefinitionService {
                     ErrorCode.USER_NOT_FOUND, String.format("User not found (userId=%s)", userId)));
   }
 
-  public UserEntity findUserEntityByUserName(final String username) {
+  public UserEntity findUserByUserName(final String username) {
     return userRepository
         .findByUsername(username.toLowerCase(Locale.ENGLISH))
         .orElseThrow(
@@ -80,7 +80,7 @@ public class UserDefinitionService {
   }
 
   public void signEula(String username) {
-    UserEntity entityToBeUpdated = findUserEntityByUserName(username);
+    UserEntity entityToBeUpdated = findUserByUserName(username);
     entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
     userRepository.save(entityToBeUpdated);
   }

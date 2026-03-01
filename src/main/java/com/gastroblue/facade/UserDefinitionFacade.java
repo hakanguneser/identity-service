@@ -176,7 +176,7 @@ public class UserDefinitionFacade {
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
     boolean isAuthorized;
     String username = IJwtService.findSessionUserOrThrow().username();
-    UserEntity sessionUser = userService.findUserEntityByUserName(username);
+    UserEntity sessionUser = userService.findUserByUserName(username);
     if (sessionUser == null) {
       if (!adminRegistrationEnabled) {
         throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
@@ -242,7 +242,7 @@ public class UserDefinitionFacade {
 
   public void sendOtp(final String userId) {
     UserEntity managerUser =
-        userService.findUserEntityByUserName(IJwtService.findSessionUserOrThrow().username());
+        userService.findUserByUserName(IJwtService.findSessionUserOrThrow().username());
     UserEntity userEntity = userService.findById(userId);
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
@@ -269,8 +269,9 @@ public class UserDefinitionFacade {
         RESET_PASSWORD, userEntity, managerUser, generatedPassword, companyGroupName, companyName);
   }
 
-  public void changePassword(final String userId, final PasswordChangeRequest request) {
-    UserEntity userEntity = userService.findById(userId);
+  public void changePassword(final PasswordChangeRequest request) {
+    UserEntity userEntity =
+        userService.findUserByUserName(IJwtService.findSessionUserOrThrow().username());
 
     if (userEntity == null
         || !passwordEncoder.matches(request.oldPassword(), userEntity.getPassword())) {

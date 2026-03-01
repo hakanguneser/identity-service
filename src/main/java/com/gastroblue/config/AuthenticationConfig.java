@@ -20,7 +20,7 @@ public class AuthenticationConfig {
 
   @Bean
   public UserDetailsService userDetailsService() {
-    return userService::findUserEntityByUserName;
+    return userService::findUserByUserName;
   }
 
   @Bean
