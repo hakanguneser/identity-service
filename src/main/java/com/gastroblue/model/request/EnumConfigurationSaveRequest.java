@@ -12,4 +12,5 @@ public record EnumConfigurationSaveRequest(
     @NotBlank String enumKey,
     @NotNull Language language,
     @NotBlank String label,
-    boolean active) {}
+    boolean active,
+    Integer displayOrder) {}

@@ -17,7 +17,7 @@ public class ErrorMessageService {
 
   private final ErrorMessageEntityRepository repository;
 
-  @Cacheable(value = "appProperties", key = "#errorCode.name() + '_' + #language.name()")
+  @Cacheable(value = "errorMessages", key = "#errorCode.name() + '_' + #language.name()")
   public ErrorMessageEntity findOrCreatePropertyValue(ErrorCode errorCode, Language language) {
     log.info("Resolving code {} for locale {}", errorCode, language.name());
     return repository

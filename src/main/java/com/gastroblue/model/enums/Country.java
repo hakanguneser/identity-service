@@ -1,8 +1,8 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.model.base.DefaultConfigurableEnum;
+import com.gastroblue.model.base.ConfigurableEnum;
 
-public enum Country implements DefaultConfigurableEnum {
+public enum Country implements ConfigurableEnum {
   TURKEY,
   GERMANY
 }

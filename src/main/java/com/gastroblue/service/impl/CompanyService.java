@@ -1,13 +1,11 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
-import com.gastroblue.mapper.CompanyGroupMapper;
-import com.gastroblue.model.base.Company;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.Zone;
 import com.gastroblue.repository.CompanyRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,20 +17,12 @@ public class CompanyService {
 
   private final CompanyRepository companyRepository;
 
-  public Company findByBaseId(String id) {
-    return companyRepository
-        .findById(id)
-        .map(CompanyGroupMapper::toBase)
-        .orElseThrow(
-            () ->
-                new IllegalDefinitionException(
-                    ErrorCode.COMPANY_NOT_FOUND,
-                    String.format("Company not found (companyId=%s)", id)));
+  public List<CompanyEntity> findByBaseIdIn(List<String> idList) {
+    return companyRepository.findByIdIn(idList);
   }
 
-  public CompanyEntity findOrThrow(String id) {
-    return companyRepository
-        .findById(id)
+  public CompanyEntity findByIdOrThrow(String id) {
+    return findById(id)
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
@@ -44,8 +34,8 @@ public class CompanyService {
     return companyRepository.findByCompanyGroupId(companyGroupId);
   }
 
-  public List<CompanyEntity> findByCompanyGroupIdAndZone(String companyGroupId, Zone zone) {
-    return companyRepository.findByCompanyGroupIdAndZone(companyGroupId, zone);
+  public List<CompanyEntity> findAll() {
+    return companyRepository.findAll();
   }
 
   public CompanyEntity save(CompanyEntity companyEntity) {
@@ -53,8 +43,7 @@ public class CompanyService {
   }
 
   public CompanyEntity findByCompanyGroupIdAndId(String companyGroupId, String companyId) {
-    return companyRepository
-        .findById(companyId)
+    return findById(companyId)
         .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
         .orElseThrow(
             () ->
@@ -67,8 +56,7 @@ public class CompanyService {
 
   public CompanyEntity toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity entity =
-        companyRepository
-            .findById(companyId)
+        findById(companyId)
             .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
             .orElseThrow(
                 () ->
@@ -82,7 +70,11 @@ public class CompanyService {
     return companyRepository.save(entity);
   }
 
-  public java.util.Optional<CompanyEntity> findByCompanyCode(String companyCode) {
+  public Optional<CompanyEntity> findById(String companyId) {
+    return companyRepository.findById(companyId);
+  }
+
+  public Optional<CompanyEntity> findByCompanyCode(String companyCode) {
     return companyRepository.findByCompanyCode(companyCode);
   }
 }

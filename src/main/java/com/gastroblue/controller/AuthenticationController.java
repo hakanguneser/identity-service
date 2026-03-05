@@ -26,7 +26,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<AuthLoginResponse> refresh(
+  public ResponseEntity<AuthRefreshTokenResponse> refresh(
       @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
     return ResponseEntity.ok(authenticationFacade.refreshToken(refreshTokenRequest));
   }
@@ -51,9 +51,9 @@ public class AuthenticationController {
     return ResponseEntity.ok(authenticationFacade.getEula());
   }
 
-  @PatchMapping("/agreement")
-  public ResponseEntity<Void> signAgreement() {
-    authenticationFacade.signAgreement();
+  @PatchMapping("/eula")
+  public ResponseEntity<Void> signEula() {
+    authenticationFacade.signEula();
     return ResponseEntity.noContent().build();
   }
 }

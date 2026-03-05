@@ -15,4 +15,15 @@ public enum Zone implements ConfigurableEnum {
   ZONE_8,
   ZONE_9,
   ZONE_10;
+
+  public static Zone fromString(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+    try {
+      return Zone.valueOf(value.trim().toUpperCase());
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
+  }
 }

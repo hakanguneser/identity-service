@@ -2,6 +2,7 @@ package com.gastroblue.service.impl;
 
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
+import com.gastroblue.exception.DefinitionNotFoundException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
@@ -13,6 +14,7 @@ import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
 import com.gastroblue.service.IJwtService;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,11 +26,9 @@ public class CompanyGroupService {
 
   private final CompanyGroupRepository companyGroupRepository;
 
-  public static final String DEFAULT_COMPANY_GROUP_ID = "*";
-
-  public CompanyGroupEntity save(final CompanyGroupSaveRequest companyGroupRequest) {
-    CompanyGroupEntity entityToBeSave = CompanyGroupMapper.toEntity(companyGroupRequest);
-    return companyGroupRepository.save(entityToBeSave);
+  public CompanyGroupEntity save(CompanyGroupSaveRequest request) {
+    CompanyGroupEntity entity = CompanyGroupMapper.toEntity(request);
+    return companyGroupRepository.save(entity);
   }
 
   public CompanyGroupEntity update(String companyGroupId, CompanyGroupUpdateRequest request) {
@@ -38,23 +38,22 @@ public class CompanyGroupService {
             .orElseThrow(
                 () -> {
                   log.debug("Company Group not found for update with id: {}", companyGroupId);
-                  return new IllegalDefinitionException(
-                      ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
+                  return new DefinitionNotFoundException(ErrorCode.COMPANY_GROUP_NOT_FOUND);
                 });
     entityToBeUpdate.setName(request.name());
-    entityToBeUpdate.setGroupCode(request.groupCode());
     entityToBeUpdate.setGroupMail(join(request.groupMails()));
     entityToBeUpdate.setLogoUrl(request.logoUrl());
-    entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
-    entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
     if (request.thermometerTrackerEnabled() != null) {
       entityToBeUpdate.setThermometerTrackerEnabled(request.thermometerTrackerEnabled());
+      entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
+      entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
     }
-    entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
-    entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
     if (request.formflowEnabled() != null) {
       entityToBeUpdate.setFormflowEnabled(request.formflowEnabled());
+      entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
+      entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
     }
+    entityToBeUpdate.setMailDomains(join(request.mailDomains()));
     return companyGroupRepository.save(entityToBeUpdate);
   }
 
@@ -77,7 +76,7 @@ public class CompanyGroupService {
 
   public List<CompanyGroupEntity> findMyCompanyGroups() {
     SessionUser user = IJwtService.findSessionUserOrThrow();
-    return switch (user.applicationRole()) {
+    return switch (user.getApplicationRole()) {
       case ADMIN -> findAll();
       case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR ->
           List.of(findByIdOrThrow(user.companyGroupId()));
@@ -85,7 +84,7 @@ public class CompanyGroupService {
     };
   }
 
-  public CompanyGroup findById(String companyGroupId) {
+  public CompanyGroup findCompanyByIdOrThrow(String companyGroupId) {
     return companyGroupRepository
         .findById(companyGroupId)
         .map(CompanyGroupMapper::toBase)
@@ -106,5 +105,9 @@ public class CompanyGroupService {
               return new IllegalDefinitionException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Group not found: " + groupCode);
             });
+  }
+
+  public Optional<CompanyGroupEntity> findById(String companyGroupId) {
+    return companyGroupRepository.findById(companyGroupId);
   }
 }

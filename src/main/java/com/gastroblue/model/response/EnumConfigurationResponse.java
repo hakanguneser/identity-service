@@ -11,4 +11,5 @@ public record EnumConfigurationResponse(
     String enumKey,
     Language language,
     String label,
-    boolean active) {}
+    boolean active,
+    Integer displayOrder) {}

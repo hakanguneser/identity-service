@@ -12,5 +12,7 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, String> 
 
   List<CompanyEntity> findByCompanyGroupId(String companyGroupId);
 
+  List<CompanyEntity> findByIdIn(List<String> companyIdList);
+
   List<CompanyEntity> findByCompanyGroupIdAndZone(String companyGroupId, Zone zone);
 }

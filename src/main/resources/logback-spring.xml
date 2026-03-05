@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!--
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │  logback-spring.xml — identity-service                                  │
+    │                                                                          │
+    │  Two appenders:                                                          │
+    │    CONSOLE_PLAIN  — human-readable, always active                        │
+    │    CONSOLE_JSON   — structured JSON for ELK/OpenSearch, test profile     │
+    │                                                                          │
+    │  The MDC key "traceId" (set by RequestTracingFilter) is automatically    │
+    │  included in every log line via %X{traceId} in the pattern and           │
+    │  via the MDC map in the JSON encoder.                                    │
+    └─────────────────────────────────────────────────────────────────────────┘
+  -->
+
+  <property name="LOG_PATTERN"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-NO_TRACE}] %-5level %logger{40} - %msg%n"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       APPENDER: plain console (active on all profiles)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <appender name="CONSOLE_PLAIN" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       APPENDER: structured JSON console (active on "test" profile only)
+       Uses Logback's built-in JsonEncoder (logback-classic 1.5+, ships  
+       with Spring Boot 4.x — no extra logstash dependency required).    
+       All MDC keys including "traceId" are emitted under the "mdc" node.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <springProfile name="test">
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="ch.qos.logback.classic.encoder.JsonEncoder"/>
+    </appender>
+  </springProfile>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       ROOT LOGGER
+       default: INFO (overridden per-profile in application-*.yml)
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Non-test: plain console only -->
+  <springProfile name="!test">
+    <root level="INFO">
+      <appender-ref ref="CONSOLE_PLAIN"/>
+    </root>
+  </springProfile>
+
+  <!-- Test: both plain (readable in IDE) + JSON (parseable by ELK) -->
+  <springProfile name="test">
+    <root level="INFO">
+      <appender-ref ref="CONSOLE_PLAIN"/>
+      <appender-ref ref="CONSOLE_JSON"/>
+    </root>
+  </springProfile>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PER-LOGGER OVERRIDES
+       Fine-grained levels are intentionally kept minimal here and left   
+       to application-{profile}.yml so ops can adjust without a rebuild.  
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Silence chatty Hibernate DDL / startup banners at INFO -->
+  <logger name="org.hibernate.engine.jdbc.env" level="WARN"/>
+  <logger name="org.hibernate.orm.connections.pooling" level="WARN"/>
+
+</configuration>
