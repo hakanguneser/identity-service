@@ -25,7 +25,7 @@ public class SecurityConfig {
   private boolean swaggerEnabled;
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
@@ -45,12 +45,17 @@ public class SecurityConfig {
               }
               // 🔐 ADMIN only
               authorize
-                  .requestMatchers(
-                      "/api/v1/definition/company-groups", "/api/v1/definition/company-groups/**")
+                  .requestMatchers("/api/v1/definition/company-groups/**")
                   .hasAnyRole(
                       ApplicationRole.ADMIN.name(),
+                      ApplicationRole.APP_CLIENT.name(),
                       ApplicationRole.GROUP_MANAGER.name(),
                       ApplicationRole.ZONE_MANAGER.name());
+
+              // 🔐 APP_CLIENT only
+              authorize
+                  .requestMatchers("/api/v1/definition/company-groups/context")
+                  .hasAnyRole(ApplicationRole.APP_CLIENT.name());
 
               // 🔒 Everything else
               authorize.anyRequest().authenticated();
