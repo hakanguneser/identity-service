@@ -21,7 +21,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Table(
     name = "USERS",
     uniqueConstraints = {@UniqueConstraint(name = "UK_USERS", columnNames = "USERNAME")},
-    indexes = {@Index(name = "IDX_USERS", columnList = "USERNAME")})
+    indexes = {
+        @Index(name = "IDX_USERS", columnList = "USERNAME"),
+        @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")})
 public class UserEntity extends Auditable implements UserDetails {
 
   @Column(name = "COMPANY_ID", length = 36)
