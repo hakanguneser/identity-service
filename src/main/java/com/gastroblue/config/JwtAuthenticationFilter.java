@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (jwtToken.equals(ttToken)) {
           sessionUser =
               new SessionUser(
-                  ApplicationProduct.THERMOMETER_TRACKER.name(),
+                  ApplicationProduct.TRACKER.name(),
                   ApplicationRole.APP_CLIENT.name(),
                   List.of(),
                   null,

@@ -1,7 +1,7 @@
 package com.gastroblue.facade;
 
 import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
-import static com.gastroblue.model.enums.ApplicationProduct.THERMOMETER_TRACKER;
+import static com.gastroblue.model.enums.ApplicationProduct.TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
@@ -166,9 +166,9 @@ public class AuthenticationFacade {
     CompanyGroup companyGroup =
         companyGroupService.findCompanyByIdOrThrow(userEntity.getCompanyGroupId());
     return switch (product) {
-      case THERMOMETER_TRACKER ->
+      case TRACKER ->
           buildApiInfo(
-              THERMOMETER_TRACKER,
+              TRACKER,
               companyGroup.isThermometerTrackerEnabled(),
               companyGroup.getThermometerTrackerApiUrl(),
               companyGroup.getThermometerTrackerApiVersion());
@@ -188,7 +188,7 @@ public class AuthenticationFacade {
       switch (product) {
         case FORMFLOW:
           throw new AccessDeniedException(ErrorCode.FORMFLOW_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
-        case THERMOMETER_TRACKER:
+        case TRACKER:
           throw new AccessDeniedException(
               ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
         default:

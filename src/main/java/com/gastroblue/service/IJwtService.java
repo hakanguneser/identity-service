@@ -44,8 +44,7 @@ public interface IJwtService {
     extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
     extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
     extraClaims.put(JWT_COMPANY_IDS, companyIds);
-    // extraClaims.put(JWT_APPLICATION_PRODUCT, product);
-    extraClaims.put(JWT_APPLICATION_PRODUCT, ApplicationProduct.THERMOMETER_TRACKER);
+    extraClaims.put(JWT_APPLICATION_PRODUCT, product);
     extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
     extraClaims.put(
         JWT_DEPARTMENTS, splitToEnumList(userEntity.getDepartments(), Department.class));
