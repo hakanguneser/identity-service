@@ -67,5 +67,4 @@ public class EnumConfigurationFacade {
         .active(entity.isActive())
         .build();
   }
-
 }

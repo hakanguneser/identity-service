@@ -33,5 +33,4 @@ public class CompanyGroupEntity extends Auditable {
 
   @Column(name = "MAIL_DOMAINS")
   private String mailDomains;
-
 }

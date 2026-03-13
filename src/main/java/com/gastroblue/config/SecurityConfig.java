@@ -46,7 +46,10 @@ public class SecurityConfig {
               // 🔐 ADMIN / APP_CLIENT only
               authorize
                   .requestMatchers("/api/v1/definition/company-groups/**")
-                  .hasAnyRole(SystemRole.ADMIN.name(), SystemRole.APP_CLIENT.name(), SystemRole.USER.name());
+                  .hasAnyRole(
+                      SystemRole.ADMIN.name(),
+                      SystemRole.APP_CLIENT.name(),
+                      SystemRole.USER.name());
 
               // 🔐 APP_CLIENT only
               authorize

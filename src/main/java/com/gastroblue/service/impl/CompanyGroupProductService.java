@@ -38,7 +38,9 @@ public class CompanyGroupProductService {
         .orElseThrow(
             () -> {
               log.debug(
-                  "CompanyGroupProduct not found for groupId={} product={}", companyGroupId, product);
+                  "CompanyGroupProduct not found for groupId={} product={}",
+                  companyGroupId,
+                  product);
               return new IllegalDefinitionException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Product not defined for company group");
             });

@@ -54,10 +54,9 @@ public class AuthenticationFacade {
 
   public AuthLoginResponse login(AuthLoginRequest loginRequest) {
     log.info("Login request: {}", loginRequest.toString());
-    Authentication authentication;
-    UserEntity userEntity = null;
+    UserEntity userEntity;
     try {
-      authentication =
+      Authentication authentication =
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(
                   loginRequest.username(), loginRequest.password()));
@@ -65,10 +64,8 @@ public class AuthenticationFacade {
     } catch (BadCredentialsException e) {
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     } catch (RuntimeException e) {
-      log.error("Authentication failed: {}", e.getMessage());
-    }
-    if (userEntity == null) {
-      throw new BadCredentialsException("User not found");
+      log.error("Authentication failed unexpectedly: {}", e.getMessage(), e);
+      throw e;
     }
 
     UserProductEntity userProduct =
@@ -78,7 +75,8 @@ public class AuthenticationFacade {
                 .orElse(null)
             : null;
 
-    userService.updateLoginStats(userEntity.getUsername(), userEntity.getId(), loginRequest.product());
+    userService.updateLoginStats(
+        userEntity.getUsername(), userEntity.getId(), loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
     HashMap<String, Object> extraClaims =
         IJwtService.toExtraClaims(

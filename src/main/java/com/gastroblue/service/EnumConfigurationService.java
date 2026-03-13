@@ -48,8 +48,7 @@ public class EnumConfigurationService {
 
     return merged.values().stream()
         .filter(EnumValueConfigurationEntity::isActive)
-        .sorted(
-            Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
+        .sorted(Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
         .map(
             e ->
                 ResolvedEnum.builder()

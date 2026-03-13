@@ -44,8 +44,7 @@ public class UserDefinitionService {
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
-                    ErrorCode.USER_NOT_FOUND,
-                    String.format("User not found (userId=%s)", userId)));
+                    ErrorCode.USER_NOT_FOUND, String.format("User not found (userId=%s)", userId)));
   }
 
   public UserEntity findUserByUserName(final String username) {

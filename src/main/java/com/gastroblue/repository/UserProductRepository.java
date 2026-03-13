@@ -16,7 +16,8 @@ public interface UserProductRepository extends JpaRepository<UserProductEntity, 
 
   Optional<UserProductEntity> findByUserIdAndProduct(String userId, ApplicationProduct product);
 
-  List<UserProductEntity> findByUserIdInAndProduct(List<String> userIds, ApplicationProduct product);
+  List<UserProductEntity> findByUserIdInAndProduct(
+      List<String> userIds, ApplicationProduct product);
 
   @Modifying
   @Query(

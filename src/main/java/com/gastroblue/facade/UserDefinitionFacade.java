@@ -314,7 +314,13 @@ public class UserDefinitionFacade {
               .orElse("");
     }
     notifyNewPassword(
-        RESET_PASSWORD, userEntity, null, managerUser, generatedPassword, companyGroupName, companyName);
+        RESET_PASSWORD,
+        userEntity,
+        null,
+        managerUser,
+        generatedPassword,
+        companyGroupName,
+        companyName);
   }
 
   public void changePassword(final PasswordChangeRequest request) {

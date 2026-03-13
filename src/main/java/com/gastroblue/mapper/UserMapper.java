@@ -59,9 +59,7 @@ public class UserMapper {
             : Collections.emptyList();
 
     List<ResolvedEnum> resolvedDepartmentList =
-        departmentList.stream()
-            .map(d -> resolve(facade, d, entity.getCompanyGroupId()))
-            .toList();
+        departmentList.stream().map(d -> resolve(facade, d, entity.getCompanyGroupId())).toList();
 
     return UserDefinitionResponse.builder()
         .userId(entity.getId())
