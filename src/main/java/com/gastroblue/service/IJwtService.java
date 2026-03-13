@@ -1,64 +1,77 @@
 package com.gastroblue.service;
 
+import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
+
 import com.gastroblue.exception.AccessDeniedException;
-import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
-import io.jsonwebtoken.Claims;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IJwtService {
   String ANONYMOUS_USER = "anonymousUser";
 
-  String extractUsername(String token);
+  String JWT_ROLE = "role";
+  String JWT_COMPANY_GROUP_ID = "cgId";
+  String JWT_LANGUAGE = "lang";
+  String JWT_COMPANY_IDS = "cIds";
+  String JWT_APPLICATION_PRODUCT = "aud";
+  String JWT_DEPARTMENTS = "dpts";
 
-  <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
+  String generateToken(String username, HashMap<String, Object> extraClaims, long expiration);
 
-  String generateToken(UserDetails userDetails, HashMap<String, Object> extraClaims);
+  SessionUser validateAndExtractToken(String token) throws AccessDeniedException;
 
-  String generateToken(Map<String, Object> extraClaims, UserDetails userDetails);
+  static HashMap<String, Object> toExtraClaims(SessionUser sessionUser) {
+    HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(JWT_COMPANY_GROUP_ID, sessionUser.companyGroupId());
+    extraClaims.put(JWT_ROLE, sessionUser.getApplicationRole());
+    extraClaims.put(JWT_COMPANY_IDS, sessionUser.companyIds());
+    extraClaims.put(JWT_APPLICATION_PRODUCT, sessionUser.applicationProduct());
+    extraClaims.put(JWT_LANGUAGE, sessionUser.language());
+    extraClaims.put(JWT_DEPARTMENTS, sessionUser.departments());
+    return extraClaims;
+  }
 
-  String generateRefreshToken(UserDetails userDetails);
+  static HashMap<String, Object> toExtraClaims(
+      UserEntity userEntity, ApplicationProduct product, List<String> companyIds) {
+    HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
+    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
+    extraClaims.put(JWT_COMPANY_IDS, companyIds);
+    extraClaims.put(JWT_APPLICATION_PRODUCT, product);
+    extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
+    extraClaims.put(
+        JWT_DEPARTMENTS, splitToEnumList(userEntity.getDepartments(), Department.class));
+    return extraClaims;
+  }
 
-  boolean isTokenValid(String token, UserDetails userDetails);
-
-  boolean isTokenExpired(String token);
-
-  static UserEntity findUser() {
+  static SessionUser findSessionUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null
         || authentication.getPrincipal() == null
         || Objects.equals(authentication.getPrincipal(), ANONYMOUS_USER)) {
       return null;
     }
-    return (UserEntity) authentication.getPrincipal();
-  }
-
-  static SessionUser findSessionUser() {
-    UserEntity sessionUser = findUser();
-    return UserMapper.toSessionUser(sessionUser);
+    return (SessionUser) authentication.getPrincipal();
   }
 
   static SessionUser findSessionUserOrThrow() {
-    UserEntity sessionUser = findUser();
+    SessionUser sessionUser = findSessionUser();
     if (sessionUser == null) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
-    return UserMapper.toSessionUser(sessionUser);
+    return sessionUser;
   }
 
   static Language getSessionLanguage() {
-    return Optional.ofNullable(findUser())
-        .map(UserEntity::getLanguage)
+    return Optional.ofNullable(findSessionUser())
+        .map(SessionUser::getLanguage)
         .orElse(Language.defaultLang());
   }
 }

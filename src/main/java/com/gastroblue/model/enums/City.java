@@ -3,11 +3,11 @@ package com.gastroblue.model.enums;
 import static com.gastroblue.model.enums.Country.GERMANY;
 import static com.gastroblue.model.enums.Country.TURKEY;
 
-import com.gastroblue.model.base.DefaultConfigurableEnum;
+import com.gastroblue.model.base.ConfigurableEnum;
 import java.util.Arrays;
 import java.util.List;
 
-public enum City implements DefaultConfigurableEnum {
+public enum City implements ConfigurableEnum {
   ADANA(TURKEY),
   ADIYAMAN(TURKEY),
   AFYONKARAHISAR(TURKEY),

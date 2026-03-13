@@ -14,6 +14,7 @@ import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
 import com.gastroblue.model.response.AuthUserCompanyResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.util.DelimitedStringUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -35,6 +36,7 @@ public class CompanyGroupMapper {
         .formflowApiUrl(request.formflowApiUrl())
         .formflowApiVersion(request.formflowApiVersion())
         .formflowEnabled(request.formflowEnabled() != null ? request.formflowEnabled() : false)
+        .mailDomains(DelimitedStringUtil.join(request.mailDomains()))
         .build();
   }
 
@@ -51,6 +53,7 @@ public class CompanyGroupMapper {
         .formflowApiUrl(entity.getFormflowApiUrl())
         .formflowApiVersion(entity.getFormflowApiVersion())
         .formflowEnabled(entity.getFormflowEnabled())
+        .mailDomains(split(entity.getMailDomains()))
         .build();
   }
 

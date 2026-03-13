@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApplicationError {
   private String errorMessage;
   private String debugContext;
@@ -17,7 +18,6 @@ public class ApplicationError {
   private String referenceId;
   private HttpStatus httpStatus;
   private LocalDateTime timeStamp;
-
-  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String traceId;
   private List<ValidationError> errorDetails;
 }

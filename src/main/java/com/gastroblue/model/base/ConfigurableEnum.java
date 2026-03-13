@@ -1,9 +1,13 @@
 package com.gastroblue.model.base;
 
-public interface ConfigurableEnum extends DefaultConfigurableEnum {
+import com.gastroblue.facade.EnumConfigurationFacade;
+import com.gastroblue.model.shared.ResolvedEnum;
 
-  @Override
-  default boolean isDefault() {
-    return false;
+public interface ConfigurableEnum {
+  String name();
+
+  default <T extends ConfigurableEnum> ResolvedEnum resolve(
+      EnumConfigurationFacade facade, String companyGroupId) {
+    return facade.resolve((T) this, companyGroupId);
   }
 }

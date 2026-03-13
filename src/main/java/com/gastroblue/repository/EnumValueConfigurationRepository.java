@@ -14,6 +14,9 @@ public interface EnumValueConfigurationRepository
   List<EnumValueConfigurationEntity> findByCompanyGroupIdAndEnumTypeAndLanguage(
       String companyGroupId, String enumType, Language language);
 
+  List<EnumValueConfigurationEntity> findByEnumTypeAndCompanyGroupIdAndLanguage(
+      String enumType, String companyGroupId, Language language);
+
   List<EnumValueConfigurationEntity> findByCompanyGroupId(String companyGroupId);
 
   Optional<EnumValueConfigurationEntity> findByIdAndCompanyGroupId(
