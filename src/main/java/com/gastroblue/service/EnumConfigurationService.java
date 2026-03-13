@@ -9,7 +9,10 @@ import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,14 +25,31 @@ public class EnumConfigurationService {
 
   private final EnumValueConfigurationRepository repository;
 
+  /**
+   * Two-tier lookup: loads global defaults (companyGroupId=null) and company-group overrides in one
+   * query, merges them (override wins), then filters to active-only entries.
+   */
   @Cacheable(
       value = "enum_dropdown_configs",
       key = "{#enumType, #companyGroupId, #sessionLanguage}")
   public List<ResolvedEnum> getDropdownValues(
       String enumType, final String companyGroupId, Language sessionLanguage) {
-    return repository
-        .findByEnumTypeAndCompanyGroupIdAndLanguage(enumType, companyGroupId, sessionLanguage)
-        .stream()
+
+    List<EnumValueConfigurationEntity> rows =
+        repository.findForGroupWithDefaults(enumType, companyGroupId, sessionLanguage);
+
+    LinkedHashMap<String, EnumValueConfigurationEntity> merged = new LinkedHashMap<>();
+    rows.stream()
+        .filter(e -> e.getCompanyGroupId() == null)
+        .forEach(e -> merged.put(e.getEnumKey(), e));
+    rows.stream()
+        .filter(e -> e.getCompanyGroupId() != null)
+        .forEach(e -> merged.put(e.getEnumKey(), e));
+
+    return merged.values().stream()
+        .filter(EnumValueConfigurationEntity::isActive)
+        .sorted(
+            Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
         .map(
             e ->
                 ResolvedEnum.builder()
@@ -38,6 +58,12 @@ public class EnumConfigurationService {
                     .displayOrder(e.getDisplayOrder())
                     .build())
         .toList();
+  }
+
+  public boolean isActive(String companyGroupId, ConfigurableEnum enumValue, Language language) {
+    return getDropdownValues(enumValue.getClass().getSimpleName(), companyGroupId, language)
+        .stream()
+        .anyMatch(r -> r.getKey().equals(enumValue.name()));
   }
 
   @Transactional(readOnly = true)
@@ -54,7 +80,7 @@ public class EnumConfigurationService {
   }
 
   @Transactional
-  @CacheEvict(value = "enum_configs", allEntries = true)
+  @CacheEvict(value = "enum_dropdown_configs", allEntries = true)
   public EnumValueConfigurationEntity save(EnumConfigurationSaveRequest request) {
     EnumValueConfigurationEntity entity =
         EnumValueConfigurationEntity.builder()
@@ -70,7 +96,7 @@ public class EnumConfigurationService {
   }
 
   @Transactional
-  @CacheEvict(value = "enum_configs", allEntries = true)
+  @CacheEvict(value = "enum_dropdown_configs", allEntries = true)
   public EnumValueConfigurationEntity update(
       String id, EnumConfigurationUpdateRequest request, String companyGroupId) {
     EnumValueConfigurationEntity entity =
@@ -92,52 +118,11 @@ public class EnumConfigurationService {
     if (request.displayOrder() != null) {
       entity.setDisplayOrder(request.displayOrder());
     }
-    if (request.displayOrder() != null) {
-      entity.setDisplayOrder(request.displayOrder());
-    }
     return repository.save(entity);
   }
 
   @Transactional(readOnly = true)
   public List<EnumValueConfigurationEntity> findAll(String companyGroupId) {
     return repository.findByCompanyGroupId(companyGroupId);
-  }
-
-  public boolean isActive(String companyGroupId, ConfigurableEnum enumValue, Language language) {
-    EnumValueConfigurationEntity config =
-        repository
-            .findByCompanyGroupIdAndEnumTypeAndLanguage(
-                companyGroupId, enumValue.getClass().getSimpleName(), language)
-            .stream()
-            .filter(c -> c.getEnumKey().equals(enumValue.name()))
-            .findFirst()
-            .orElse(null);
-
-    if (config == null) {
-      return true;
-    }
-    return config.isActive();
-  }
-
-  @Transactional
-  public void copyConfigurations(String toCompanyGroupId) {
-    List<EnumValueConfigurationEntity> defaultConfigs = repository.findByCompanyGroupId(null);
-
-    List<EnumValueConfigurationEntity> newConfigs =
-        defaultConfigs.stream()
-            .map(
-                c ->
-                    EnumValueConfigurationEntity.builder()
-                        .companyGroupId(toCompanyGroupId)
-                        .enumType(c.getEnumType())
-                        .enumKey(c.getEnumKey())
-                        .language(c.getLanguage())
-                        .label(c.getLabel())
-                        .active(false)
-                        .displayOrder(c.getDisplayOrder())
-                        .build())
-            .toList();
-
-    repository.saveAll(newConfigs);
   }
 }

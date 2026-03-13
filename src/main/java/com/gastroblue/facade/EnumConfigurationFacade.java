@@ -68,7 +68,4 @@ public class EnumConfigurationFacade {
         .build();
   }
 
-  public void copyConfigurations(String toCompanyGroupId) {
-    enumConfigurationService.copyConfigurations(toCompanyGroupId);
-  }
 }

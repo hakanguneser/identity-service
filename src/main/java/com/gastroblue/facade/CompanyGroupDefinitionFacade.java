@@ -24,7 +24,6 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -35,11 +34,9 @@ public class CompanyGroupDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final EnumConfigurationFacade enumConfigurationFacade;
 
-  @Transactional
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
     EmailDomainValidator.validateAllowedDomains(request.mailDomains(), request.groupMails());
     CompanyGroupEntity savedEntity = companyGroupService.save(request);
-    enumConfigurationFacade.copyConfigurations(savedEntity.getId());
     return CompanyGroupMapper.toResponse(savedEntity);
   }
 
