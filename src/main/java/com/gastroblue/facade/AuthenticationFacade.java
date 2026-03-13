@@ -1,7 +1,5 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
-import static com.gastroblue.model.enums.ApplicationProduct.TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
@@ -43,6 +41,7 @@ public class AuthenticationFacade {
   private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
+  private final CompanyGroupProductService companyGroupProductService;
 
   @Value("${application.security.jwt.token-validity-in-minutes}")
   private Long jwtTokenValidityMinutes;
@@ -160,26 +159,13 @@ public class AuthenticationFacade {
   }
 
   private ApiInfoDto getApiInfo(UserEntity userEntity, ApplicationProduct product) {
-    if (userEntity.getApplicationRole().isAdministrator()) {
+    if (userEntity.getApplicationRole().isAdministrator() || product == ApplicationProduct.ADMIN_PANEL) {
       return ApiInfoDto.builder().build();
     }
-    CompanyGroup companyGroup =
-        companyGroupService.findCompanyByIdOrThrow(userEntity.getCompanyGroupId());
-    return switch (product) {
-      case TRACKER ->
-          buildApiInfo(
-              TRACKER,
-              companyGroup.isThermometerTrackerEnabled(),
-              companyGroup.getThermometerTrackerApiUrl(),
-              companyGroup.getThermometerTrackerApiVersion());
-      case FORMFLOW ->
-          buildApiInfo(
-              FORMFLOW,
-              companyGroup.isFormflowEnabled(),
-              companyGroup.getFormflowApiUrl(),
-              companyGroup.getFormflowApiVersion());
-      case ADMIN_PANEL -> ApiInfoDto.builder().build();
-    };
+    return companyGroupProductService
+        .findByCompanyGroupIdAndProduct(userEntity.getCompanyGroupId(), product)
+        .map(p -> buildApiInfo(product, p.getEnabled(), p.getApiUrl(), p.getApiVersion()))
+        .orElseThrow(() -> new AccessDeniedException(ErrorCode.ACCESS_DENIED));
   }
 
   private ApiInfoDto buildApiInfo(

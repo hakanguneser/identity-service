@@ -43,16 +43,6 @@ public class CompanyGroupService {
     entityToBeUpdate.setName(request.name());
     entityToBeUpdate.setGroupMail(join(request.groupMails()));
     entityToBeUpdate.setLogoUrl(request.logoUrl());
-    if (request.thermometerTrackerEnabled() != null) {
-      entityToBeUpdate.setThermometerTrackerEnabled(request.thermometerTrackerEnabled());
-      entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
-      entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
-    }
-    if (request.formflowEnabled() != null) {
-      entityToBeUpdate.setFormflowEnabled(request.formflowEnabled());
-      entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
-      entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
-    }
     entityToBeUpdate.setMailDomains(join(request.mailDomains()));
     return companyGroupRepository.save(entityToBeUpdate);
   }

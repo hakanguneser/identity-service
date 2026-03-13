@@ -18,12 +18,6 @@ public record CompanyGroupSaveRequest(
                 @Pattern(regexp = "^[^A-Z\\s]+$", message = "{validation.email.lowercase}") String>
             groupMails,
     String logoUrl,
-    String thermometerTrackerApiUrl,
-    String thermometerTrackerApiVersion,
-    Boolean thermometerTrackerEnabled,
-    String formflowApiUrl,
-    String formflowApiVersion,
-    Boolean formflowEnabled,
     @Valid
         List<
                 @Pattern(regexp = "^[^A-Z\\s]+$", message = "{validation.domain.lowercase}")

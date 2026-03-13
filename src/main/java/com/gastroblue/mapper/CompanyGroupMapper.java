@@ -27,15 +27,6 @@ public class CompanyGroupMapper {
         .groupCode(request.groupCode())
         .groupMail(join(request.groupMails()))
         .logoUrl(request.logoUrl())
-        .thermometerTrackerApiUrl(request.thermometerTrackerApiUrl())
-        .thermometerTrackerApiVersion(request.thermometerTrackerApiVersion())
-        .thermometerTrackerEnabled(
-            request.thermometerTrackerEnabled() != null
-                ? request.thermometerTrackerEnabled()
-                : false)
-        .formflowApiUrl(request.formflowApiUrl())
-        .formflowApiVersion(request.formflowApiVersion())
-        .formflowEnabled(request.formflowEnabled() != null ? request.formflowEnabled() : false)
         .mailDomains(DelimitedStringUtil.join(request.mailDomains()))
         .build();
   }
@@ -47,12 +38,6 @@ public class CompanyGroupMapper {
         .name(entity.getName())
         .groupMails(split(entity.getGroupMail()))
         .logoUrl(entity.getLogoUrl())
-        .thermometerTrackerApiUrl(entity.getThermometerTrackerApiUrl())
-        .thermometerTrackerApiVersion(entity.getThermometerTrackerApiVersion())
-        .thermometerTrackerEnabled(entity.getThermometerTrackerEnabled())
-        .formflowApiUrl(entity.getFormflowApiUrl())
-        .formflowApiVersion(entity.getFormflowApiVersion())
-        .formflowEnabled(entity.getFormflowEnabled())
         .mailDomains(split(entity.getMailDomains()))
         .build();
   }
@@ -186,12 +171,7 @@ public class CompanyGroupMapper {
         .groupCode(entity.getGroupCode())
         .groupMails(split(entity.getGroupMail()))
         .logoUrl(entity.getLogoUrl())
-        .thermometerTrackerApiUrl(entity.getThermometerTrackerApiUrl())
-        .thermometerTrackerApiVersion(entity.getThermometerTrackerApiVersion())
-        .thermometerTrackerEnabled(entity.getThermometerTrackerEnabled())
-        .formflowApiUrl(entity.getFormflowApiUrl())
-        .formflowApiVersion(entity.getFormflowApiVersion())
-        .formflowEnabled(entity.getFormflowEnabled())
+        .mailDomains(entity.getMailDomains())
         .build();
   }
 }
