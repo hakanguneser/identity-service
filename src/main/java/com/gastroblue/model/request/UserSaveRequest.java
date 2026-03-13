@@ -1,9 +1,11 @@
 package com.gastroblue.model.request;
 
 import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
-import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.Gender;
+import com.gastroblue.model.enums.ProductRole;
+import com.gastroblue.model.enums.SystemRole;
 import com.gastroblue.model.enums.Zone;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -17,7 +19,9 @@ public record UserSaveRequest(
         String username,
     String companyGroupId,
     String companyId,
-    @NotNull(message = "{validation.applicationRole.check.null}") ApplicationRole applicationRole,
+    SystemRole systemRole,
+    ApplicationProduct product,
+    @NotNull(message = "{validation.productRole.check.null}") ProductRole productRole,
     @NotNull(message = "{validation.department.check.null}") List<Department> departments,
     @Size(min = 3, max = 100, message = "{validation.name.size.3.100}")
         @NotBlank(message = "{validation.name.check.null}")

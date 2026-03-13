@@ -4,6 +4,7 @@ import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.ProductRole;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,11 @@ public class EligibilityFacade {
   public void addUser() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity userEntity = userDefinitionService.findUserByUserName(sessionUser.username());
-    if (!sessionUser.getApplicationRole().isSupervisorAndAbove()) {
-      throw new ValidationException(ErrorCode.INSUFFICIENT_ROLE, "User is not a supervisor");
+    if (!sessionUser.isAdmin()) {
+      ProductRole productRole = sessionUser.getProductRole();
+      if (productRole == null || !productRole.isSupervisorAndAbove()) {
+        throw new ValidationException(ErrorCode.INSUFFICIENT_ROLE, "User is not a supervisor");
+      }
     }
     if (userEntity.getEmail() == null || userEntity.getEmail().isBlank()) {
       throw new ValidationException(ErrorCode.USER_EMAIL_NOT_FOUND, "User email is not found");

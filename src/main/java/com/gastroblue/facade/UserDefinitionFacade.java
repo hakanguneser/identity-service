@@ -1,9 +1,9 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.model.enums.ApplicationRole.*;
 import static com.gastroblue.model.enums.MailParameters.*;
 import static com.gastroblue.model.enums.MailTemplate.INITIAL_PASSWORD;
 import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
+import static com.gastroblue.model.enums.ProductRole.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
@@ -13,6 +13,7 @@ import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
@@ -28,10 +29,13 @@ import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
+import com.gastroblue.service.impl.UserProductService;
+import com.gastroblue.util.DelimitedStringUtil;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,51 +57,70 @@ public class UserDefinitionFacade {
   private final PasswordEncoder passwordEncoder;
   private final EnumConfigurationFacade enumFacade;
   private final IMailService mailService;
+  private final UserProductService userProductService;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
-    return UserMapper.toResponse(userEntity, enumFacade);
+    UserProductEntity userProduct = resolveUserProduct(userId);
+    return UserMapper.toResponse(userEntity, userProduct, enumFacade);
   }
 
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
-    return UserMapper.toResponse(updatedEntity, enumFacade);
+    UserProductEntity userProduct = resolveUserProduct(userId);
+    return UserMapper.toResponse(updatedEntity, userProduct, enumFacade);
   }
 
   public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
-
-    Set<ApplicationRole> targetRoles;
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    ApplicationProduct product = sessionUser.getApplicationProduct();
 
-    if (includeAll) {
+    Set<ProductRole> targetRoles;
+    if (sessionUser.isAdmin()) {
       targetRoles =
-          switch (sessionUser.getApplicationRole()) {
-            case ADMIN -> Set.of(GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
-            case GROUP_MANAGER -> Set.of(ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
-            case ZONE_MANAGER -> Set.of(COMPANY_MANAGER, SUPERVISOR, STAFF);
-            case COMPANY_MANAGER -> Set.of(SUPERVISOR, STAFF);
-            case SUPERVISOR -> Set.of(STAFF);
-            default -> Set.of();
-          };
+          includeAll
+              ? Set.of(GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF)
+              : Set.of(GROUP_MANAGER);
     } else {
-      targetRoles =
-          switch (sessionUser.getApplicationRole()) {
-            case ADMIN -> Set.of(GROUP_MANAGER);
-            case GROUP_MANAGER -> Set.of(COMPANY_MANAGER, ZONE_MANAGER);
-            case ZONE_MANAGER -> Set.of(COMPANY_MANAGER);
-            case COMPANY_MANAGER -> Set.of(SUPERVISOR);
-            case SUPERVISOR -> Set.of(STAFF);
-            default -> Set.of();
-          };
+      ProductRole productRole = sessionUser.getProductRole();
+      if (productRole == null) return List.of();
+      if (includeAll) {
+        targetRoles =
+            switch (productRole) {
+              case GROUP_MANAGER -> Set.of(ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
+              case ZONE_MANAGER -> Set.of(COMPANY_MANAGER, SUPERVISOR, STAFF);
+              case COMPANY_MANAGER -> Set.of(SUPERVISOR, STAFF);
+              case SUPERVISOR -> Set.of(STAFF);
+              default -> Set.of();
+            };
+      } else {
+        targetRoles =
+            switch (productRole) {
+              case GROUP_MANAGER -> Set.of(COMPANY_MANAGER, ZONE_MANAGER);
+              case ZONE_MANAGER -> Set.of(COMPANY_MANAGER);
+              case COMPANY_MANAGER -> Set.of(SUPERVISOR);
+              case SUPERVISOR -> Set.of(STAFF);
+              default -> Set.of();
+            };
+      }
     }
-    return userService.findAccessibleUser(targetRoles).stream()
-        .map(u -> UserMapper.toResponse(u, enumFacade))
+
+    List<UserEntity> users = userService.findAccessibleUser(targetRoles, product);
+    List<String> userIds = users.stream().map(UserEntity::getId).toList();
+    Map<String, UserProductEntity> userProductMap =
+        product != null
+            ? userProductService.findByUserIdInAndProduct(userIds, product).stream()
+                .collect(Collectors.toMap(UserProductEntity::getUserId, up -> up))
+            : Map.of();
+
+    List<Department> sessionDepartments = sessionUser.getDepartments();
+    return users.stream()
+        .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), enumFacade))
         .filter(
             user -> {
-              List<Department> sessionDepartments = sessionUser.getDepartments();
-              if (sessionDepartments.contains(Department.ALL)) {
+              if (sessionDepartments == null || sessionDepartments.contains(Department.ALL)) {
                 return true;
               }
               return user.getDepartmentsList().stream().anyMatch(sessionDepartments::contains);
@@ -115,17 +138,30 @@ public class UserDefinitionFacade {
             companyGroup.getId(),
             company.getId(),
             request,
-            passwordEncoder.encode(generatedPassword),
-            getDepartments(request));
+            passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
+
+    UserProductEntity savedUserProduct = null;
+    if (request.product() != null && request.productRole() != null) {
+      UserProductEntity userProduct =
+          UserProductEntity.builder()
+              .userId(savedUserEntity.getId())
+              .product(request.product())
+              .productRole(request.productRole())
+              .departments(DelimitedStringUtil.join(getDepartments(request)))
+              .build();
+      savedUserProduct = userProductService.save(userProduct);
+    }
+
     notifyNewPassword(
         INITIAL_PASSWORD,
         savedUserEntity,
+        savedUserProduct,
         managerUser,
         generatedPassword,
         companyGroup.getName(),
         company.getCompanyName());
-    return UserMapper.toResponse(savedUserEntity, enumFacade);
+    return UserMapper.toResponse(savedUserEntity, savedUserProduct, enumFacade);
   }
 
   private List<Department> getDepartments(UserSaveRequest request) {
@@ -139,6 +175,7 @@ public class UserDefinitionFacade {
   private void notifyNewPassword(
       MailTemplate mailTemplate,
       UserEntity createdUserEntity,
+      UserProductEntity userProduct,
       UserEntity managerUserEntity,
       String generatedPassword,
       String companyGroupName,
@@ -147,7 +184,8 @@ public class UserDefinitionFacade {
     List<String> ccAddress = new ArrayList<>();
     List<String> bccAddress = new ArrayList<>();
     boolean activateManagerNote = false;
-    UserDefinitionResponse createdUser = UserMapper.toResponse(createdUserEntity, enumFacade);
+    UserDefinitionResponse createdUser =
+        UserMapper.toResponse(createdUserEntity, userProduct, enumFacade);
     if (createdUserEntity.getEmail() == null || createdUserEntity.getEmail().isBlank()) {
       toAddress.add(managerUserEntity.getEmail());
       activateManagerNote = true;
@@ -162,7 +200,9 @@ public class UserDefinitionFacade {
     mailParams.put(TEMPORARY_PASSWORD, generatedPassword);
     mailParams.put(ACTIVATE_MANAGER_NOTE, activateManagerNote);
     mailParams.put(MANAGER_FULL_NAME, managerUserEntity.getFullName());
-    mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
+    if (createdUser.getProductRole() != null) {
+      mailParams.put(APPLICATION_ROLE, createdUser.getProductRole().getDisplay());
+    }
     mailParams.put(
         DEPARTMENT, createdUser.getDepartments().stream().map(ResolvedEnum::getDisplay).toList());
     if (createdUser.getZone() != null) {
@@ -176,54 +216,61 @@ public class UserDefinitionFacade {
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
     boolean isAuthorized;
     String username = IJwtService.findSessionUserOrThrow().username();
-    UserEntity sessionUser = userService.findUserByUserName(username);
-    if (sessionUser == null) {
+    UserEntity sessionUserEntity = userService.findUserByUserName(username);
+    SessionUser sessionUser = IJwtService.findSessionUser();
+    if (sessionUserEntity == null) {
       if (!adminRegistrationEnabled) {
         throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
       }
       isAuthorized =
           request.departments().contains(Department.ALL)
-              && request.applicationRole().isAdministrator();
+              && request.systemRole() == SystemRole.ADMIN;
     } else {
-      isAuthorized = sessionUser.getApplicationRole().isSupervisorAndAbove();
+      ProductRole productRole = sessionUser != null ? sessionUser.getProductRole() : null;
+      isAuthorized =
+          (sessionUser != null && sessionUser.isAdmin())
+              || (productRole != null && productRole.isSupervisorAndAbove());
     }
 
     if (!isAuthorized) {
       throw new AccessDeniedException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
     }
-    if (sessionUser == null || sessionUser.getEmail() == null || sessionUser.getEmail().isBlank()) {
+    if (sessionUserEntity == null
+        || sessionUserEntity.getEmail() == null
+        || sessionUserEntity.getEmail().isBlank()) {
       throw new ValidationException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION, "User email is required");
     }
-    return sessionUser;
+    return sessionUserEntity;
   }
 
   private CompanyEntity getRegistrationCompany(UserSaveRequest request) {
-
     SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUser == null || request.applicationRole().isZoneManagerAndAbove()) {
+    if (sessionUser == null
+        || (request.productRole() != null && request.productRole().isZoneManagerAndAbove())) {
       return new CompanyEntity();
     }
 
-    if (sessionUser.getApplicationRole().isCompanyManagerAndAbove()) {
+    ProductRole sessionProductRole = sessionUser.getProductRole();
+    if (sessionProductRole != null && sessionProductRole.isCompanyManagerAndAbove()) {
       return companyService.findByIdOrThrow(request.companyId());
     }
 
-    return companyService.findByIdOrThrow(sessionUser.companyIds().get(0));
+    return companyService.findByIdOrThrow(sessionUser.getCompanyId());
   }
 
   private CompanyGroupEntity getRegistrationCompanyGroup(UserSaveRequest request) {
     SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUser == null || request.applicationRole().isAdministrator()) {
+    if (sessionUser == null || request.systemRole() == SystemRole.ADMIN) {
       return new CompanyGroupEntity();
     }
-    if (request.applicationRole().isGroupManagerOrZoneManager()) {
+    if (request.productRole() != null && request.productRole().isGroupManagerOrZoneManager()) {
       if (request.companyGroupId() == null) {
         throw new ValidationException(
             ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
             String.format(
-                "Requested user %s has GroupManager or ZoneManager role, but no companyGroupId is assigned. ApplicationRole: %s, companyGroupId is null",
-                request.username(), request.applicationRole()));
+                "Requested user %s has GroupManager or ZoneManager role, but no companyGroupId is assigned. ProductRole: %s, companyGroupId is null",
+                request.username(), request.productRole()));
       }
       return companyGroupService.findByIdOrThrow(request.companyGroupId());
     }
@@ -237,7 +284,8 @@ public class UserDefinitionFacade {
 
   public UserDefinitionResponse toggleUser(String userId) {
     UserEntity toggledEntity = userService.toggleUser(userId);
-    return UserMapper.toResponse(toggledEntity, enumFacade);
+    UserProductEntity userProduct = resolveUserProduct(userId);
+    return UserMapper.toResponse(toggledEntity, userProduct, enumFacade);
   }
 
   public void sendOtp(final String userId) {
@@ -266,7 +314,7 @@ public class UserDefinitionFacade {
               .orElse("");
     }
     notifyNewPassword(
-        RESET_PASSWORD, userEntity, managerUser, generatedPassword, companyGroupName, companyName);
+        RESET_PASSWORD, userEntity, null, managerUser, generatedPassword, companyGroupName, companyName);
   }
 
   public void changePassword(final PasswordChangeRequest request) {
@@ -287,15 +335,18 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  public List<ResolvedEnum> findAllApplicationRoles() {
+  public List<ResolvedEnum> findAllProductRoles() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-    ApplicationRole sessionRole = sessionUser.getApplicationRole();
-
-    return enumFacade.getDropdownValues(ApplicationRole.class).stream()
+    if (sessionUser.isAdmin()) {
+      return enumFacade.getDropdownValues(ProductRole.class);
+    }
+    ProductRole sessionProductRole = sessionUser.getProductRole();
+    if (sessionProductRole == null) return List.of();
+    return enumFacade.getDropdownValues(ProductRole.class).stream()
         .filter(
             resolved -> {
-              ApplicationRole role = ApplicationRole.fromString(resolved.getKey());
-              return role != null && role.getLevel() > sessionRole.getLevel();
+              ProductRole role = ProductRole.fromString(resolved.getKey());
+              return role != null && role.getLevel() > sessionProductRole.getLevel();
             })
         .toList();
   }
@@ -378,5 +429,15 @@ public class UserDefinitionFacade {
     UserEntity userEntity = userService.findById(userId);
     userEntity.setLanguage(request.language());
     userService.updateUser(userEntity);
+  }
+
+  private UserProductEntity resolveUserProduct(String userId) {
+    SessionUser sessionUser = IJwtService.findSessionUser();
+    if (sessionUser != null && sessionUser.getApplicationProduct() != null) {
+      return userProductService
+          .findByUserIdAndProduct(userId, sessionUser.getApplicationProduct())
+          .orElse(null);
+    }
+    return null;
   }
 }

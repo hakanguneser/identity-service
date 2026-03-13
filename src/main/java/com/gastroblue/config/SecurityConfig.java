@@ -1,6 +1,6 @@
 package com.gastroblue.config;
 
-import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.model.enums.SystemRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,19 +43,15 @@ public class SecurityConfig {
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
                     .permitAll();
               }
-              // 🔐 ADMIN only
+              // 🔐 ADMIN / APP_CLIENT only
               authorize
                   .requestMatchers("/api/v1/definition/company-groups/**")
-                  .hasAnyRole(
-                      ApplicationRole.ADMIN.name(),
-                      ApplicationRole.APP_CLIENT.name(),
-                      ApplicationRole.GROUP_MANAGER.name(),
-                      ApplicationRole.ZONE_MANAGER.name());
+                  .hasAnyRole(SystemRole.ADMIN.name(), SystemRole.APP_CLIENT.name(), SystemRole.USER.name());
 
               // 🔐 APP_CLIENT only
               authorize
                   .requestMatchers("/api/v1/definition/company-groups/context")
-                  .hasAnyRole(ApplicationRole.APP_CLIENT.name());
+                  .hasAnyRole(SystemRole.APP_CLIENT.name());
 
               // 🔒 Everything else
               authorize.anyRequest().authenticated();

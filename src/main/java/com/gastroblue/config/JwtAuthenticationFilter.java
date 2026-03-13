@@ -4,7 +4,7 @@ import static com.gastroblue.model.enums.ErrorCode.EXPIRED_JWT_TOKEN;
 
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.model.enums.SystemRole;
 import com.gastroblue.service.IJwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -64,7 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           sessionUser =
               new SessionUser(
                   ApplicationProduct.TRACKER.name(),
-                  ApplicationRole.APP_CLIENT.name(),
+                  SystemRole.APP_CLIENT.name(),
+                  null,
                   List.of(),
                   null,
                   List.of(),
