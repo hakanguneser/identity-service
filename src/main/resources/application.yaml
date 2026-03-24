@@ -35,9 +35,15 @@ application:
       token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
       sys-tokens:
-        tt: ${TT_TOKEN:tt-token}
-        ff: ${FF_TOKEN:ff-token}
-        admin: ${ADMIN_TOKEN:admin-token}
+        tt:
+          token: ${TT_TOKEN:tt-token}
+          product: TRACKER
+        ff:
+          token: ${FF_TOKEN:ff-token}
+          product: FORMFLOW
+        admin:
+          token: ${ADMIN_TOKEN:admin-token}
+          product: CHECK
 
 management:
   endpoints:

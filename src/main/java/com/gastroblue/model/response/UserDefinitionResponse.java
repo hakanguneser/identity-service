@@ -25,7 +25,7 @@ public class UserDefinitionResponse {
   private ResolvedEnum language;
   private ResolvedEnum gender;
   private ResolvedEnum zone;
-  private List<ResolvedEnum> departments;
   private ResolvedEnum applicationRole;
+  private List<ResolvedEnum> departments;
   @JsonIgnore List<Department> departmentsList;
 }

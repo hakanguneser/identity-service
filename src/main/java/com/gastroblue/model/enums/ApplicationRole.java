@@ -55,7 +55,6 @@ public enum ApplicationRole implements ConfigurableEnum {
     if (value == null || value.isBlank()) {
       return null;
     }
-
     try {
       return ApplicationRole.valueOf(value.trim().toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException ex) {

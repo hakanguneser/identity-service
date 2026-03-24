@@ -3,6 +3,7 @@ package com.gastroblue.exception.helper;
 import static com.gastroblue.model.enums.ErrorCode.*;
 
 import com.gastroblue.config.tracing.TraceIdConstants;
+import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.exception.base.AbstractRuntimeException;
 import com.gastroblue.model.entity.ErrorMessageEntity;
@@ -65,6 +66,29 @@ public class GlobalExceptionHelper {
             .debugContext(ex.getMessage())
             .traceId(currentTraceId())
             .build());
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<Object> handleAccessDenied(final AccessDeniedException ex) {
+    HttpStatus status =
+        (ex.getErrorCode() == INVALID_USERNAME_OR_PASSWORD
+                || ex.getErrorCode() == EXPIRED_JWT_TOKEN)
+            ? HttpStatus.UNAUTHORIZED
+            : HttpStatus.FORBIDDEN;
+    log.warn("AccessDeniedException | errorCode={} | status={}", ex.getErrorCode(), status.value());
+    ErrorMessageEntity errorProp =
+        errorMessageService.findOrCreatePropertyValue(
+            ex.getErrorCode(), IJwtService.getSessionLanguage());
+    return ResponseEntity.status(status)
+        .body(
+            ApplicationError.builder()
+                .errorMessage(errorProp.getMessage())
+                .errorCode(ex.getErrorCode())
+                .referenceId(errorProp.getId())
+                .httpStatus(status)
+                .timeStamp(LocalDateTime.now())
+                .traceId(currentTraceId())
+                .build());
   }
 
   @ExceptionHandler(AbstractRuntimeException.class)

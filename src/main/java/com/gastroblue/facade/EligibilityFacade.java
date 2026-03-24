@@ -3,6 +3,7 @@ package com.gastroblue.facade;
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
@@ -20,7 +21,8 @@ public class EligibilityFacade {
   public void addUser() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity userEntity = userDefinitionService.findUserByUserName(sessionUser.username());
-    if (!sessionUser.getApplicationRole().isSupervisorAndAbove()) {
+    ApplicationRole applicationRole = sessionUser.getApplicationRole();
+    if (applicationRole == null || !applicationRole.isSupervisorAndAbove()) {
       throw new ValidationException(ErrorCode.INSUFFICIENT_ROLE, "User is not a supervisor");
     }
     if (userEntity.getEmail() == null || userEntity.getEmail().isBlank()) {

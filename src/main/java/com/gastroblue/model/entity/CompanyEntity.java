@@ -69,4 +69,13 @@ public class CompanyEntity extends Auditable {
 
   @Column(name = "IS_ACTIVE")
   private boolean active;
+
+  @Column(name = "IS_CHECK_ENABLED", nullable = false)
+  private boolean checkEnabled;
+
+  @Column(name = "IS_FORMFLOW_ENABLED", nullable = false)
+  private boolean formflowEnabled;
+
+  @Column(name = "IS_TRACKER_ENABLED", nullable = false)
+  private boolean trackerEnabled;
 }
