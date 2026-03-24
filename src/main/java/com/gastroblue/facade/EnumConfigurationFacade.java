@@ -33,7 +33,7 @@ public class EnumConfigurationFacade {
   public <T extends ConfigurableEnum> List<ResolvedEnum> getDropdownValues(
       Class<T> enumClass, String companyGroupId) {
     return enumConfigurationService.getDropdownValues(
-        enumClass.getSimpleName(), companyGroupId, IJwtService.getSessionLanguage());
+        enumClass, companyGroupId, IJwtService.getSessionLanguage());
   }
 
   public <T extends ConfigurableEnum> List<ResolvedEnum> getDropdownValues(Class<T> enumClass) {
