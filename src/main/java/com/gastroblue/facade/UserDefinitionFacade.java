@@ -135,7 +135,7 @@ public class UserDefinitionFacade {
             passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
 
-    ApplicationProduct product = getApplicationProduct(request.product()) ;
+    ApplicationProduct product = getApplicationProduct(request.product());
 
     UserProductEntity savedUserProduct = null;
     if (product != null && request.applicationRole() != null) {
@@ -161,17 +161,17 @@ public class UserDefinitionFacade {
     return UserMapper.toResponse(savedUserEntity, savedUserProduct, enumFacade);
   }
 
-  private static ApplicationProduct getApplicationProduct(ApplicationProduct requestedProduct  ) {
+  private static ApplicationProduct getApplicationProduct(ApplicationProduct requestedProduct) {
 
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     ApplicationProduct product = sessionUser.getApplicationProduct();
-    if (sessionUser.getApplicationRole().isAdministrator()){
-      if (requestedProduct  == null){
+    if (sessionUser.getApplicationRole().isAdministrator()) {
+      if (requestedProduct == null) {
         throw new ValidationException(
             ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
             String.format(
                 "Requested user %s has Admin role, but no product is assigned. ApplicationRole: %s, companyGroupId is null",
-                    sessionUser.username(), sessionUser.applicationRole()));
+                sessionUser.username(), sessionUser.applicationRole()));
       }
       product = requestedProduct;
     }
