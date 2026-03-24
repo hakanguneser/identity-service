@@ -49,6 +49,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Value("${application.security.jwt.sys-tokens.tt}")
   private String ttToken;
 
+  @Value("${application.security.jwt.sys-tokens.ff}")
+  private String ffToken;
+
+  @Value("${application.security.jwt.sys-tokens.admin}")
+  private String adminToken;
+
   @Override
   protected void doFilterInternal(
       @NonNull HttpServletRequest request,
@@ -69,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
         SessionUser sessionUser;
-        if (jwtToken.equals(ttToken)) {
+        if (jwtToken.equals(ttToken) || jwtToken.equals(ffToken) || jwtToken.equals(adminToken)) {
           sessionUser =
               new SessionUser(
                   ApplicationProduct.TRACKER.name(),

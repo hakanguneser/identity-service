@@ -43,7 +43,8 @@ public class UserDefinitionService {
         .orElseThrow(
             () ->
                 new IllegalDefinitionException(
-                    ErrorCode.USER_NOT_FOUND, String.format("User not found (userId=%s)", userId)));
+                    ErrorCode.USER_NOT_FOUND,
+                    String.format("User not found (userId=%s)", userId)));
   }
 
   public UserEntity findUserByUserName(final String username) {
@@ -56,7 +57,8 @@ public class UserDefinitionService {
                     String.format("User not found (username=%s)", username)));
   }
 
-  public List<UserEntity> findAccessibleUser(Set<ApplicationRole> applicationRole) {
+  public List<UserEntity> findAccessibleUser(
+      Set<ApplicationRole> applicationRoles, ApplicationProduct product) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
 
     List<String> normalizedCompanyIds =
@@ -65,10 +67,11 @@ public class UserDefinitionService {
             : sessionUser.companyIds();
 
     Set<ApplicationRole> normalizedRoles =
-        (applicationRole == null || applicationRole.isEmpty()) ? null : applicationRole;
+        (applicationRoles == null || applicationRoles.isEmpty()) ? null : applicationRoles;
 
     return userRepository
-        .findAccessibleUsers(sessionUser.companyGroupId(), normalizedCompanyIds, normalizedRoles)
+        .findAccessibleUsers(
+            sessionUser.companyGroupId(), product, normalizedCompanyIds, normalizedRoles)
         .stream()
         .toList();
   }
@@ -79,14 +82,8 @@ public class UserDefinitionService {
     return userRepository.save(entityToBeUpdated);
   }
 
-  public void signEula(String username) {
-    UserEntity entityToBeUpdated = findUserByUserName(username);
-    entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
-    userRepository.save(entityToBeUpdated);
-  }
-
   @Transactional
-  public void updateLoginStats(String username, ApplicationProduct product) {
-    userRepository.updateUserAfterSuccessfulLogin(username, product, LocalDateTime.now());
+  public void updatePasswordCheckAfterLogin(String username) {
+    userRepository.updatePasswordCheckAfterLogin(username, LocalDateTime.now());
   }
 }

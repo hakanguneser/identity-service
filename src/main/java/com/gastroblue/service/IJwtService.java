@@ -5,6 +5,7 @@ import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.ErrorCode;
@@ -38,16 +39,26 @@ public interface IJwtService {
     return extraClaims;
   }
 
+  /**
+   * Builds JWT claims from UserEntity (identity) + UserProductEntity (per-product role/dept). Used
+   * during login after the product-specific record is loaded.
+   */
   static HashMap<String, Object> toExtraClaims(
-      UserEntity userEntity, ApplicationProduct product, List<String> companyIds) {
+      UserEntity userEntity,
+      UserProductEntity userProduct,
+      ApplicationProduct product,
+      List<String> companyIds) {
     HashMap<String, Object> extraClaims = new HashMap<>();
     extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
-    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
+    extraClaims.put(JWT_ROLE, userProduct != null ? userProduct.getApplicationRole().name() : null);
     extraClaims.put(JWT_COMPANY_IDS, companyIds);
     extraClaims.put(JWT_APPLICATION_PRODUCT, product);
     extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
     extraClaims.put(
-        JWT_DEPARTMENTS, splitToEnumList(userEntity.getDepartments(), Department.class));
+        JWT_DEPARTMENTS,
+        userProduct != null
+            ? splitToEnumList(userProduct.getDepartments(), Department.class)
+            : List.of());
     return extraClaims;
   }
 

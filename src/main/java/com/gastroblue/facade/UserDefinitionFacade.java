@@ -13,6 +13,7 @@ import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
@@ -28,10 +29,13 @@ import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
+import com.gastroblue.service.impl.UserProductService;
+import com.gastroblue.util.DelimitedStringUtil;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,27 +57,31 @@ public class UserDefinitionFacade {
   private final PasswordEncoder passwordEncoder;
   private final EnumConfigurationFacade enumFacade;
   private final IMailService mailService;
+  private final UserProductService userProductService;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
-    return UserMapper.toResponse(userEntity, enumFacade);
+    UserProductEntity userProduct = resolveUserProduct(userId);
+    return UserMapper.toResponse(userEntity, userProduct, enumFacade);
   }
 
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
-    return UserMapper.toResponse(updatedEntity, enumFacade);
+    UserProductEntity userProduct = resolveUserProduct(userId);
+    return UserMapper.toResponse(updatedEntity, userProduct, enumFacade);
   }
 
   public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    ApplicationProduct product = sessionUser.getApplicationProduct();
+    ApplicationRole sessionRole = sessionUser.getApplicationRole();
 
     Set<ApplicationRole> targetRoles;
-    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-
     if (includeAll) {
       targetRoles =
-          switch (sessionUser.getApplicationRole()) {
+          switch (sessionRole) {
             case ADMIN -> Set.of(GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
             case GROUP_MANAGER -> Set.of(ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
             case ZONE_MANAGER -> Set.of(COMPANY_MANAGER, SUPERVISOR, STAFF);
@@ -83,7 +91,7 @@ public class UserDefinitionFacade {
           };
     } else {
       targetRoles =
-          switch (sessionUser.getApplicationRole()) {
+          switch (sessionRole) {
             case ADMIN -> Set.of(GROUP_MANAGER);
             case GROUP_MANAGER -> Set.of(COMPANY_MANAGER, ZONE_MANAGER);
             case ZONE_MANAGER -> Set.of(COMPANY_MANAGER);
@@ -92,12 +100,21 @@ public class UserDefinitionFacade {
             default -> Set.of();
           };
     }
+
+    List<UserEntity> users = userService.findAccessibleUser(targetRoles, product);
+    List<String> userIds = users.stream().map(UserEntity::getId).toList();
+    Map<String, UserProductEntity> userProductMap =
+        product != null
+            ? userProductService.findByUserIdInAndProduct(userIds, product).stream()
+                .collect(Collectors.toMap(UserProductEntity::getUserId, up -> up))
+            : Map.of();
+
     List<Department> sessionDepartments = sessionUser.getDepartments();
-    return userService.findAccessibleUser(targetRoles).stream()
-        .map(u -> UserMapper.toResponse(u, enumFacade))
+    return users.stream()
+        .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), enumFacade))
         .filter(
             user -> {
-              if (sessionDepartments.contains(Department.ALL)) {
+              if (sessionDepartments == null || sessionDepartments.contains(Department.ALL)) {
                 return true;
               }
               return user.getDepartmentsList().stream().anyMatch(sessionDepartments::contains);
@@ -115,17 +132,33 @@ public class UserDefinitionFacade {
             companyGroup.getId(),
             company.getId(),
             request,
-            passwordEncoder.encode(generatedPassword),
-            getDepartments(request));
+            passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
+
+    // Product context'i token'dan al
+    ApplicationProduct product = IJwtService.findSessionUserOrThrow().getApplicationProduct();
+    UserProductEntity savedUserProduct = null;
+    if (product != null && request.applicationRole() != null) {
+      UserProductEntity userProduct =
+          UserProductEntity.builder()
+              .userId(savedUserEntity.getId())
+              .product(product)
+              .applicationRole(request.applicationRole())
+              .departments(DelimitedStringUtil.join(getDepartments(request)))
+              .active(true)
+              .build();
+      savedUserProduct = userProductService.save(userProduct);
+    }
+
     notifyNewPassword(
         INITIAL_PASSWORD,
         savedUserEntity,
+        savedUserProduct,
         managerUser,
         generatedPassword,
         companyGroup.getName(),
         company.getCompanyName());
-    return UserMapper.toResponse(savedUserEntity, enumFacade);
+    return UserMapper.toResponse(savedUserEntity, savedUserProduct, enumFacade);
   }
 
   private List<Department> getDepartments(UserSaveRequest request) {
@@ -139,6 +172,7 @@ public class UserDefinitionFacade {
   private void notifyNewPassword(
       MailTemplate mailTemplate,
       UserEntity createdUserEntity,
+      UserProductEntity userProduct,
       UserEntity managerUserEntity,
       String generatedPassword,
       String companyGroupName,
@@ -147,7 +181,8 @@ public class UserDefinitionFacade {
     List<String> ccAddress = new ArrayList<>();
     List<String> bccAddress = new ArrayList<>();
     boolean activateManagerNote = false;
-    UserDefinitionResponse createdUser = UserMapper.toResponse(createdUserEntity, enumFacade);
+    UserDefinitionResponse createdUser =
+        UserMapper.toResponse(createdUserEntity, userProduct, enumFacade);
     if (createdUserEntity.getEmail() == null || createdUserEntity.getEmail().isBlank()) {
       toAddress.add(managerUserEntity.getEmail());
       activateManagerNote = true;
@@ -162,7 +197,9 @@ public class UserDefinitionFacade {
     mailParams.put(TEMPORARY_PASSWORD, generatedPassword);
     mailParams.put(ACTIVATE_MANAGER_NOTE, activateManagerNote);
     mailParams.put(MANAGER_FULL_NAME, managerUserEntity.getFullName());
-    mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
+    if (createdUser.getApplicationRole() != null) {
+      mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
+    }
     mailParams.put(
         DEPARTMENT, createdUser.getDepartments().stream().map(ResolvedEnum::getDisplay).toList());
     if (createdUser.getZone() != null) {
@@ -176,36 +213,43 @@ public class UserDefinitionFacade {
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
     boolean isAuthorized;
     String username = IJwtService.findSessionUserOrThrow().username();
-    UserEntity sessionUser = userService.findUserByUserName(username);
-    if (sessionUser == null) {
+    UserEntity sessionUserEntity = userService.findUserByUserName(username);
+    SessionUser sessionUser = IJwtService.findSessionUser();
+    if (sessionUserEntity == null) {
       if (!adminRegistrationEnabled) {
         throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
       }
       isAuthorized =
           request.departments().contains(Department.ALL)
+              && request.applicationRole() != null
               && request.applicationRole().isAdministrator();
     } else {
-      isAuthorized = sessionUser.getApplicationRole().isSupervisorAndAbove();
+      ApplicationRole sessionRole = sessionUser != null ? sessionUser.getApplicationRole() : null;
+      isAuthorized = sessionRole != null && sessionRole.isSupervisorAndAbove();
     }
 
     if (!isAuthorized) {
       throw new AccessDeniedException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
     }
-    if (sessionUser == null || sessionUser.getEmail() == null || sessionUser.getEmail().isBlank()) {
+    if (sessionUserEntity == null
+        || sessionUserEntity.getEmail() == null
+        || sessionUserEntity.getEmail().isBlank()) {
       throw new ValidationException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION, "User email is required");
     }
-    return sessionUser;
+    return sessionUserEntity;
   }
 
   private CompanyEntity getRegistrationCompany(UserSaveRequest request) {
-
     SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUser == null || request.applicationRole().isZoneManagerAndAbove()) {
+    if (sessionUser == null
+        || (request.applicationRole() != null
+            && request.applicationRole().isZoneManagerAndAbove())) {
       return new CompanyEntity();
     }
 
-    if (sessionUser.getApplicationRole().isCompanyManagerAndAbove()) {
+    if (sessionUser.getApplicationRole() != null
+        && sessionUser.getApplicationRole().isCompanyManagerAndAbove()) {
       return companyService.findByIdOrThrow(request.companyId());
     }
 
@@ -214,10 +258,12 @@ public class UserDefinitionFacade {
 
   private CompanyGroupEntity getRegistrationCompanyGroup(UserSaveRequest request) {
     SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUser == null || request.applicationRole().isAdministrator()) {
+    if (sessionUser == null
+        || (request.applicationRole() != null && request.applicationRole().isAdministrator())) {
       return new CompanyGroupEntity();
     }
-    if (request.applicationRole().isGroupManagerOrZoneManager()) {
+    if (request.applicationRole() != null
+        && request.applicationRole().isGroupManagerOrZoneManager()) {
       if (request.companyGroupId() == null) {
         throw new ValidationException(
             ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
@@ -236,8 +282,18 @@ public class UserDefinitionFacade {
   }
 
   public UserDefinitionResponse toggleUser(String userId) {
-    UserEntity toggledEntity = userService.toggleUser(userId);
-    return UserMapper.toResponse(toggledEntity, enumFacade);
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    ApplicationProduct product = sessionUser.getApplicationProduct();
+
+    UserProductEntity userProduct =
+        userProductService
+            .findByUserIdAndProduct(userId, product)
+            .orElseThrow(() -> new AccessDeniedException(ErrorCode.ACCESS_DENIED));
+    userProduct.setActive(!userProduct.isActive());
+    UserProductEntity updatedProduct = userProductService.save(userProduct);
+
+    UserEntity userEntity = userService.findById(userId);
+    return UserMapper.toResponse(userEntity, updatedProduct, enumFacade);
   }
 
   public void sendOtp(final String userId) {
@@ -266,7 +322,13 @@ public class UserDefinitionFacade {
               .orElse("");
     }
     notifyNewPassword(
-        RESET_PASSWORD, userEntity, managerUser, generatedPassword, companyGroupName, companyName);
+        RESET_PASSWORD,
+        userEntity,
+        null,
+        managerUser,
+        generatedPassword,
+        companyGroupName,
+        companyName);
   }
 
   public void changePassword(final PasswordChangeRequest request) {
@@ -290,6 +352,7 @@ public class UserDefinitionFacade {
   public List<ResolvedEnum> findAllApplicationRoles() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     ApplicationRole sessionRole = sessionUser.getApplicationRole();
+    if (sessionRole == null) return List.of();
 
     return enumFacade.getDropdownValues(ApplicationRole.class).stream()
         .filter(
@@ -378,5 +441,15 @@ public class UserDefinitionFacade {
     UserEntity userEntity = userService.findById(userId);
     userEntity.setLanguage(request.language());
     userService.updateUser(userEntity);
+  }
+
+  private UserProductEntity resolveUserProduct(String userId) {
+    SessionUser sessionUser = IJwtService.findSessionUser();
+    if (sessionUser != null && sessionUser.getApplicationProduct() != null) {
+      return userProductService
+          .findByUserIdAndProduct(userId, sessionUser.getApplicationProduct())
+          .orElse(null);
+    }
+    return null;
   }
 }
