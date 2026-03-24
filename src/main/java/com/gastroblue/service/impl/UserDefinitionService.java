@@ -4,8 +4,8 @@ import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.ProductRole;
 import com.gastroblue.repository.UserRepository;
 import com.gastroblue.service.IJwtService;
 import java.time.LocalDateTime;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDefinitionService {
 
   private final UserRepository userRepository;
-  private final UserProductService userProductService;
 
   public UserEntity updateUser(UserEntity userEntity) {
     return userRepository.save(userEntity);
@@ -57,8 +56,7 @@ public class UserDefinitionService {
                     String.format("User not found (username=%s)", username)));
   }
 
-  public List<UserEntity> findAccessibleUser(
-      Set<ProductRole> productRoles, ApplicationProduct product) {
+  public List<UserEntity> findAccessibleUser(Set<ApplicationRole> applicationRole) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
 
     List<String> normalizedCompanyIds =
@@ -66,12 +64,11 @@ public class UserDefinitionService {
             ? null
             : sessionUser.companyIds();
 
-    Set<ProductRole> normalizedRoles =
-        (productRoles == null || productRoles.isEmpty()) ? null : productRoles;
+    Set<ApplicationRole> normalizedRoles =
+        (applicationRole == null || applicationRole.isEmpty()) ? null : applicationRole;
 
     return userRepository
-        .findAccessibleUsers(
-            sessionUser.companyGroupId(), product, normalizedCompanyIds, normalizedRoles)
+        .findAccessibleUsers(sessionUser.companyGroupId(), normalizedCompanyIds, normalizedRoles)
         .stream()
         .toList();
   }
@@ -82,16 +79,14 @@ public class UserDefinitionService {
     return userRepository.save(entityToBeUpdated);
   }
 
-  public void signEula(String username, ApplicationProduct product) {
-    UserEntity user = findUserByUserName(username);
-    userProductService.updateEulaAcceptedAt(user.getId(), product);
+  public void signEula(String username) {
+    UserEntity entityToBeUpdated = findUserByUserName(username);
+    entityToBeUpdated.setEulaAcceptedAt(LocalDateTime.now());
+    userRepository.save(entityToBeUpdated);
   }
 
   @Transactional
-  public void updateLoginStats(String username, String userId, ApplicationProduct product) {
-    userRepository.updatePasswordCheckAfterLogin(username, LocalDateTime.now());
-    if (product != null && userId != null) {
-      userProductService.updateLastSuccessLogin(userId, product);
-    }
+  public void updateLoginStats(String username, ApplicationProduct product) {
+    userRepository.updateUserAfterSuccessfulLogin(username, product, LocalDateTime.now());
   }
 }

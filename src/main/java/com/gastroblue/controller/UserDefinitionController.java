@@ -85,9 +85,9 @@ public class UserDefinitionController {
     return ResponseEntity.ok(userFacade.findAccessibleUsers(includeAll));
   }
 
-  @GetMapping("dropdown/product-roles")
-  public ResponseEntity<List<ResolvedEnum>> findAllProductRoles() {
-    return ResponseEntity.ok(userFacade.findAllProductRoles());
+  @GetMapping("dropdown/application-roles")
+  public ResponseEntity<List<ResolvedEnum>> findAllApplicationRoles() {
+    return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")

@@ -22,8 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails;
     name = "USERS",
     uniqueConstraints = {@UniqueConstraint(name = "UK_USERS", columnNames = "USERNAME")},
     indexes = {
-        @Index(name = "IDX_USERS", columnList = "USERNAME"),
-        @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")})
+      @Index(name = "IDX_USERS", columnList = "USERNAME"),
+      @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")
+    })
 public class UserEntity extends Auditable implements UserDetails {
 
   @Column(name = "COMPANY_ID", length = 36)
@@ -46,8 +47,11 @@ public class UserEntity extends Auditable implements UserDetails {
   private Language language;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "SYSTEM_ROLE", length = 20)
-  private SystemRole systemRole;
+  @Column(name = "APPLICATION_ROLE", length = 50)
+  private ApplicationRole applicationRole;
+
+  @Column(name = "DEPARTMENTS", length = 1000, nullable = false)
+  private String departments;
 
   @Column(name = "IS_ACTIVE")
   private boolean active;
@@ -69,6 +73,16 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "ZONE", length = 10)
   private Zone zone;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "LAST_SUCCESS_LOGIN_PRODUCT")
+  private ApplicationProduct lastSuccessLoginProduct;
+
+  @Column(name = "LAST_SUCCESS_LOGIN")
+  private LocalDateTime lastSuccessLogin;
+
+  @Column(name = "EULA_ACCEPTED_AT")
+  private LocalDateTime eulaAcceptedAt;
+
   @Column(name = "PASSWORD_CHANGE_REQUIRED", nullable = false)
   private boolean passwordChangeRequired;
 
@@ -77,7 +91,7 @@ public class UserEntity extends Auditable implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_" + systemRole.name()));
+    return List.of(new SimpleGrantedAuthority("ROLE_" + applicationRole.name()));
   }
 
   @Override

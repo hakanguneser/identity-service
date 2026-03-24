@@ -27,8 +27,11 @@ import lombok.NoArgsConstructor;
           columnNames = {"COMPANY_GROUP_ID", "ENUM_TYPE", "LANGUAGE", "ENUM_KEY"})
     },
     indexes = {
-        @Index(name = "IDX_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID"),
-        @Index(name = "IDX_ENUM_CONFIG_TYPE_LANG_GROUP", columnList = "ENUM_TYPE, LANGUAGE, COMPANY_GROUP_ID")})
+      @Index(name = "IDX_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID"),
+      @Index(
+          name = "IDX_ENUM_CONFIG_TYPE_LANG_GROUP",
+          columnList = "ENUM_TYPE, LANGUAGE, COMPANY_GROUP_ID")
+    })
 public class EnumValueConfigurationEntity extends Auditable {
   @Column(name = "COMPANY_GROUP_ID", length = 36)
   private String companyGroupId;

@@ -2,7 +2,7 @@ package com.gastroblue.repository;
 
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ProductRole;
+import com.gastroblue.model.enums.ApplicationRole;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,28 +18,28 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
   @Query(
       """
-      select u from UserEntity u
-      where u.companyGroupId = :companyGroupId
-        and (coalesce(:companyIdList, null) is null or u.companyId in :companyIdList)
-        and u.id in (
-          select up.userId from UserProductEntity up
-          where up.product = :product
-            and (coalesce(:productRoleList, null) is null or up.productRole in :productRoleList)
-        )
-      """)
+                    select u
+                    from UserEntity u
+                    where u.companyGroupId = :companyGroupId
+                      and (coalesce(:companyIdList, null) is null  or u.companyId in :companyIdList)
+                      and (coalesce(:applicationRoleList, null) is null or u.applicationRole in :applicationRoleList)
+                    """)
   List<UserEntity> findAccessibleUsers(
       @Param("companyGroupId") String companyGroupId,
-      @Param("product") ApplicationProduct product,
       @Param("companyIdList") List<String> companyIdList,
-      @Param("productRoleList") Set<ProductRole> productRoleList);
+      @Param("applicationRoleList") Set<ApplicationRole> applicationRoleList);
 
   @Modifying
   @Query(
       """
-      update UserEntity u
-      set u.passwordChangeRequired = case when (u.passwordExpiresAt is null or u.passwordExpiresAt < :now) then true else u.passwordChangeRequired end
-      where u.username = :username
-      """)
-  void updatePasswordCheckAfterLogin(
-      @Param("username") String username, @Param("now") LocalDateTime now);
+                    update UserEntity u
+                    set u.lastSuccessLogin = :now,
+                        u.lastSuccessLoginProduct = :lastSuccessLoginProduct,
+                        u.passwordChangeRequired = case when (u.passwordExpiresAt is null or u.passwordExpiresAt < :now) then true else u.passwordChangeRequired end
+                    where u.username = :username
+                    """)
+  void updateUserAfterSuccessfulLogin(
+      @Param("username") String username,
+      @Param("lastSuccessLoginProduct") ApplicationProduct lastSuccessLoginProduct,
+      @Param("now") LocalDateTime now);
 }

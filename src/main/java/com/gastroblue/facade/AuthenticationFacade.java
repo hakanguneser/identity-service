@@ -9,16 +9,13 @@ import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.*;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.UserEntity;
-import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.SystemRole;
 import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +41,6 @@ public class AuthenticationFacade {
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
   private final CompanyGroupProductService companyGroupProductService;
-  private final UserProductService userProductService;
 
   @Value("${application.security.jwt.token-validity-in-minutes}")
   private Long jwtTokenValidityMinutes;
@@ -67,23 +63,11 @@ public class AuthenticationFacade {
       log.error("Authentication failed unexpectedly: {}", e.getMessage(), e);
       throw e;
     }
-
-    UserProductEntity userProduct =
-        loginRequest.product() != ApplicationProduct.ADMIN_PANEL
-            ? userProductService
-                .findByUserIdAndProduct(userEntity.getId(), loginRequest.product())
-                .orElse(null)
-            : null;
-
-    userService.updateLoginStats(
-        userEntity.getUsername(), userEntity.getId(), loginRequest.product());
+    updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
     ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
     HashMap<String, Object> extraClaims =
         IJwtService.toExtraClaims(
-            userEntity,
-            userProduct,
-            loginRequest.product(),
-            getResponsibleCompanyIds(userEntity, userProduct));
+            userEntity, loginRequest.product(), getResponsibleCompanyIds(userEntity));
     String token =
         jwtService.generateToken(
             userEntity.getUsername(),
@@ -94,17 +78,13 @@ public class AuthenticationFacade {
             userEntity.getUsername(),
             extraClaims,
             TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
-
-    boolean eulaRequired =
-        userProduct == null
-            || userProduct.getEulaAcceptedAt() == null
-            || userProduct.getEulaAcceptedAt().isBefore(LocalDateTime.now());
-
     return AuthLoginResponse.builder()
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .eulaRequired(eulaRequired)
+        .eulaRequired(
+            userEntity.getEulaAcceptedAt() == null
+                || userEntity.getEulaAcceptedAt().isBefore(java.time.LocalDateTime.now()))
         .apiInfo(apiInfo)
         .build();
   }
@@ -124,17 +104,7 @@ public class AuthenticationFacade {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AuthUserInfoResponse response = new AuthUserInfoResponse();
     UserEntity userEntityByUserName = userService.findUserByUserName(sessionUser.username());
-
-    UserProductEntity userProduct =
-        sessionUser.getApplicationProduct() != null
-            ? userProductService
-                .findByUserIdAndProduct(
-                    userEntityByUserName.getId(), sessionUser.getApplicationProduct())
-                .orElse(null)
-            : null;
-
-    response.setUser(
-        UserMapper.toResponse(userEntityByUserName, userProduct, enumConfigurationFacade));
+    response.setUser(UserMapper.toResponse(userEntityByUserName, enumConfigurationFacade));
     if (sessionUser.companyGroupId() != null) {
       try {
         CompanyGroup companyGroup =
@@ -143,7 +113,7 @@ public class AuthenticationFacade {
       } catch (IllegalDefinitionException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
       }
-      List<Company> companyList;
+      List<Company> companyList = null;
       if (sessionUser.companyIds() != null) {
         companyList =
             companyService.findByBaseIdIn(sessionUser.companyIds()).stream()
@@ -155,8 +125,10 @@ public class AuthenticationFacade {
                 .map(CompanyGroupMapper::toBase)
                 .toList();
       }
+
       response.setCompany(companyList);
     }
+
     return response;
   }
 
@@ -175,8 +147,7 @@ public class AuthenticationFacade {
   }
 
   public void signEula() {
-    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-    userDefinitionService.signEula(sessionUser.username(), sessionUser.getApplicationProduct());
+    userDefinitionService.signEula(IJwtService.findSessionUserOrThrow().username());
   }
 
   public EulaResponse getEula() {
@@ -186,7 +157,7 @@ public class AuthenticationFacade {
   }
 
   private ApiInfoDto getApiInfo(UserEntity userEntity, ApplicationProduct product) {
-    if (userEntity.getSystemRole() == SystemRole.ADMIN
+    if (userEntity.getApplicationRole().isAdministrator()
         || product == ApplicationProduct.ADMIN_PANEL) {
       return ApiInfoDto.builder().build();
     }
@@ -212,17 +183,18 @@ public class AuthenticationFacade {
     return ApiInfoDto.builder().url(url).version(version).build();
   }
 
-  private List<String> getResponsibleCompanyIds(
-      UserEntity userEntity, UserProductEntity userProduct) {
-    if (userEntity.getSystemRole() == SystemRole.ADMIN) return List.of();
-    if (userProduct == null) return List.of();
-    return switch (userProduct.getProductRole()) {
-      case GROUP_MANAGER -> List.of();
+  private List<String> getResponsibleCompanyIds(UserEntity sessionUser) {
+    return switch (sessionUser.getApplicationRole()) {
+      case ADMIN, GROUP_MANAGER -> List.of();
       case ZONE_MANAGER ->
-          companyService.findByCompanyGroupId(userEntity.getCompanyGroupId()).stream()
+          companyService.findByCompanyGroupId(sessionUser.getCompanyGroupId()).stream()
               .map(CompanyEntity::getId)
               .toList();
-      default -> List.of(userEntity.getCompanyId());
+      default -> List.of(sessionUser.getCompanyId());
     };
+  }
+
+  private void updateUserAfterSuccessfulLogin(UserEntity userEntity, ApplicationProduct product) {
+    userService.updateLoginStats(userEntity.getUsername(), product);
   }
 }

@@ -5,7 +5,6 @@ import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
-import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.ErrorCode;
@@ -17,8 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public interface IJwtService {
   String ANONYMOUS_USER = "anonymousUser";
 
-  String JWT_SYSTEM_ROLE = "sRole";
-  String JWT_PRODUCT_ROLE = "pRole";
+  String JWT_ROLE = "role";
   String JWT_COMPANY_GROUP_ID = "cgId";
   String JWT_LANGUAGE = "lang";
   String JWT_COMPANY_IDS = "cIds";
@@ -32,8 +30,7 @@ public interface IJwtService {
   static HashMap<String, Object> toExtraClaims(SessionUser sessionUser) {
     HashMap<String, Object> extraClaims = new HashMap<>();
     extraClaims.put(JWT_COMPANY_GROUP_ID, sessionUser.companyGroupId());
-    extraClaims.put(JWT_SYSTEM_ROLE, sessionUser.systemRole());
-    extraClaims.put(JWT_PRODUCT_ROLE, sessionUser.productRole());
+    extraClaims.put(JWT_ROLE, sessionUser.applicationRole());
     extraClaims.put(JWT_COMPANY_IDS, sessionUser.companyIds());
     extraClaims.put(JWT_APPLICATION_PRODUCT, sessionUser.applicationProduct());
     extraClaims.put(JWT_LANGUAGE, sessionUser.language());
@@ -42,22 +39,15 @@ public interface IJwtService {
   }
 
   static HashMap<String, Object> toExtraClaims(
-      UserEntity userEntity,
-      UserProductEntity userProduct,
-      ApplicationProduct product,
-      List<String> companyIds) {
+      UserEntity userEntity, ApplicationProduct product, List<String> companyIds) {
     HashMap<String, Object> extraClaims = new HashMap<>();
     extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
-    extraClaims.put(JWT_SYSTEM_ROLE, userEntity.getSystemRole());
-    extraClaims.put(JWT_PRODUCT_ROLE, userProduct != null ? userProduct.getProductRole() : null);
+    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
     extraClaims.put(JWT_COMPANY_IDS, companyIds);
     extraClaims.put(JWT_APPLICATION_PRODUCT, product);
     extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
     extraClaims.put(
-        JWT_DEPARTMENTS,
-        userProduct != null
-            ? splitToEnumList(userProduct.getDepartments(), Department.class)
-            : List.of());
+        JWT_DEPARTMENTS, splitToEnumList(userEntity.getDepartments(), Department.class));
     return extraClaims;
   }
 

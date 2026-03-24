@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gastroblue.config.tracing.TraceIdConstants;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.SystemRole;
 import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.service.IJwtService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER = "Bearer ";
 
   private final IJwtService jwtService;
-  private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Value("${application.security.jwt.sys-tokens.tt}")
   private String ttToken;
@@ -73,8 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           sessionUser =
               new SessionUser(
                   ApplicationProduct.TRACKER.name(),
-                  SystemRole.APP_CLIENT.name(),
-                  null,
+                  ApplicationRole.APP_CLIENT.name(),
                   List.of(),
                   null,
                   List.of(),

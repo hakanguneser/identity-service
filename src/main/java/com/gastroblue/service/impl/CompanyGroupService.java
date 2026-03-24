@@ -66,13 +66,12 @@ public class CompanyGroupService {
 
   public List<CompanyGroupEntity> findMyCompanyGroups() {
     SessionUser user = IJwtService.findSessionUserOrThrow();
-    if (user.isAdmin()) {
-      return findAll();
-    }
-    if (user.companyGroupId() != null) {
-      return List.of(findByIdOrThrow(user.companyGroupId()));
-    }
-    return List.of();
+    return switch (user.getApplicationRole()) {
+      case ADMIN -> findAll();
+      case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR ->
+          List.of(findByIdOrThrow(user.companyGroupId()));
+      default -> null;
+    };
   }
 
   public CompanyGroup findCompanyByIdOrThrow(String companyGroupId) {

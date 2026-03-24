@@ -58,8 +58,7 @@ public class JwtService implements IJwtService {
     Claims claims = extractAllClaims(token);
     return new SessionUser(
         claims.get(JWT_APPLICATION_PRODUCT, String.class),
-        claims.get(JWT_SYSTEM_ROLE, String.class),
-        claims.get(JWT_PRODUCT_ROLE, String.class),
+        claims.get(JWT_ROLE, String.class),
         getClaimList(claims, JWT_DEPARTMENTS),
         claims.get(JWT_COMPANY_GROUP_ID, String.class),
         getClaimList(claims, JWT_COMPANY_IDS),
