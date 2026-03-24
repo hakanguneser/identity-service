@@ -135,8 +135,8 @@ public class UserDefinitionFacade {
             passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
 
-    // Product context'i token'dan al
-    ApplicationProduct product = IJwtService.findSessionUserOrThrow().getApplicationProduct();
+    ApplicationProduct product = getApplicationProduct(request.product()) ;
+
     UserProductEntity savedUserProduct = null;
     if (product != null && request.applicationRole() != null) {
       UserProductEntity userProduct =
@@ -159,6 +159,23 @@ public class UserDefinitionFacade {
         companyGroup.getName(),
         company.getCompanyName());
     return UserMapper.toResponse(savedUserEntity, savedUserProduct, enumFacade);
+  }
+
+  private static ApplicationProduct getApplicationProduct(ApplicationProduct requestedProduct  ) {
+
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    ApplicationProduct product = sessionUser.getApplicationProduct();
+    if (sessionUser.getApplicationRole().isAdministrator()){
+      if (requestedProduct  == null){
+        throw new ValidationException(
+            ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
+            String.format(
+                "Requested user %s has Admin role, but no product is assigned. ApplicationRole: %s, companyGroupId is null",
+                    sessionUser.username(), sessionUser.applicationRole()));
+      }
+      product = requestedProduct;
+    }
+    return product;
   }
 
   private List<Department> getDepartments(UserSaveRequest request) {
@@ -200,6 +217,7 @@ public class UserDefinitionFacade {
     if (createdUser.getApplicationRole() != null) {
       mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
     }
+
     mailParams.put(
         DEPARTMENT, createdUser.getDepartments().stream().map(ResolvedEnum::getDisplay).toList());
     if (createdUser.getZone() != null) {

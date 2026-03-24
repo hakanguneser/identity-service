@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,16 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER = "Bearer ";
 
   private final IJwtService jwtService;
+  private final Map<String, ApplicationProduct> sysTokenProductMap;
   private final ObjectMapper objectMapper = new ObjectMapper();
-
-  @Value("${application.security.jwt.sys-tokens.tt}")
-  private String ttToken;
-
-  @Value("${application.security.jwt.sys-tokens.ff}")
-  private String ffToken;
-
-  @Value("${application.security.jwt.sys-tokens.admin}")
-  private String adminToken;
 
   @Override
   protected void doFilterInternal(
@@ -74,22 +66,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        SessionUser sessionUser;
-        if (jwtToken.equals(ttToken) || jwtToken.equals(ffToken) || jwtToken.equals(adminToken)) {
-          sessionUser =
-              new SessionUser(
-                  ApplicationProduct.TRACKER.name(),
-                  ApplicationRole.APP_CLIENT.name(),
-                  List.of(),
-                  null,
-                  List.of(),
-                  "TR",
-                  "TT",
-                  new Date(),
-                  new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 365));
-        } else {
-          sessionUser = jwtService.validateAndExtractToken(jwtToken);
-        }
+        SessionUser sessionUser =
+            sysTokenProductMap.containsKey(jwtToken)
+                ? buildSysTokenSession(sysTokenProductMap.get(jwtToken))
+                : jwtService.validateAndExtractToken(jwtToken);
 
         // Log parsed, non-sensitive claims only — the raw token is never emitted
         log.debug(
@@ -119,6 +99,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     filterChain.doFilter(request, response);
+  }
+
+  private SessionUser buildSysTokenSession(ApplicationProduct product) {
+    ApplicationRole role =
+        product == ApplicationProduct.CHECK ? ApplicationRole.ADMIN : ApplicationRole.APP_CLIENT;
+    Date now = new Date();
+    Date expiresAt = new Date(now.getTime() + 1000L * 60 * 60 * 24 * 365);
+    return new SessionUser(
+        product.name(),
+        role.name(),
+        List.of(),
+        null,
+        List.of(),
+        "TR",
+        product.name(),
+        now,
+        expiresAt);
   }
 
   private void writeJsonError(HttpServletResponse response, HttpStatus status, ErrorCode errorCode)

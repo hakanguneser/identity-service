@@ -17,7 +17,6 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -95,15 +94,11 @@ public class AuthenticationFacade {
             extraClaims,
             TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
 
-    boolean eulaRequired =
-        userProduct.getEulaAcceptedAt() == null
-            || userProduct.getEulaAcceptedAt().isBefore(LocalDateTime.now());
-
     return AuthLoginResponse.builder()
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .eulaRequired(eulaRequired)
+        .eulaRequired(userProduct.getEulaAcceptedAt() == null)
         .apiInfo(apiInfo)
         .build();
   }
@@ -176,6 +171,9 @@ public class AuthenticationFacade {
   public void signEula() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity user = userDefinitionService.findUserByUserName(sessionUser.username());
+    userProductService
+        .findByUserIdAndProduct(user.getId(), sessionUser.getApplicationProduct())
+        .orElseThrow();
     userProductService.updateEulaAcceptedAt(user.getId(), sessionUser.getApplicationProduct());
   }
 

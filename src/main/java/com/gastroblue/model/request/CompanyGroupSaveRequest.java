@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import java.util.List;
+import java.util.Set;
 
 public record CompanyGroupSaveRequest(
     @NotBlank(message = "{validation.companyGroupName.check.blank}") String name,
@@ -12,14 +12,20 @@ public record CompanyGroupSaveRequest(
         @Pattern(regexp = "^[A-Z0-9_]+$", message = "{validation.companyGroupCode.pattern}")
         String groupCode,
     @Valid
-        List<
-                @NotBlank(message = "validation.email.check.blank")
+        Set<
+                @NotBlank(message = "{validation.email.check.blank}")
                 @Email(message = "{validation.email}")
-                @Pattern(regexp = "^[^A-Z\\s]+$", message = "{validation.email.lowercase}") String>
+                @Pattern(
+                    regexp = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$",
+                    message = "{validation.email.lowercase}")
+                String>
             groupMails,
     String logoUrl,
     @Valid
-        List<
-                @Pattern(regexp = "^[^A-Z\\s]+$", message = "{validation.domain.lowercase}")
-                @NotBlank(message = "{validation.domain.check.blank}") String>
+        Set<
+                @NotBlank(message = "{validation.domain.check.blank}")
+                @Pattern(
+                    regexp = "^[a-z0-9.-]+\\.[a-z]{2,}$",
+                    message = "{validation.domain.lowercase}")
+                String>
             mailDomains) {}
