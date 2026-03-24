@@ -31,8 +31,8 @@ public class EnumConfigurationService {
    * query, merges them (override wins), then filters to active-only entries.
    *
    * <p>If no global defaults exist for this enum type and language, they are <b>auto-seeded</b>
-   * from the enum's own constants using {@link ConfigurableEnum#getDefaultLabel()} so callers
-   * never receive an empty dropdown on first use.
+   * from the enum's own constants using {@link ConfigurableEnum#getDefaultLabel()} so callers never
+   * receive an empty dropdown on first use.
    */
   @Transactional
   @Cacheable(
