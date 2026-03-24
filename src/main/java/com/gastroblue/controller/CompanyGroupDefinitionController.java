@@ -7,6 +7,7 @@ import com.gastroblue.model.request.*;
 import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.response.CompanyGroupProductResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -38,6 +39,34 @@ public class CompanyGroupDefinitionController {
             .buildAndExpand(created.getCompanyGroupId())
             .toUri();
     return ResponseEntity.created(location).body(created);
+  }
+
+  @GetMapping("/{companyGroupId}/products")
+  public ResponseEntity<List<CompanyGroupProductResponse>> findCompanyGroupProducts(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyFacade.findCompanyGroupProducts(companyGroupId));
+  }
+
+  @PostMapping("/{companyGroupId}/products")
+  public ResponseEntity<CompanyGroupProductResponse> saveCompanyGroupProduct(
+      @PathVariable(name = "companyGroupId") final String companyGroupId,
+      @Valid @RequestBody final CompanyGroupProductSaveRequest request) {
+    var created = companyFacade.saveCompanyGroupProduct(companyGroupId, request);
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{product}")
+            .buildAndExpand(created.getProduct())
+            .toUri();
+    return ResponseEntity.created(location).body(created);
+  }
+
+  @PutMapping("/{companyGroupId}/products/{product}")
+  public ResponseEntity<CompanyGroupProductResponse> updateCompanyGroupProduct(
+      @PathVariable(name = "companyGroupId") final String companyGroupId,
+      @PathVariable(name = "product") final ApplicationProduct product,
+      @Valid @RequestBody final CompanyGroupProductUpdateRequest request) {
+    return ResponseEntity.ok(
+        companyFacade.updateCompanyGroupProduct(companyGroupId, product, request));
   }
 
   @GetMapping("/{companyGroupId}")
@@ -93,6 +122,15 @@ public class CompanyGroupDefinitionController {
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "companyId") final String companyId) {
     return ResponseEntity.ok(companyFacade.toggleCompanyStatus(companyGroupId, companyId));
+  }
+
+  @PatchMapping("/{companyGroupId}/companies/{companyId}/products/{product}/toggle")
+  public ResponseEntity<CompanyDefinitionResponse> toggleCompanyProduct(
+      @PathVariable(name = "companyGroupId") final String companyGroupId,
+      @PathVariable(name = "companyId") final String companyId,
+      @PathVariable(name = "product") final ApplicationProduct product) {
+    return ResponseEntity.ok(
+        companyFacade.toggleCompanyProduct(companyGroupId, companyId, product));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/zones")

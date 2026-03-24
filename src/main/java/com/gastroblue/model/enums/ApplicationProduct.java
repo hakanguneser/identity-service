@@ -4,6 +4,7 @@ import java.util.Locale;
 
 public enum ApplicationProduct {
   ADMIN_PANEL,
+  CHECK,
   FORMFLOW,
   TRACKER;
 

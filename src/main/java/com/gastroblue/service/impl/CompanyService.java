@@ -2,6 +2,7 @@ package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.entity.CompanyEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.CompanyRepository;
 import java.util.List;
@@ -76,5 +77,16 @@ public class CompanyService {
 
   public Optional<CompanyEntity> findByCompanyCode(String companyCode) {
     return companyRepository.findByCompanyCode(companyCode);
+  }
+
+  public CompanyEntity toggleProductEnabled(
+      String companyGroupId, String companyId, ApplicationProduct product) {
+    CompanyEntity entity = findByCompanyGroupIdAndId(companyGroupId, companyId);
+    switch (product) {
+      case CHECK -> entity.setCheckEnabled(!entity.isCheckEnabled());
+      case FORMFLOW -> entity.setFormflowEnabled(!entity.isFormflowEnabled());
+      case TRACKER -> entity.setTrackerEnabled(!entity.isTrackerEnabled());
+    }
+    return companyRepository.save(entity);
   }
 }

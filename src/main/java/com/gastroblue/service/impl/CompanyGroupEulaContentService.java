@@ -110,7 +110,15 @@ public class CompanyGroupEulaContentService {
             sessionUser.getApplicationProduct(),
             sessionUser.getLanguage(),
             LocalDate.now())
-        .orElseThrow()
+        .orElseThrow(
+            () ->
+                new IllegalDefinitionException(
+                    ErrorCode.EULA_CONTENT_NOT_FOUND,
+                    String.format(
+                        "No active EULA content for companyGroupId=%s product=%s language=%s",
+                        sessionUser.companyGroupId(),
+                        sessionUser.getApplicationProduct(),
+                        sessionUser.getLanguage())))
         .getContent();
   }
 }
