@@ -66,23 +66,21 @@ public class AuthenticationFacade {
       throw e;
     }
 
+    ApplicationProduct product = ApplicationProduct.TRACKER;
     UserProductEntity userProduct =
         userProductService
-            .findByUserIdAndProduct(userEntity.getId(), loginRequest.product())
+            .findByUserIdAndProduct(userEntity.getId(), product)
             .orElseThrow(() -> new AccessDeniedException(ErrorCode.ACCESS_DENIED));
     if (!userProduct.isActive()) {
       throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
     }
 
     userService.updatePasswordCheckAfterLogin(userEntity.getUsername());
-    userProductService.updateLastSuccessLogin(userEntity.getId(), loginRequest.product());
-    ApiInfoDto apiInfo = getApiInfo(userEntity, userProduct, loginRequest.product());
+    userProductService.updateLastSuccessLogin(userEntity.getId(), product);
+    ApiInfoDto apiInfo = getApiInfo(userEntity, userProduct, product);
     HashMap<String, Object> extraClaims =
         IJwtService.toExtraClaims(
-            userEntity,
-            userProduct,
-            loginRequest.product(),
-            getResponsibleCompanyIds(userEntity, userProduct));
+            userEntity, userProduct, product, getResponsibleCompanyIds(userEntity, userProduct));
     String token =
         jwtService.generateToken(
             userEntity.getUsername(),
