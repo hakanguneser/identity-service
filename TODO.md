@@ -38,6 +38,30 @@ Bu dosya; aktif geliştirme, eksik bırakılan parçalar ve planlanan özellikle
 
 ## İyileştirme
 
+- [ ] **`EnumValueConfigurationEntity` — Segment label ve hiyerarşik enum desteği**
+
+  **1. Segment label'larının companygroup bazında konfigüre edilebilmesi (`SEGMENT_META` convention):**
+  - `CompanyEntity.segment1-5` alanları Java enum'dan (`CompanySegment1Values` vb.) `String`'e dönüştürülmeli
+  - `CompanySegment1Values`, `CompanySegment2Values`, ..., `CompanySegment5Values` Java enum'ları silinmeli
+  - Segment *etiketleri* `EnumValueConfigurationEntity`'de `enumType = "SEGMENT_META"` convention'ı ile saklanacak:
+    - `enumType = "SEGMENT_META"`, `enumKey = "SEGMENT_1"`, `label = "Otel Tipi"` → Hilton için
+    - `enumType = "SEGMENT_META"`, `enumKey = "SEGMENT_1"`, `label = "Şube Kodu"` → başka bir müşteri için
+  - Segment *değerleri* aynı tabloda `enumType = "SEGMENT_1"`, `enumKey = "DELUXE"` vb. ile saklanacak
+  - Company kaydedilirken seçilen segment değerinin, o companygroup'un `EnumValueConfigurationEntity`'sinde var olduğu doğrulanmalı
+  - `enumKey` format validasyonu: `^[A-Z][A-Z0-9]*(_[A-Z][A-Z0-9]*)*$` (mevcut `@ValidItemCode` kullanılabilir)
+
+  **2. `EnumValueConfigurationEntity`'e `parentKey` alanı eklenmesi (N-seviye hiyerarşik cascade desteği):**
+  - `parentKey` nullable `String` (50 karakter) alanı eklenmeli
+  - Root seviye kayıtlar (örn. ülkeler) `parentKey = null`
+  - Alt seviye kayıtlar, üst seviyenin `enumKey`'ini referans alır:
+    - `enumType = "CITY"`, `enumKey = "ISTANBUL"`, `parentKey = "TURKEY"`
+    - `enumType = "DISTRICT"`, `enumKey = "KADIKOY"`, `parentKey = "ISTANBUL"`
+    - `enumType = "NEIGHBOURHOOD"`, `enumKey = "MODA"`, `parentKey = "KADIKOY"`
+  - Cascade dropdown sorgusu: `WHERE enumType = ? AND parentKey = ? AND companyGroupId = ? AND language = ? AND isActive = true`
+  - `EnumConfigurationService`'e `parentKey` bazlı sorgular eklenmeli
+  - `EnumValueConfigurationEntity` unique constraint'i `parentKey` dahil edilecek şekilde güncellenmeli
+  - `parentKey` de `enumKey` ile aynı format kuralına tabi: `^[A-Z][A-Z0-9]*(_[A-Z][A-Z0-9]*)*$`
+
 - [ ] **Kullanıcı hiyerarşisi yetki kontrollerinin sıkılaştırılması**
   - Her kullanıcı yalnızca kendi altındaki role user tanımlayabilmeli (şu anki kontrol yeterli mi?)
   - Zone Manager akışı tam test edilmeli
