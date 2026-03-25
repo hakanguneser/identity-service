@@ -23,6 +23,10 @@ public enum ApplicationRole implements ConfigurableEnum {
     return this == ADMIN;
   }
 
+  public boolean isClient() {
+    return this == APP_CLIENT;
+  }
+
   public boolean isSupervisor() {
     return this == SUPERVISOR;
   }

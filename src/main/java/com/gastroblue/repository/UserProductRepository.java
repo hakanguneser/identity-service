@@ -42,4 +42,16 @@ public interface UserProductRepository extends JpaRepository<UserProductEntity, 
       @Param("userId") String userId,
       @Param("product") ApplicationProduct product,
       @Param("now") LocalDateTime now);
+
+  @Query(
+      """
+      select count(up) from UserProductEntity up
+      where up.userId in (
+          select u.id from UserEntity u where u.companyId = :companyId and u.active = true
+      )
+      and up.product = :product
+      and up.active = true
+      """)
+  long countActiveByCompanyIdAndProduct(
+      @Param("companyId") String companyId, @Param("product") ApplicationProduct product);
 }

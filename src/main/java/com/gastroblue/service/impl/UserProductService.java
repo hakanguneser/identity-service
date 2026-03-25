@@ -39,4 +39,8 @@ public class UserProductService {
   public void updateEulaAcceptedAt(String userId, ApplicationProduct product) {
     userProductRepository.updateEulaAcceptedAt(userId, product, LocalDateTime.now());
   }
+
+  public long countActiveByCompanyIdAndProduct(String companyId, ApplicationProduct product) {
+    return userProductRepository.countActiveByCompanyIdAndProduct(companyId, product);
+  }
 }

@@ -75,7 +75,13 @@ public class GlobalExceptionHelper {
                 || ex.getErrorCode() == EXPIRED_JWT_TOKEN)
             ? HttpStatus.UNAUTHORIZED
             : HttpStatus.FORBIDDEN;
-    log.warn("AccessDeniedException | errorCode={} | status={}", ex.getErrorCode(), status.value());
+    StackTraceElement origin = findThrowOrigin(ex);
+    log.warn(
+        "AccessDeniedException | errorCode={} | status={} | reason={} | at={}",
+        ex.getErrorCode(),
+        status.value(),
+        ex.getMessage(),
+        origin);
     ErrorMessageEntity errorProp =
         errorMessageService.findOrCreatePropertyValue(
             ex.getErrorCode(), IJwtService.getSessionLanguage());
@@ -87,6 +93,7 @@ public class GlobalExceptionHelper {
                 .referenceId(errorProp.getId())
                 .httpStatus(status)
                 .timeStamp(LocalDateTime.now())
+                .debugContext(ex.getMessage())
                 .traceId(currentTraceId())
                 .build());
   }
@@ -265,6 +272,22 @@ public class GlobalExceptionHelper {
    */
   private String currentTraceId() {
     return MDC.get(TraceIdConstants.MDC_TRACE_ID_KEY);
+  }
+
+  /**
+   * Walks the stack trace and returns the first frame from application code (com.gastroblue),
+   * skipping exception and helper classes. This pinpoints exactly where the exception was thrown.
+   */
+  private static StackTraceElement findThrowOrigin(Throwable ex) {
+    for (StackTraceElement frame : ex.getStackTrace()) {
+      String cls = frame.getClassName();
+      if (cls.startsWith("com.gastroblue")
+          && !cls.contains("Exception")
+          && !cls.contains("GlobalException")) {
+        return frame;
+      }
+    }
+    return ex.getStackTrace().length > 0 ? ex.getStackTrace()[0] : null;
   }
 
   private ResponseEntity<Object> badRequest(ApplicationError error) {

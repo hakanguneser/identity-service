@@ -8,20 +8,25 @@ import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
+import com.gastroblue.model.entity.CompanyProductEntity;
 import com.gastroblue.model.enums.*;
 import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
+import com.gastroblue.model.request.CompanyProductSaveRequest;
+import com.gastroblue.model.request.CompanyProductUpdateRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
+import com.gastroblue.model.response.CompanyProductResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.impl.CompanyGroupProductService;
 import com.gastroblue.service.impl.CompanyGroupService;
+import com.gastroblue.service.impl.CompanyProductService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
 import java.util.List;
@@ -40,6 +45,7 @@ public class CompanyGroupDefinitionFacade {
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
   private final CompanyGroupProductService companyGroupProductService;
+  private final CompanyProductService companyProductService;
   private final EnumConfigurationFacade enumConfigurationFacade;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
@@ -188,8 +194,6 @@ public class CompanyGroupDefinitionFacade {
             .companyGroupId(companyGroupId)
             .product(request.product())
             .enabled(request.enabled())
-            .licenseExpiresAt(request.licenseExpiresAt())
-            .agreedUserCount(request.agreedUserCount())
             .apiUrl(request.apiUrl())
             .apiVersion(request.apiVersion())
             .notes(request.notes())
@@ -209,8 +213,6 @@ public class CompanyGroupDefinitionFacade {
     CompanyGroupProductEntity updated =
         CompanyGroupProductEntity.builder()
             .enabled(request.enabled())
-            .licenseExpiresAt(request.licenseExpiresAt())
-            .agreedUserCount(request.agreedUserCount())
             .apiUrl(request.apiUrl())
             .apiVersion(request.apiVersion())
             .notes(request.notes())
@@ -225,6 +227,62 @@ public class CompanyGroupDefinitionFacade {
     return companyGroupProductService.findAllByCompanyGroupId(companyGroupId).stream()
         .map(CompanyGroupMapper::toResponse)
         .toList();
+  }
+
+  public List<CompanyProductResponse> findCompanyProducts(String companyGroupId, String companyId) {
+    companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
+    return companyProductService.findAllByCompanyId(companyId).stream()
+        .map(CompanyGroupMapper::toResponse)
+        .toList();
+  }
+
+  public CompanyProductResponse saveCompanyProduct(
+      String companyGroupId, String companyId, CompanyProductSaveRequest request) {
+    companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
+    companyGroupProductService.findByCompanyGroupIdAndProductOrThrow(
+        companyGroupId, request.product());
+    companyProductService
+        .findByCompanyIdAndProduct(companyId, request.product())
+        .ifPresent(
+            existing -> {
+              throw new IllegalDefinitionException(
+                  ErrorCode.COMPANY_PRODUCT_ALREADY_EXISTS,
+                  "Product already assigned to company: " + request.product());
+            });
+    CompanyProductEntity entity =
+        CompanyProductEntity.builder()
+            .companyId(companyId)
+            .product(request.product())
+            .enabled(request.enabled())
+            .licenseExpiresAt(request.licenseExpiresAt())
+            .agreedUserCount(request.agreedUserCount())
+            .build();
+    return CompanyGroupMapper.toResponse(companyProductService.save(entity));
+  }
+
+  public CompanyProductResponse updateCompanyProduct(
+      String companyGroupId,
+      String companyId,
+      ApplicationProduct product,
+      CompanyProductUpdateRequest request) {
+    companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
+    CompanyProductEntity existing =
+        companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
+    CompanyProductEntity updated =
+        CompanyProductEntity.builder()
+            .enabled(request.enabled())
+            .licenseExpiresAt(request.licenseExpiresAt())
+            .agreedUserCount(request.agreedUserCount())
+            .build();
+    return CompanyGroupMapper.toResponse(companyProductService.update(existing.getId(), updated));
+  }
+
+  public void deleteCompanyProduct(
+      String companyGroupId, String companyId, ApplicationProduct product) {
+    companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
+    CompanyProductEntity existing =
+        companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
+    companyProductService.delete(existing.getId());
   }
 
   public CompanyContextResponse findCompanyAndGroupContext(String groupCode, String companyCode) {

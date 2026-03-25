@@ -9,6 +9,7 @@ import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
+import com.gastroblue.model.entity.CompanyProductEntity;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
@@ -16,6 +17,7 @@ import com.gastroblue.model.response.AuthUserCompanyResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
+import com.gastroblue.model.response.CompanyProductResponse;
 import com.gastroblue.util.DelimitedStringUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -175,11 +177,20 @@ public class CompanyGroupMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .product(entity.getProduct())
         .enabled(entity.getEnabled())
-        .licenseExpiresAt(entity.getLicenseExpiresAt())
-        .agreedUserCount(entity.getAgreedUserCount())
         .apiUrl(entity.getApiUrl())
         .apiVersion(entity.getApiVersion())
         .notes(entity.getNotes())
+        .build();
+  }
+
+  public static CompanyProductResponse toResponse(CompanyProductEntity entity) {
+    return CompanyProductResponse.builder()
+        .id(entity.getId())
+        .companyId(entity.getCompanyId())
+        .product(entity.getProduct())
+        .enabled(entity.getEnabled())
+        .licenseExpiresAt(entity.getLicenseExpiresAt())
+        .agreedUserCount(entity.getAgreedUserCount())
         .build();
   }
 

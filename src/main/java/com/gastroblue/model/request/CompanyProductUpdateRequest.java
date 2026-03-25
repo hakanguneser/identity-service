@@ -1,9 +1,9 @@
 package com.gastroblue.model.request;
 
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 
-public record CompanyGroupProductUpdateRequest(
+public record CompanyProductUpdateRequest(
     @NotNull(message = "{validation.enabled.check.null}") Boolean enabled,
-    String apiUrl,
-    String apiVersion,
-    String notes) {}
+    LocalDate licenseExpiresAt,
+    Integer agreedUserCount) {}

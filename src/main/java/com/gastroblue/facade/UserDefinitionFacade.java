@@ -260,14 +260,14 @@ public class UserDefinitionFacade {
 
   private CompanyEntity getRegistrationCompany(UserSaveRequest request) {
     SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUser == null
-        || (request.applicationRole() != null
-            && request.applicationRole().isZoneManagerAndAbove())) {
+
+    if (request.applicationRole() != null && request.applicationRole().isZoneManagerAndAbove()) {
       return new CompanyEntity();
     }
 
-    if (sessionUser.getApplicationRole() != null
-        && sessionUser.getApplicationRole().isCompanyManagerAndAbove()) {
+    if (sessionUser == null
+        || (sessionUser.getApplicationRole() != null
+            && sessionUser.getApplicationRole().isCompanyManagerAndAbove())) {
       return companyService.findByIdOrThrow(request.companyId());
     }
 
@@ -276,22 +276,24 @@ public class UserDefinitionFacade {
 
   private CompanyGroupEntity getRegistrationCompanyGroup(UserSaveRequest request) {
     SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUser == null
-        || (request.applicationRole() != null && request.applicationRole().isAdministrator())) {
-      return new CompanyGroupEntity();
-    }
-    if (request.applicationRole() != null
-        && request.applicationRole().isGroupManagerOrZoneManager()) {
-      if (request.companyGroupId() == null) {
-        throw new ValidationException(
-            ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
-            String.format(
-                "Requested user %s has GroupManager or ZoneManager role, but no companyGroupId is assigned. ApplicationRole: %s, companyGroupId is null",
-                request.username(), request.applicationRole()));
+
+    // 1. Session ADMIN ise
+    if (sessionUser == null || sessionUser.getApplicationRole().isAdministrator()) {
+      // Request'te de ADMIN tanımlıysa → boş entity dön (admin kaydı)
+      if (request.applicationRole() != null && request.applicationRole().isAdministrator()) {
+        return new CompanyGroupEntity();
       }
-      return companyGroupService.findByIdOrThrow(request.companyGroupId());
+      // Request'te companyGroupId varsa → oradan çek
+      if (request.companyGroupId() != null) {
+        return companyGroupService.findByIdOrThrow(request.companyGroupId());
+      }
+      throw new ValidationException(
+          ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
+          String.format("Requested user %s has no companyGroupId", sessionUser.username()));
     }
-    if (sessionUser.companyGroupId() == null) {
+
+    // 2. Session ADMIN değilse → direkt session'dan çek
+    if (sessionUser.companyGroupId() == null || sessionUser.companyGroupId().isEmpty()) {
       throw new ValidationException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
           String.format("Requested user %s has no companyGroupId", sessionUser.username()));

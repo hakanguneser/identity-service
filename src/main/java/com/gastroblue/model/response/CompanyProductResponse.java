@@ -1,6 +1,7 @@
 package com.gastroblue.model.response;
 
 import com.gastroblue.model.enums.ApplicationProduct;
+import java.time.LocalDate;
 import lombok.*;
 
 @Getter
@@ -9,13 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CompanyGroupProductResponse {
+public class CompanyProductResponse {
 
   private String id;
-  private String companyGroupId;
+  private String companyId;
   private ApplicationProduct product;
   private Boolean enabled;
-  private String apiUrl;
-  private String apiVersion;
-  private String notes;
+  private LocalDate licenseExpiresAt;
+  private Integer agreedUserCount;
 }

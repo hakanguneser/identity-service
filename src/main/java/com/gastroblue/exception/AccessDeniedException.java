@@ -8,4 +8,8 @@ public class AccessDeniedException extends AbstractRuntimeException {
   public AccessDeniedException(ErrorCode errorCode) {
     super(errorCode);
   }
+
+  public AccessDeniedException(ErrorCode errorCode, String debugMessage) {
+    super(errorCode, debugMessage);
+  }
 }

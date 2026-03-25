@@ -8,11 +8,13 @@ import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
+import com.gastroblue.model.response.CompanyProductResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -180,6 +182,45 @@ public class CompanyGroupDefinitionController {
   public ResponseEntity<List<ResolvedEnum>> findSegment5(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyFacade.findSegment5(companyGroupId));
+  }
+
+  @GetMapping("/{companyGroupId}/companies/{companyId}/products")
+  public ResponseEntity<List<CompanyProductResponse>> findCompanyProducts(
+      @PathVariable final String companyGroupId, @PathVariable final String companyId) {
+    return ResponseEntity.ok(companyFacade.findCompanyProducts(companyGroupId, companyId));
+  }
+
+  @PostMapping("/{companyGroupId}/companies/{companyId}/products")
+  public ResponseEntity<CompanyProductResponse> saveCompanyProduct(
+      @PathVariable final String companyGroupId,
+      @PathVariable final String companyId,
+      @Valid @RequestBody final CompanyProductSaveRequest request) {
+    var created = companyFacade.saveCompanyProduct(companyGroupId, companyId, request);
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{product}")
+            .buildAndExpand(created.getProduct())
+            .toUri();
+    return ResponseEntity.created(location).body(created);
+  }
+
+  @PutMapping("/{companyGroupId}/companies/{companyId}/products/{product}")
+  public ResponseEntity<CompanyProductResponse> updateCompanyProduct(
+      @PathVariable final String companyGroupId,
+      @PathVariable final String companyId,
+      @PathVariable final ApplicationProduct product,
+      @Valid @RequestBody final CompanyProductUpdateRequest request) {
+    return ResponseEntity.ok(
+        companyFacade.updateCompanyProduct(companyGroupId, companyId, product, request));
+  }
+
+  @DeleteMapping("/{companyGroupId}/companies/{companyId}/products/{product}")
+  public ResponseEntity<Void> deleteCompanyProduct(
+      @PathVariable final String companyGroupId,
+      @PathVariable final String companyId,
+      @PathVariable final ApplicationProduct product) {
+    companyFacade.deleteCompanyProduct(companyGroupId, companyId, product);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @GetMapping("/context")

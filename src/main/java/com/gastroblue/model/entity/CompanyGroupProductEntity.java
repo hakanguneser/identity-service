@@ -3,7 +3,6 @@ package com.gastroblue.model.entity;
 import com.gastroblue.model.entity.base.Auditable;
 import com.gastroblue.model.enums.ApplicationProduct;
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import lombok.*;
 
 @Setter
@@ -34,12 +33,6 @@ public class CompanyGroupProductEntity extends Auditable {
 
   @Column(name = "ENABLED", nullable = false)
   private Boolean enabled;
-
-  @Column(name = "LICENSE_EXPIRES_AT")
-  private LocalDate licenseExpiresAt;
-
-  @Column(name = "AGREED_USER_COUNT")
-  private Integer agreedUserCount;
 
   @Column(name = "API_URL", length = 512)
   private String apiUrl;

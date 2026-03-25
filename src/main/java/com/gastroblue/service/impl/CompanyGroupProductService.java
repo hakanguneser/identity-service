@@ -55,8 +55,6 @@ public class CompanyGroupProductService {
                     new IllegalDefinitionException(
                         ErrorCode.COMPANY_GROUP_NOT_FOUND, "CompanyGroupProduct not found"));
     existing.setEnabled(updated.getEnabled());
-    existing.setLicenseExpiresAt(updated.getLicenseExpiresAt());
-    existing.setAgreedUserCount(updated.getAgreedUserCount());
     existing.setApiUrl(updated.getApiUrl());
     existing.setApiVersion(updated.getApiVersion());
     existing.setNotes(updated.getNotes());

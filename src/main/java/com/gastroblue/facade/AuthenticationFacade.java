@@ -17,6 +17,7 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class AuthenticationFacade {
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
   private final CompanyGroupProductService companyGroupProductService;
+  private final CompanyProductService companyProductService;
   private final UserProductService userProductService;
 
   @Value("${application.security.jwt.token-validity-in-minutes}")
@@ -50,14 +52,13 @@ public class AuthenticationFacade {
   @Value("${application.security.jwt.refresh-token-validity-in-days}")
   private Long jwtRefreshTokenValidityDays;
 
-  public AuthLoginResponse login(AuthLoginRequest loginRequest) {
-    log.info("Login request: {}", loginRequest.toString());
+  public AuthLoginResponse login(AuthLoginRequest request) {
+    log.info("Login request: {}", request.toString());
     UserEntity userEntity;
     try {
       Authentication authentication =
           authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(
-                  loginRequest.username(), loginRequest.password()));
+              new UsernamePasswordAuthenticationToken(request.username(), request.password()));
       userEntity = (UserEntity) authentication.getPrincipal();
     } catch (BadCredentialsException e) {
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
@@ -66,13 +67,26 @@ public class AuthenticationFacade {
       throw e;
     }
 
-    ApplicationProduct product = ApplicationProduct.TRACKER;
+    ApplicationProduct product = request.product();
     UserProductEntity userProduct =
         userProductService
             .findByUserIdAndProduct(userEntity.getId(), product)
-            .orElseThrow(() -> new AccessDeniedException(ErrorCode.ACCESS_DENIED));
+            .orElseThrow(
+                () ->
+                    new AccessDeniedException(
+                        ErrorCode.ACCESS_DENIED,
+                        "No product record for userId="
+                            + userEntity.getId()
+                            + " product="
+                            + product));
     if (!userProduct.isActive()) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+      throw new AccessDeniedException(
+          ErrorCode.ACCESS_DENIED,
+          "UserProduct is inactive for userId=" + userEntity.getId() + " product=" + product);
+    }
+
+    if (!userProduct.getApplicationRole().isAdministrator()) {
+      validateLicense(userEntity.getCompanyId(), product);
     }
 
     userService.updatePasswordCheckAfterLogin(userEntity.getUsername());
@@ -181,6 +195,33 @@ public class AuthenticationFacade {
     return new EulaResponse(activeEulaContent);
   }
 
+  private void validateLicense(String companyId, ApplicationProduct product) {
+    companyProductService
+        .findByCompanyIdAndProduct(companyId, product)
+        .ifPresent(
+            cp -> {
+              if (Boolean.FALSE.equals(cp.getEnabled())) {
+                throw new AccessDeniedException(
+                    ErrorCode.ACCESS_DENIED,
+                    "Product disabled at company level for companyId="
+                        + companyId
+                        + " product="
+                        + product);
+              }
+              if (cp.getLicenseExpiresAt() != null
+                  && cp.getLicenseExpiresAt().isBefore(LocalDate.now())) {
+                throw new AccessDeniedException(ErrorCode.LICENSE_EXPIRED);
+              }
+              if (cp.getAgreedUserCount() != null) {
+                long activeCount =
+                    userProductService.countActiveByCompanyIdAndProduct(companyId, product);
+                if (activeCount > cp.getAgreedUserCount()) {
+                  throw new AccessDeniedException(ErrorCode.LICENSE_USER_LIMIT_EXCEEDED);
+                }
+              }
+            });
+  }
+
   private ApiInfoDto getApiInfo(
       UserEntity userEntity, UserProductEntity userProduct, ApplicationProduct product) {
     if (userProduct.getApplicationRole().isAdministrator()) {
@@ -202,7 +243,9 @@ public class AuthenticationFacade {
           throw new AccessDeniedException(
               ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
         default:
-          throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+          throw new AccessDeniedException(
+              ErrorCode.ACCESS_DENIED,
+              "Product not enabled or apiUrl missing for product=" + product);
       }
     }
     return ApiInfoDto.builder().url(url).version(version).build();

@@ -66,7 +66,8 @@ public class UserDefinitionController {
   }
 
   @PutMapping(value = "/{userId}/password")
-  public ResponseEntity<Void> changePassword(@PathVariable("userId") final String userId,
+  public ResponseEntity<Void> changePassword(
+      @PathVariable("userId") final String userId,
       @Valid @RequestBody final PasswordChangeRequest request) {
     userFacade.changePassword(request);
     return ResponseEntity.noContent().build();

@@ -6,20 +6,30 @@ Bu dosya; aktif geliştirme, eksik bırakılan parçalar ve planlanan özellikle
 
 ## Kritik / Acil
 
-- [ ] **`CompanyGroupProductEntity` alanlarının login akışına entegrasyonu**
-  - Entity'deki `apiUrl` ve `apiVersion` login response'una eklenmeli
-  - `enabled = false` olan product için login reddedilmeli 
+- [x] **`CompanyGroupProductEntity` alanlarının login akışına entegrasyonu**
+  - `apiUrl` ve `apiVersion` login response'una `apiInfo` ile dönülüyor
+  - `enabled = false` olan product için login reddediliyor (`buildApiInfo`)
 
-- [ ] **`CompanyProductEntity` alanlarının login akışına entegrasyonu**
-  - `enabled = false` olan product için login reddedilmeli
-  - `licenseExpiresAt` ve `agreedUserCount` CompanyGroupProductEntity'dan cikarilip buraya tasinmali
-  - `licenseExpiresAt` ve `agreedUserCount` login sırasında kontrol edilmeli 
+- [x] **`CompanyProductEntity` alanlarının login akışına entegrasyonu**
+  - `licenseExpiresAt` ve `agreedUserCount` `CompanyGroupProductEntity`'den kaldırıldı
+  - Yeni `CompanyProductEntity` (company bazında lisans) oluşturuldu
+  - `enabled`, `licenseExpiresAt`, `agreedUserCount` login sırasında kontrol ediliyor
 
-- [ ] **Lisans limit kontrolü (gerçek zamanlı)**
-  - Login sırasında `agreedUserCount` ve aktif user sayısı karşılaştırılmalı
-  - Limit aşıldığında hata dönülmeli (`ErrorCode` eklenmeli)
-  - `licenseExpiresAt` süresi geçmişse login engellenmeli
+- [x] **Lisans limit kontrolü (gerçek zamanlı)**
+  - `AuthenticationFacade.validateLicense()` ile login sırasında kontrol edilir
+  - `agreedUserCount` aşılırsa `LICENSE_USER_LIMIT_EXCEEDED` hatası
+  - `licenseExpiresAt` geçmişse `LICENSE_EXPIRED` hatası
+  - Admin rolü bu kontrolden muaf tutulur
 
+- [ ] **Controller ve Facade katmanlarının domain'e göre bölünmesi**
+  - `CompanyGroupDefinitionController` tek dosyada 6 farklı sorumluluk taşıyor — bölünmeli
+  - `CompanyGroupDefinitionFacade` 250+ satıra ulaştı — bölünmeli
+  - Hedef yapı:
+    - `CompanyGroupDefinitionController` + `CompanyGroupDefinitionFacade` → sadece CompanyGroup CRUD ve dropdown'lar
+    - `CompanyGroupProductController` + (facade metotları group facade'de kalabilir)
+    - `CompanyDefinitionController` + `CompanyDefinitionFacade` → Company CRUD
+    - `CompanyProductController` + (facade metotları company facade'de kalabilir)
+  - Her controller tek bir facade'e bağlanır, URL yapısı değişmez
 
 ---
 
@@ -127,3 +137,10 @@ Bu dosya; aktif geliştirme, eksik bırakılan parçalar ve planlanan özellikle
 - [ ] **Cache invalidation stratejisi**
   - Caffeine cache TTL ve eviction policy gözden geçirilmeli
   - Hangi verilerin önbelleklendiği dokümante edilmeli
+- [ ] **`gastroblue-jwt` shared library oluşturulması**
+  - JWT doğrulama mantığı tüm servislerde (Tracker, FormFlow, CheckApp) tekrar kullanılacak
+  - Ayrı bir Maven projesi olarak çıkarılacak içerik: `JwtAuthenticationFilter`, `JwtProperties`, `JwtConfig`, `IJwtService`, `JwtService`, `SessionUser`, `ApplicationProduct`, `ApplicationRole`
+  - Her servis `SecurityConfig`'ini kendisi yönetir, yalnızca JWT mekanizması ortak olur
+  - Identity versiyonu değiştiğinde tüm servisler aynı versiyonu çekerek otomatik güncellenir
+  - **Artifact deposu seçenekleri:** GitHub Packages (önerilen, sıfır altyapı), Nexus OSS Docker (tam kontrol, sunucu gerekli), JitPack (kurulum yok, başlangıç için)
+  - Başlangıç için GitHub Packages yeterli; servis sayısı arttıkça Nexus OSS değerlendirilebilir
