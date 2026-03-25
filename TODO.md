@@ -8,14 +8,18 @@ Bu dosya; aktif geliştirme, eksik bırakılan parçalar ve planlanan özellikle
 
 - [ ] **`CompanyGroupProductEntity` alanlarının login akışına entegrasyonu**
   - Entity'deki `apiUrl` ve `apiVersion` login response'una eklenmeli
-  - `enabled = false` olan product için login reddedilmeli
-  - `licenseExpiresAt` ve `agreedUserCount` login sırasında kontrol edilmeli
-  - `AuthenticationFacade` ve `AuthLoginResponse` güncellenmeli
+  - `enabled = false` olan product için login reddedilmeli 
 
-- [ ] **EULA yapısının gözden geçirilmesi**
-  - Şu an `CompanyGroupEulaContentEntity` companygroup bazında ayrı bir tablo
-  - Değerlendirme: EULA product bazında mı olmalı? (`CompanyGroupProductEntity`'ye taşınabilir)
-  - Karar verilmeden önce mevcut EULA akışını (`AuthenticationFacade.signEula`) incele
+- [ ] **`CompanyProductEntity` alanlarının login akışına entegrasyonu**
+  - `enabled = false` olan product için login reddedilmeli
+  - `licenseExpiresAt` ve `agreedUserCount` CompanyGroupProductEntity'dan cikarilip buraya tasinmali
+  - `licenseExpiresAt` ve `agreedUserCount` login sırasında kontrol edilmeli 
+
+- [ ] **Lisans limit kontrolü (gerçek zamanlı)**
+  - Login sırasında `agreedUserCount` ve aktif user sayısı karşılaştırılmalı
+  - Limit aşıldığında hata dönülmeli (`ErrorCode` eklenmeli)
+  - `licenseExpiresAt` süresi geçmişse login engellenmeli
+
 
 ---
 
@@ -83,11 +87,6 @@ Bu dosya; aktif geliştirme, eksik bırakılan parçalar ve planlanan özellikle
   - Tüm platformlara user tanımlayabilme (`ADMIN_PANEL` ürünü)
   - `UserDefinitionController` üzerinden admin özel endpoint'ler
   - Admin-panel'e özel UI gereksinimlerinin belirlenmesi
-
-- [ ] **Lisans limit kontrolü (gerçek zamanlı)**
-  - Login sırasında `agreedUserCount` ve aktif user sayısı karşılaştırılmalı
-  - Limit aşıldığında hata dönülmeli (`ErrorCode` eklenmeli)
-  - `licenseExpiresAt` süresi geçmişse login engellenmeli
 
 - [ ] **Password expiry notification**
   - `passwordExpiresAt` yaklaşan kullanıcılara uyarı maili
