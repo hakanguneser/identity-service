@@ -1,0 +1,127 @@
+---
+description: GastroBlue Identity Service — Cursor geliştirme kuralları
+globs: ["src/**/*.java", "pom.xml", "docker-compose.yml", "Dockerfile"]
+alwaysApply: true
+---
+
+# Identity Service — Cursor Kuralları
+
+## Proje Bağlamı
+
+GastroBlue ekosisteminin merkezi IAM servisi. Tüm ürünler (Tracker, FormFlow, CheckApp, Admin-Panel) login ve kimlik doğrulama için bu servise bağlanır.
+
+- **Spring Boot 4.0.1 / Java 21 / Maven**
+- **Paket:** `com.gastroblue`
+- **Port:** 7102
+- **DB:** PostgreSQL, JPA/Hibernate (`ddl-auto: update`)
+- **Auth:** JWT HS256
+
+---
+
+## Mimari — Katman Hiyerarşisi (KESİN KURAL)
+
+```
+Controller  →  Facade  →  Service  →  Repository
+```
+
+### Kurallar
+
+- Aynı katmandaki iki sınıf birbirini **çağıramaz**
+- Bir `Service` yalnızca **tek bir** `Repository` ile çalışır
+- `Controller` yalnızca **DTO** (request/response) alır ve verir — entity yasak
+- Her `Service` kendi request/response modellerini kullanır — paylaşımlı response yasak
+- İş mantığı **Facade**'da toplanır; Controller sadece HTTP yönlendirmesi yapar
+- `@Transactional` sadece `Service` metodlarında kullanılır
+
+### Kod Üretirken
+
+- Yeni bir özellik eklerken katman sırası: önce Repository → Service → Facade → Controller
+- Mevcut bir katmanda değişiklik yaparken aynı katmandan referans ekleme
+- Facade'a birden fazla service inject edebilirsin, ancak service'e birden fazla repository enjekte etme
+
+---
+
+## Domain Modeli
+
+### Hiyerarşi
+
+```
+CompanyGroup  →  Company  →  User
+```
+
+```
+ADMIN > GROUP_MANAGER > ZONE_MANAGER > COMPANY_MANAGER > SUPERVISOR > STAFF
+```
+
+### Kritik Entity'ler
+
+| Entity | Önemli Alanlar |
+|--------|----------------|
+| `CompanyGroupProductEntity` | `apiUrl`, `apiVersion`, `enabled`, `agreedUserCount`, `licenseExpiresAt`, `notes` |
+| `UserProductEntity` | `product`, `applicationRole`, `departments`, `eulaAcceptedAt`, `lastSuccessLogin` |
+| `UserEntity` | `username`, `password` (BCrypt), `passwordChangeRequired`, `passwordExpiresAt` |
+| `Auditable` (base) | `id` (UUID), `createdBy`, `createdDate`, `lastModifiedBy`, `lastModifiedDate`, `version` |
+
+---
+
+## Kod Kuralları
+
+### Java
+
+- Lombok: `@Data`, `@RequiredArgsConstructor`, `@Slf4j`, `@Builder`, `@Getter/@Setter`
+- Spotless (Google Java Format) — her `mvn package`'da çalışır, formata uy
+- Request DTO validasyonu: `@NotBlank`, `@NotNull`, `@Valid`, `@Size` vb. (Jakarta Validation)
+- Oturum bilgisi: `@AuthenticationPrincipal SessionUser sessionUser`
+- `SessionUser` bir record'dur — immutable, doğrudan kullan
+- Şifre: `BCryptPasswordEncoder` — plain text yasak
+
+### Hata Yönetimi
+
+- `IllegalDefinitionException` — iş kuralı ihlalleri
+- `AccessDeniedException` — yetki hataları
+- `ValidationException` — validasyon hataları
+- Hata mesajları hardcode yazılmaz — DB'den çekilir (`ErrorMessageEntity`)
+- Yeni hata kodu eklemek için `ErrorCode` enum'una ekle
+
+### Enum'lar
+
+- Sabit: `ApplicationRole`, `ApplicationProduct` — kodda direkt kullan
+- Dinamik: `Language`, `Department`, `Country`, `City`, `Zone`, `CompanySegment` — DB'den gelir, hardcode değer yazma
+
+---
+
+## Dosya Konumları
+
+| Tür | Konum |
+|-----|-------|
+| Controller | `src/main/java/com/gastroblue/controller/` |
+| Facade | `src/main/java/com/gastroblue/facade/` |
+| Service impl | `src/main/java/com/gastroblue/service/impl/` |
+| Repository | `src/main/java/com/gastroblue/repository/` |
+| Entity | `src/main/java/com/gastroblue/model/entity/` |
+| Request DTO | `src/main/java/com/gastroblue/model/request/` |
+| Response DTO | `src/main/java/com/gastroblue/model/response/` |
+| Enum | `src/main/java/com/gastroblue/model/enums/` |
+| Config | `src/main/java/com/gastroblue/config/` |
+| Util | `src/main/java/com/gastroblue/util/` |
+
+---
+
+## Login Akışı (Referans)
+
+`AuthenticationFacade.java` → `JwtService.java`
+
+1. `AuthenticationManager` ile kimlik doğrula
+2. `UserProductEntity` bul (kullanıcı + ürün)
+3. `CompanyGroupProductEntity` üzerinden `apiUrl` ve `apiVersion` al
+4. `passwordChangeRequired` ve EULA durumu kontrol et
+5. JWT üret (`IJwtService.generateToken`)
+6. `AuthLoginResponse` dön
+
+---
+
+## Güvenlik Filtresi
+
+`JwtAuthenticationFilter` → `SecurityConfig` filter chain'inde kayıtlıdır.
+Sistem token'ları `JwtConfig` üzerinden `ApplicationProduct`'a maplenir.
+Public endpoint'ler: `/api/v1/auth/login`, `/api/v1/auth/refresh`, `/actuator/health/**`
