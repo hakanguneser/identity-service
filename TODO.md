@@ -21,7 +21,7 @@ Bu dosya; aktif geliştirme, eksik bırakılan parçalar ve planlanan özellikle
   - `licenseExpiresAt` geçmişse `LICENSE_EXPIRED` hatası
   - Admin rolü bu kontrolden muaf tutulur
 
-- [ ] **Controller ve Facade katmanlarının domain'e göre bölünmesi**
+- [x] **Controller ve Facade katmanlarının domain'e göre bölünmesi**
   - `CompanyGroupDefinitionController` tek dosyada 6 farklı sorumluluk taşıyor — bölünmeli
   - `CompanyGroupDefinitionFacade` 250+ satıra ulaştı — bölünmeli
   - Hedef yapı:

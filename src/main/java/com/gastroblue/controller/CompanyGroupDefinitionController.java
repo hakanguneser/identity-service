@@ -1,20 +1,19 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.CompanyGroupDefinitionFacade;
-import com.gastroblue.model.enums.*;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Country;
-import com.gastroblue.model.request.*;
-import com.gastroblue.model.response.CompanyContextResponse;
-import com.gastroblue.model.response.CompanyDefinitionResponse;
+import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
+import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
+import com.gastroblue.model.request.CompanyGroupSaveRequest;
+import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
-import com.gastroblue.model.response.CompanyProductResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -24,17 +23,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequiredArgsConstructor
 public class CompanyGroupDefinitionController {
 
-  private final CompanyGroupDefinitionFacade companyFacade;
+  private final CompanyGroupDefinitionFacade companyGroupDefinitionFacade;
 
   @GetMapping
   public ResponseEntity<List<CompanyGroupDefinitionResponse>> findAllCompanyGroups() {
-    return ResponseEntity.ok(companyFacade.findAllCompanyGroups());
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findAllCompanyGroups());
   }
 
   @PostMapping
   public ResponseEntity<CompanyGroupDefinitionResponse> saveCompanyGroup(
       @Valid @RequestBody final CompanyGroupSaveRequest request) {
-    var created = companyFacade.saveCompanyGroup(request);
+    var created = companyGroupDefinitionFacade.saveCompanyGroup(request);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -43,17 +42,31 @@ public class CompanyGroupDefinitionController {
     return ResponseEntity.created(location).body(created);
   }
 
+  @GetMapping("/{companyGroupId}")
+  public ResponseEntity<CompanyGroupDefinitionResponse> findCompanyGroupById(
+      @PathVariable(name = "companyGroupId") final String companyGroupId) {
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findCompanyGroupById(companyGroupId));
+  }
+
+  @PutMapping("/{companyGroupId}")
+  public ResponseEntity<CompanyGroupDefinitionResponse> updateCompanyGroup(
+      @PathVariable(name = "companyGroupId") final String companyGroupId,
+      @Valid @RequestBody final CompanyGroupUpdateRequest request) {
+    return ResponseEntity.ok(
+        companyGroupDefinitionFacade.updateCompanyGroup(companyGroupId, request));
+  }
+
   @GetMapping("/{companyGroupId}/products")
   public ResponseEntity<List<CompanyGroupProductResponse>> findCompanyGroupProducts(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findCompanyGroupProducts(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findCompanyGroupProducts(companyGroupId));
   }
 
   @PostMapping("/{companyGroupId}/products")
   public ResponseEntity<CompanyGroupProductResponse> saveCompanyGroupProduct(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @Valid @RequestBody final CompanyGroupProductSaveRequest request) {
-    var created = companyFacade.saveCompanyGroupProduct(companyGroupId, request);
+    var created = companyGroupDefinitionFacade.saveCompanyGroupProduct(companyGroupId, request);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{product}")
@@ -68,166 +81,55 @@ public class CompanyGroupDefinitionController {
       @PathVariable(name = "product") final ApplicationProduct product,
       @Valid @RequestBody final CompanyGroupProductUpdateRequest request) {
     return ResponseEntity.ok(
-        companyFacade.updateCompanyGroupProduct(companyGroupId, product, request));
-  }
-
-  @GetMapping("/{companyGroupId}")
-  public ResponseEntity<CompanyGroupDefinitionResponse> findCompanyGroupById(
-      @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findCompanyGroupById(companyGroupId));
-  }
-
-  @PutMapping("/{companyGroupId}")
-  public ResponseEntity<CompanyGroupDefinitionResponse> updateCompanyGroup(
-      @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @Valid @RequestBody final CompanyGroupUpdateRequest request) {
-    return ResponseEntity.ok(companyFacade.updateCompanyGroup(companyGroupId, request));
-  }
-
-  @GetMapping("/{companyGroupId}/companies")
-  public ResponseEntity<List<CompanyDefinitionResponse>> findCompaniesByCompanyGroupId(
-      @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findCompaniesByCompanyGroupId(companyGroupId));
-  }
-
-  @PostMapping("/{companyGroupId}/companies")
-  public ResponseEntity<CompanyDefinitionResponse> saveCompany(
-      @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @Valid @RequestBody final CompanySaveRequest request) {
-    var created = companyFacade.saveCompany(companyGroupId, request);
-    URI location =
-        ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("/{companyId}")
-            .buildAndExpand(created.getCompanyId())
-            .toUri();
-    return ResponseEntity.created(location).body(created);
-  }
-
-  @PutMapping("/{companyGroupId}/companies/{companyId}")
-  public ResponseEntity<CompanyDefinitionResponse> updateCompany(
-      @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @PathVariable(name = "companyId") final String companyId,
-      @Valid @RequestBody final CompanyUpdateRequest request) {
-    return ResponseEntity.ok(companyFacade.updateCompany(companyGroupId, companyId, request));
-  }
-
-  @GetMapping("/{companyGroupId}/companies/{companyId}")
-  public ResponseEntity<CompanyDefinitionResponse> findCompanyByCompanyIdAndCompanyGroupId(
-      @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @PathVariable(name = "companyId") final String companyId) {
-    return ResponseEntity.ok(
-        companyFacade.findCompanyByCompanyIdAndCompanyGroupId(companyGroupId, companyId));
-  }
-
-  @PatchMapping("/{companyGroupId}/companies/{companyId}/status")
-  public ResponseEntity<CompanyDefinitionResponse> toggleCompanyStatus(
-      @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @PathVariable(name = "companyId") final String companyId) {
-    return ResponseEntity.ok(companyFacade.toggleCompanyStatus(companyGroupId, companyId));
-  }
-
-  @PatchMapping("/{companyGroupId}/companies/{companyId}/products/{product}/toggle")
-  public ResponseEntity<CompanyDefinitionResponse> toggleCompanyProduct(
-      @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @PathVariable(name = "companyId") final String companyId,
-      @PathVariable(name = "product") final ApplicationProduct product) {
-    return ResponseEntity.ok(
-        companyFacade.toggleCompanyProduct(companyGroupId, companyId, product));
+        companyGroupDefinitionFacade.updateCompanyGroupProduct(companyGroupId, product, request));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/zones")
   public ResponseEntity<List<ResolvedEnum>> findZones(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findZones(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findZones(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/countries")
   public ResponseEntity<List<ResolvedEnum>> findCountries(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findCountries(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findCountries(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/country/{country}/cities")
   public ResponseEntity<List<ResolvedEnum>> findCities(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "country") final Country country) {
-    return ResponseEntity.ok(companyFacade.findCities(companyGroupId, country));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findCities(companyGroupId, country));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment1")
   public ResponseEntity<List<ResolvedEnum>> findSegment1(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findSegment1(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment1(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment2")
   public ResponseEntity<List<ResolvedEnum>> findSegment2(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findSegment2(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment2(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment3")
   public ResponseEntity<List<ResolvedEnum>> findSegment3(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findSegment3(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment3(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment4")
   public ResponseEntity<List<ResolvedEnum>> findSegment4(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findSegment4(companyGroupId));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment4(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment5")
   public ResponseEntity<List<ResolvedEnum>> findSegment5(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
-    return ResponseEntity.ok(companyFacade.findSegment5(companyGroupId));
-  }
-
-  @GetMapping("/{companyGroupId}/companies/{companyId}/products")
-  public ResponseEntity<List<CompanyProductResponse>> findCompanyProducts(
-      @PathVariable final String companyGroupId, @PathVariable final String companyId) {
-    return ResponseEntity.ok(companyFacade.findCompanyProducts(companyGroupId, companyId));
-  }
-
-  @PostMapping("/{companyGroupId}/companies/{companyId}/products")
-  public ResponseEntity<CompanyProductResponse> saveCompanyProduct(
-      @PathVariable final String companyGroupId,
-      @PathVariable final String companyId,
-      @Valid @RequestBody final CompanyProductSaveRequest request) {
-    var created = companyFacade.saveCompanyProduct(companyGroupId, companyId, request);
-    URI location =
-        ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("/{product}")
-            .buildAndExpand(created.getProduct())
-            .toUri();
-    return ResponseEntity.created(location).body(created);
-  }
-
-  @PutMapping("/{companyGroupId}/companies/{companyId}/products/{product}")
-  public ResponseEntity<CompanyProductResponse> updateCompanyProduct(
-      @PathVariable final String companyGroupId,
-      @PathVariable final String companyId,
-      @PathVariable final ApplicationProduct product,
-      @Valid @RequestBody final CompanyProductUpdateRequest request) {
-    return ResponseEntity.ok(
-        companyFacade.updateCompanyProduct(companyGroupId, companyId, product, request));
-  }
-
-  @DeleteMapping("/{companyGroupId}/companies/{companyId}/products/{product}")
-  public ResponseEntity<Void> deleteCompanyProduct(
-      @PathVariable final String companyGroupId,
-      @PathVariable final String companyId,
-      @PathVariable final ApplicationProduct product) {
-    companyFacade.deleteCompanyProduct(companyGroupId, companyId, product);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @GetMapping("/context")
-  public ResponseEntity<CompanyContextResponse> findCompanyAndGroupContext(
-      @RequestParam(name = "companyGroupCode") final String companyGroupCode,
-      @RequestParam(name = "companyCode") final String companyCode) {
-    return ResponseEntity.ok(
-        companyFacade.findCompanyAndGroupContext(companyGroupCode, companyCode));
+    return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment5(companyGroupId));
   }
 }
