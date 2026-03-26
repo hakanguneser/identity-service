@@ -1,5 +1,7 @@
 package com.gastroblue.model.request;
 
+import com.gastroblue.annotations.validation.field.enumkey.ValidEnumKey;
+import com.gastroblue.model.enums.EnumTypes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,14 +11,14 @@ import java.util.List;
 
 public record CompanyUpdateRequest(
     @NotNull(message = "{validation.companyName.check.null}") String companyName,
-    String zone,
-    String country,
-    String city,
-    String segment1,
-    String segment2,
-    String segment3,
-    String segment4,
-    String segment5,
+    @ValidEnumKey(enumType = EnumTypes.ZONE) String zone,
+    @ValidEnumKey(enumType = EnumTypes.COUNTRY) String country,
+    @ValidEnumKey(enumType = EnumTypes.CITY) String city,
+    @ValidEnumKey(enumType = EnumTypes.SEGMENT_1) String segment1,
+    @ValidEnumKey(enumType = EnumTypes.SEGMENT_2) String segment2,
+    @ValidEnumKey(enumType = EnumTypes.SEGMENT_3) String segment3,
+    @ValidEnumKey(enumType = EnumTypes.SEGMENT_4) String segment4,
+    @ValidEnumKey(enumType = EnumTypes.SEGMENT_5) String segment5,
     @Valid
         List<
                 @NotBlank(message = "validation.email.check.blank")

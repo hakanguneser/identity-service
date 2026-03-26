@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EnumConfigurationService {
 
   private final EnumValueConfigurationRepository repository;
+  private final CacheManager cacheManager;
 
   /**
    * Two-tier lookup: loads global defaults (companyGroupId=null) and company-group overrides in one
@@ -63,6 +66,61 @@ public class EnumConfigurationService {
       String companyGroupId, String enumType, String enumKey, Language language) {
     return getDropdownValues(enumType, companyGroupId, language).stream()
         .anyMatch(r -> r.getKey().equals(enumKey));
+  }
+
+  /**
+   * Validates that {@code enumKey} is a known, active value for the given enum type and company
+   * group.
+   *
+   * <p>Merge logic mirrors {@link #getDropdownValues}: global defaults ({@code companyGroupId =
+   * null}) are loaded first, then company-group-specific overrides replace them. The resolved entry
+   * for the key is checked for {@code isActive}.
+   *
+   * <p>If no entry exists at all the key is <em>auto-registered</em> as a new global default
+   * ({@code active = true}, {@code label = enumKey}). This "lazy seeding" means the first time any
+   * value appears in a request it becomes a known value that admins can later label / deactivate.
+   *
+   * @return {@code true} if valid (or just auto-inserted), {@code false} if explicitly deactivated
+   */
+  @Transactional
+  public boolean validateOrInsert(
+      String enumType, String enumKey, String companyGroupId, Language language) {
+
+    List<EnumValueConfigurationEntity> rows =
+        repository.findForGroupWithDefaults(enumType, companyGroupId, language);
+
+    // Same two-tier merge as getDropdownValues: global first, company-group overrides
+    LinkedHashMap<String, EnumValueConfigurationEntity> merged = new LinkedHashMap<>();
+    rows.stream()
+        .filter(e -> e.getCompanyGroupId() == null)
+        .forEach(e -> merged.put(e.getEnumKey(), e));
+    rows.stream()
+        .filter(e -> e.getCompanyGroupId() != null)
+        .forEach(e -> merged.put(e.getEnumKey(), e));
+
+    EnumValueConfigurationEntity resolved = merged.get(enumKey);
+    if (resolved != null) {
+      return resolved.isActive(); // explicitly deactivated → false
+    }
+
+    // Unknown key — auto-register as a new global default
+    repository.save(
+        EnumValueConfigurationEntity.builder()
+            .companyGroupId(null)
+            .enumType(enumType)
+            .enumKey(enumKey)
+            .language(language)
+            .label(enumKey) // raw key as default label; admins can rename later
+            .active(true)
+            .build());
+
+    // Evict cache programmatically — avoids Spring AOP self-invocation limitation
+    Cache cache = cacheManager.getCache("enum_dropdown_configs");
+    if (cache != null) {
+      cache.clear();
+    }
+
+    return true;
   }
 
   @Transactional

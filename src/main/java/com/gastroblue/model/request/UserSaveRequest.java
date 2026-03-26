@@ -1,8 +1,10 @@
 package com.gastroblue.model.request;
 
+import com.gastroblue.annotations.validation.field.enumkey.ValidEnumKey;
 import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.model.enums.EnumTypes;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,7 +18,8 @@ public record UserSaveRequest(
     String companyGroupId,
     String companyId,
     @NotNull(message = "{validation.applicationRole.check.null}") ApplicationRole applicationRole,
-    @NotNull(message = "{validation.department.check.null}") List<String> departments,
+    @NotNull(message = "{validation.department.check.null}")
+        List<@ValidEnumKey(enumType = EnumTypes.DEPARTMENT) String> departments,
     @Size(min = 3, max = 100, message = "{validation.name.size.3.100}")
         @NotBlank(message = "{validation.name.check.null}")
         String name,
@@ -25,6 +28,6 @@ public record UserSaveRequest(
         String surname,
     @ValidPhoneNumber String phone,
     @Email(message = "{validation.email}") String email,
-    String gender,
-    String zone,
+    @ValidEnumKey(enumType = EnumTypes.GENDER) String gender,
+    @ValidEnumKey(enumType = EnumTypes.ZONE) String zone,
     ApplicationProduct product) {}
