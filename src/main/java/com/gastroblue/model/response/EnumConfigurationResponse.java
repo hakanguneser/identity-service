@@ -12,4 +12,6 @@ public record EnumConfigurationResponse(
     Language language,
     String label,
     boolean active,
-    Integer displayOrder) {}
+    Integer displayOrder,
+    String parentKey,
+    String parentEnumType) {}

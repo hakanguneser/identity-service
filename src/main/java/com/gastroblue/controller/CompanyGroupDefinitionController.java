@@ -2,7 +2,6 @@ package com.gastroblue.controller;
 
 import com.gastroblue.facade.CompanyGroupDefinitionFacade;
 import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.Country;
 import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
@@ -99,7 +98,7 @@ public class CompanyGroupDefinitionController {
   @GetMapping("/{companyGroupId}/dropdown/country/{country}/cities")
   public ResponseEntity<List<ResolvedEnum>> findCities(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
-      @PathVariable(name = "country") final Country country) {
+      @PathVariable(name = "country") final String country) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCities(companyGroupId, country));
   }
 

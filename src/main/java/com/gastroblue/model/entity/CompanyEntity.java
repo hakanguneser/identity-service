@@ -1,7 +1,6 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,47 +34,30 @@ public class CompanyEntity extends Auditable {
   @Column(name = "COMPANY_MAIL", length = 500)
   private String companyMail;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "COUNTRY", length = 50)
-  private Country country;
+  private String country;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "CITY", length = 50)
-  private City city;
+  private String city;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "ZONE", length = 50)
-  private Zone zone;
+  private String zone;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "SEGMENT_1", length = 50)
-  private CompanySegment1Values segment1;
+  private String segment1;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "SEGMENT_2", length = 50)
-  private CompanySegment2Values segment2;
+  private String segment2;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "SEGMENT_3", length = 50)
-  private CompanySegment3Values segment3;
+  private String segment3;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "SEGMENT_4", length = 50)
-  private CompanySegment4Values segment4;
+  private String segment4;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "SEGMENT_5", length = 50)
-  private CompanySegment5Values segment5;
+  private String segment5;
 
   @Column(name = "IS_ACTIVE")
   private boolean active;
-
-  @Column(name = "IS_CHECK_ENABLED", nullable = false)
-  private boolean checkEnabled;
-
-  @Column(name = "IS_FORMFLOW_ENABLED", nullable = false)
-  private boolean formflowEnabled;
-
-  @Column(name = "IS_TRACKER_ENABLED", nullable = false)
-  private boolean trackerEnabled;
 }

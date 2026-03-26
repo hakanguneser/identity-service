@@ -31,4 +31,16 @@ public interface EnumValueConfigurationRepository
 
   Optional<EnumValueConfigurationEntity> findByIdAndCompanyGroupId(
       String id, String companyGroupId);
+
+  @Query(
+      "SELECT e FROM EnumValueConfigurationEntity e "
+          + "WHERE e.enumType = :enumType AND e.language = :language "
+          + "AND (e.companyGroupId IS NULL OR e.companyGroupId = :companyGroupId) "
+          + "AND e.parentKey = :parentKey AND e.parentEnumType = :parentEnumType")
+  List<EnumValueConfigurationEntity> findChildrenWithDefaults(
+      @Param("enumType") String enumType,
+      @Param("companyGroupId") String companyGroupId,
+      @Param("language") Language language,
+      @Param("parentKey") String parentKey,
+      @Param("parentEnumType") String parentEnumType);
 }

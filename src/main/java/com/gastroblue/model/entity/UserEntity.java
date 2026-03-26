@@ -58,13 +58,11 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "PHONE", length = 10)
   private String phone;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "GENDER", length = 10)
-  private Gender gender;
+  private String gender;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "ZONE", length = 10)
-  private Zone zone;
+  private String zone;
 
   @Column(name = "PASSWORD_CHANGE_REQUIRED", nullable = false)
   private boolean passwordChangeRequired;

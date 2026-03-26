@@ -13,4 +13,6 @@ public record EnumConfigurationSaveRequest(
     @NotNull Language language,
     @NotBlank String label,
     boolean active,
-    Integer displayOrder) {}
+    Integer displayOrder,
+    String parentKey,
+    String parentEnumType) {}

@@ -10,6 +10,7 @@ import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
 import com.gastroblue.model.entity.CompanyProductEntity;
+import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
@@ -84,36 +85,39 @@ public class CompanyGroupMapper {
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(entity.getCity() != null ? entity.getCity().resolve(facade, companyGroupId) : null)
+        .city(
+            entity.getCity() != null
+                ? facade.resolve(EnumTypes.CITY, entity.getCity(), companyGroupId)
+                : null)
         .country(
             entity.getCountry() != null
-                ? entity.getCountry().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.COUNTRY, entity.getCountry(), companyGroupId)
                 : null)
-        .zone(entity.getZone() != null ? entity.getZone().resolve(facade, companyGroupId) : null)
+        .zone(
+            entity.getZone() != null
+                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), companyGroupId)
+                : null)
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), companyGroupId)
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), companyGroupId)
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), companyGroupId)
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), companyGroupId)
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), companyGroupId)
                 : null)
         .isActive(entity.isActive())
-        .checkEnabled(entity.isCheckEnabled())
-        .formflowEnabled(entity.isFormflowEnabled())
-        .trackerEnabled(entity.isTrackerEnabled())
         .build();
   }
 
@@ -130,23 +134,23 @@ public class CompanyGroupMapper {
         .zone(entity.getZone())
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), entity.getId())
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), entity.getId())
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), entity.getId())
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), entity.getId())
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), entity.getId())
                 : null)
         .isActive(entity.isActive())
         .build();

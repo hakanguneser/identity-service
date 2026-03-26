@@ -1,7 +1,6 @@
 package com.gastroblue.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gastroblue.model.enums.*;
 import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.List;
 import lombok.*;
@@ -27,5 +26,5 @@ public class UserDefinitionResponse {
   private ResolvedEnum zone;
   private ResolvedEnum applicationRole;
   private List<ResolvedEnum> departments;
-  @JsonIgnore List<Department> departmentsList;
+  @JsonIgnore List<String> departmentsList;
 }

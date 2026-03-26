@@ -14,7 +14,12 @@ import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.*;
+import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.model.enums.EnumTypes;
+import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.MailParameters;
+import com.gastroblue.model.enums.MailTemplate;
 import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
@@ -109,12 +114,12 @@ public class UserDefinitionFacade {
                 .collect(Collectors.toMap(UserProductEntity::getUserId, up -> up))
             : Map.of();
 
-    List<Department> sessionDepartments = sessionUser.getDepartments();
+    List<String> sessionDepartments = sessionUser.departments();
     return users.stream()
         .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), enumFacade))
         .filter(
             user -> {
-              if (sessionDepartments == null || sessionDepartments.contains(Department.ALL)) {
+              if (sessionDepartments == null || sessionDepartments.contains("ALL")) {
                 return true;
               }
               return user.getDepartmentsList().stream().anyMatch(sessionDepartments::contains);
@@ -178,10 +183,10 @@ public class UserDefinitionFacade {
     return product;
   }
 
-  private List<Department> getDepartments(UserSaveRequest request) {
-    List<Department> departments = Optional.ofNullable(request.departments()).orElse(List.of());
-    if (departments.contains(Department.ALL)) {
-      return List.of(Department.ALL);
+  private List<String> getDepartments(UserSaveRequest request) {
+    List<String> departments = Optional.ofNullable(request.departments()).orElse(List.of());
+    if (departments.contains("ALL")) {
+      return List.of("ALL");
     }
     return departments.stream().distinct().toList();
   }
@@ -238,7 +243,7 @@ public class UserDefinitionFacade {
         throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
       }
       isAuthorized =
-          request.departments().contains(Department.ALL)
+          request.departments().contains("ALL")
               && request.applicationRole() != null
               && request.applicationRole().isAdministrator();
     } else {
@@ -374,7 +379,7 @@ public class UserDefinitionFacade {
     ApplicationRole sessionRole = sessionUser.getApplicationRole();
     if (sessionRole == null) return List.of();
 
-    return enumFacade.getDropdownValues(ApplicationRole.class).stream()
+    return enumFacade.getDropdownValues("ApplicationRole").stream()
         .filter(
             resolved -> {
               ApplicationRole role = ApplicationRole.fromString(resolved.getKey());
@@ -384,15 +389,15 @@ public class UserDefinitionFacade {
   }
 
   public List<ResolvedEnum> findAllDepartments() {
-    return enumFacade.getDropdownValues(Department.class);
+    return enumFacade.getDropdownValues(EnumTypes.DEPARTMENT);
   }
 
   public List<ResolvedEnum> findAllZones() {
-    return enumFacade.getDropdownValues(Zone.class);
+    return enumFacade.getDropdownValues(EnumTypes.ZONE);
   }
 
   public List<ResolvedEnum> findAllGenders() {
-    return enumFacade.getDropdownValues(Gender.class);
+    return enumFacade.getDropdownValues(EnumTypes.GENDER);
   }
 
   public List<ResolvedEnum> findAvailableCompanies() {

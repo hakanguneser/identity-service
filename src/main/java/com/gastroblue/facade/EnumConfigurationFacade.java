@@ -1,6 +1,5 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.model.base.ConfigurableEnum;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
@@ -30,14 +29,13 @@ public class EnumConfigurationFacade {
     return toResponse(enumConfigurationService.update(id, request, companyGroupId));
   }
 
-  public <T extends ConfigurableEnum> List<ResolvedEnum> getDropdownValues(
-      Class<T> enumClass, String companyGroupId) {
+  public List<ResolvedEnum> getDropdownValues(String enumType, String companyGroupId) {
     return enumConfigurationService.getDropdownValues(
-        enumClass, companyGroupId, IJwtService.getSessionLanguage());
+        enumType, companyGroupId, IJwtService.getSessionLanguage());
   }
 
-  public <T extends ConfigurableEnum> List<ResolvedEnum> getDropdownValues(Class<T> enumClass) {
-    return getDropdownValues(enumClass, IJwtService.findSessionUserOrThrow().companyGroupId());
+  public List<ResolvedEnum> getDropdownValues(String enumType) {
+    return getDropdownValues(enumType, IJwtService.findSessionUserOrThrow().companyGroupId());
   }
 
   public EnumConfigurationResponse findById(String id, String companyGroupId) {
@@ -48,12 +46,20 @@ public class EnumConfigurationFacade {
     return enumConfigurationService.findAll(companyGroupId).stream().map(this::toResponse).toList();
   }
 
-  public <T extends ConfigurableEnum> ResolvedEnum resolve(
-      T enumValue, final String companyGroupId) {
-    return getDropdownValues(enumValue.getClass(), companyGroupId).stream()
-        .filter(resolved -> Objects.equals(resolved.getKey(), enumValue.name()))
+  public ResolvedEnum resolve(String enumType, String enumKey, String companyGroupId) {
+    if (enumKey == null) {
+      return null;
+    }
+    return getDropdownValues(enumType, companyGroupId).stream()
+        .filter(resolved -> Objects.equals(resolved.getKey(), enumKey))
         .findFirst()
         .orElse(null);
+  }
+
+  public List<ResolvedEnum> getChildDropdownValues(
+      String enumType, String parentEnumType, String parentKey, String companyGroupId) {
+    return enumConfigurationService.getChildDropdownValues(
+        enumType, companyGroupId, IJwtService.getSessionLanguage(), parentKey, parentEnumType);
   }
 
   private EnumConfigurationResponse toResponse(EnumValueConfigurationEntity entity) {
@@ -65,6 +71,9 @@ public class EnumConfigurationFacade {
         .language(entity.getLanguage())
         .label(entity.getLabel())
         .active(entity.isActive())
+        .displayOrder(entity.getDisplayOrder())
+        .parentKey(entity.getParentKey())
+        .parentEnumType(entity.getParentEnumType())
         .build();
   }
 }

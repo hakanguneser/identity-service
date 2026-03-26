@@ -5,15 +5,8 @@ import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.City;
-import com.gastroblue.model.enums.CompanySegment1Values;
-import com.gastroblue.model.enums.CompanySegment2Values;
-import com.gastroblue.model.enums.CompanySegment3Values;
-import com.gastroblue.model.enums.CompanySegment4Values;
-import com.gastroblue.model.enums.CompanySegment5Values;
-import com.gastroblue.model.enums.Country;
+import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.Zone;
 import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
@@ -25,7 +18,6 @@ import com.gastroblue.service.impl.CompanyGroupProductService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.util.EmailDomainValidator;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -107,36 +99,35 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public List<ResolvedEnum> findZones(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(Zone.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.ZONE, companyGroupId);
   }
 
   public List<ResolvedEnum> findCountries(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(Country.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.COUNTRY, companyGroupId);
   }
 
-  public List<ResolvedEnum> findCities(final String companyGroupId, final Country country) {
-    return enumConfigurationFacade.getDropdownValues(City.class, companyGroupId).stream()
-        .filter(resolved -> Objects.equals(resolved.getKey(), country.name()))
-        .toList();
+  public List<ResolvedEnum> findCities(final String companyGroupId, final String country) {
+    return enumConfigurationFacade.getChildDropdownValues(
+        EnumTypes.CITY, EnumTypes.COUNTRY, country, companyGroupId);
   }
 
   public List<ResolvedEnum> findSegment1(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment1Values.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_1, companyGroupId);
   }
 
   public List<ResolvedEnum> findSegment2(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment2Values.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_2, companyGroupId);
   }
 
   public List<ResolvedEnum> findSegment3(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment3Values.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_3, companyGroupId);
   }
 
   public List<ResolvedEnum> findSegment4(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment4Values.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_4, companyGroupId);
   }
 
   public List<ResolvedEnum> findSegment5(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(CompanySegment5Values.class, companyGroupId);
+    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_5, companyGroupId);
   }
 }

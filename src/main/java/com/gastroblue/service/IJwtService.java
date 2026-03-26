@@ -1,15 +1,13 @@
 package com.gastroblue.service;
 
-import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
-
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
+import com.gastroblue.util.DelimitedStringUtil;
 import java.util.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,7 +55,7 @@ public interface IJwtService {
     extraClaims.put(
         JWT_DEPARTMENTS,
         userProduct != null
-            ? splitToEnumList(userProduct.getDepartments(), Department.class)
+            ? DelimitedStringUtil.splitClean(userProduct.getDepartments())
             : List.of());
     return extraClaims;
   }

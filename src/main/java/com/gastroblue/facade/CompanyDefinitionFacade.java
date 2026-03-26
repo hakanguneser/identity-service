@@ -7,7 +7,6 @@ import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
-import com.gastroblue.model.entity.CompanyGroupProductEntity;
 import com.gastroblue.model.entity.CompanyProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
@@ -24,8 +23,6 @@ import com.gastroblue.service.impl.CompanyProductService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,18 +55,7 @@ public class CompanyDefinitionFacade {
     EmailDomainValidator.validateAllowedDomains(
         split(companyGroup.getMailDomains()), request.companyMail());
 
-    Map<ApplicationProduct, Boolean> productDefaults =
-        companyGroupProductService.findAllByCompanyGroupId(companyGroupId).stream()
-            .collect(
-                Collectors.toMap(
-                    CompanyGroupProductEntity::getProduct, CompanyGroupProductEntity::getEnabled));
-
     CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(request, companyGroupId);
-    entityToBeSave.setCheckEnabled(productDefaults.getOrDefault(ApplicationProduct.CHECK, false));
-    entityToBeSave.setFormflowEnabled(
-        productDefaults.getOrDefault(ApplicationProduct.FORMFLOW, false));
-    entityToBeSave.setTrackerEnabled(
-        productDefaults.getOrDefault(ApplicationProduct.TRACKER, false));
 
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
     return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
@@ -101,13 +87,6 @@ public class CompanyDefinitionFacade {
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
     return CompanyGroupMapper.toResponse(companyEntity, enumConfigurationFacade);
-  }
-
-  public CompanyDefinitionResponse toggleCompanyProduct(
-      String companyGroupId, String companyId, ApplicationProduct product) {
-    companyGroupProductService.findByCompanyGroupIdAndProductOrThrow(companyGroupId, product);
-    CompanyEntity updated = companyService.toggleProductEnabled(companyGroupId, companyId, product);
-    return CompanyGroupMapper.toResponse(updated, enumConfigurationFacade);
   }
 
   public List<CompanyProductResponse> findCompanyProducts(String companyGroupId, String companyId) {

@@ -54,4 +54,10 @@ public class EnumValueConfigurationEntity extends Auditable {
 
   @Column(name = "DISPLAY_ORDER")
   private Integer displayOrder;
+
+  @Column(name = "PARENT_KEY", length = 50)
+  private String parentKey;
+
+  @Column(name = "PARENT_ENUM_TYPE", length = 50)
+  private String parentEnumType;
 }
