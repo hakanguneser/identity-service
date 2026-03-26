@@ -2,6 +2,7 @@ package com.gastroblue.service;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
@@ -65,6 +66,53 @@ public class EnumConfigurationService {
   public boolean isActive(
       String companyGroupId, String enumType, String enumKey, Language language) {
     return getDropdownValues(enumType, companyGroupId, language).stream()
+        .anyMatch(r -> r.getKey().equals(enumKey));
+  }
+
+  /**
+   * Product-scoped dropdown: loads global defaults and company-group overrides filtered strictly to
+   * the given {@link ApplicationProduct}. Used for enums whose values differ per product (e.g.
+   * Department).
+   */
+  @Transactional(readOnly = true)
+  @Cacheable(
+      value = "enum_dropdown_configs",
+      key = "{#enumType, #companyGroupId, #sessionLanguage, #product}")
+  public List<ResolvedEnum> getDropdownValues(
+      String enumType, String companyGroupId, Language sessionLanguage, ApplicationProduct product) {
+
+    List<EnumValueConfigurationEntity> rows =
+        repository.findForGroupWithDefaultsByProduct(enumType, companyGroupId, sessionLanguage, product);
+
+    LinkedHashMap<String, EnumValueConfigurationEntity> merged = new LinkedHashMap<>();
+    rows.stream()
+        .filter(e -> e.getCompanyGroupId() == null)
+        .forEach(e -> merged.put(e.getEnumKey(), e));
+    rows.stream()
+        .filter(e -> e.getCompanyGroupId() != null)
+        .forEach(e -> merged.put(e.getEnumKey(), e));
+
+    return merged.values().stream()
+        .filter(EnumValueConfigurationEntity::isActive)
+        .sorted(Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
+        .map(
+            e ->
+                ResolvedEnum.builder()
+                    .key(e.getEnumKey())
+                    .display(e.getLabel())
+                    .displayOrder(e.getDisplayOrder())
+                    .build())
+        .toList();
+  }
+
+  /** Product-scoped {@code isActive} check. */
+  public boolean isActive(
+      String companyGroupId,
+      String enumType,
+      String enumKey,
+      Language language,
+      ApplicationProduct product) {
+    return getDropdownValues(enumType, companyGroupId, language, product).stream()
         .anyMatch(r -> r.getKey().equals(enumKey));
   }
 
@@ -185,6 +233,7 @@ public class EnumConfigurationService {
             .displayOrder(request.displayOrder())
             .parentKey(request.parentKey())
             .parentEnumType(request.parentEnumType())
+            .product(request.product())
             .build();
     return repository.save(entity);
   }

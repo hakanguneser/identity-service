@@ -2,6 +2,7 @@ package com.gastroblue.model.request;
 
 import com.gastroblue.annotations.validation.field.enumkey.ValidEnumKey;
 import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
+import com.gastroblue.annotations.validation.request.ValidDepartmentsForProduct;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.EnumTypes;
@@ -11,6 +12,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
+/**
+ * Departments are validated via the class-level {@link ValidDepartmentsForProduct} constraint,
+ * which uses {@link #product} from this same request — not the caller's session product — so that
+ * an ADMIN can create users for any product context.
+ */
+@ValidDepartmentsForProduct
 public record UserSaveRequest(
     @Size(min = 5, max = 100, message = "{validation.username.size.5.100}")
         @NotBlank(message = "{validation.username.check.null}")
@@ -18,8 +25,7 @@ public record UserSaveRequest(
     String companyGroupId,
     String companyId,
     @NotNull(message = "{validation.applicationRole.check.null}") ApplicationRole applicationRole,
-    @NotNull(message = "{validation.department.check.null}")
-        List<@ValidEnumKey(enumType = EnumTypes.DEPARTMENT) String> departments,
+    @NotNull(message = "{validation.department.check.null}") List<String> departments,
     @Size(min = 3, max = 100, message = "{validation.name.size.3.100}")
         @NotBlank(message = "{validation.name.check.null}")
         String name,

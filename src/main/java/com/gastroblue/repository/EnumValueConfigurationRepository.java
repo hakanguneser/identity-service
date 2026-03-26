@@ -1,6 +1,7 @@
 package com.gastroblue.repository;
 
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Language;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,21 @@ public interface EnumValueConfigurationRepository
 
   Optional<EnumValueConfigurationEntity> findByIdAndCompanyGroupId(
       String id, String companyGroupId);
+
+  /**
+   * Same two-tier lookup as {@link #findForGroupWithDefaults} but strictly scoped to a given
+   * {@link ApplicationProduct}. Used for product-specific enums (e.g. Department).
+   */
+  @Query(
+      "SELECT e FROM EnumValueConfigurationEntity e "
+          + "WHERE e.enumType = :enumType AND e.language = :language "
+          + "AND (e.companyGroupId IS NULL OR e.companyGroupId = :companyGroupId) "
+          + "AND e.product = :product")
+  List<EnumValueConfigurationEntity> findForGroupWithDefaultsByProduct(
+      @Param("enumType") String enumType,
+      @Param("companyGroupId") String companyGroupId,
+      @Param("language") Language language,
+      @Param("product") ApplicationProduct product);
 
   @Query(
       "SELECT e FROM EnumValueConfigurationEntity e "

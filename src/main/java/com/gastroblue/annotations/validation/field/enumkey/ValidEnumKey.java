@@ -30,6 +30,14 @@ public @interface ValidEnumKey {
 
   String enumType();
 
+  /**
+   * When {@code true} the validator fetches the {@link
+   * com.gastroblue.model.enums.ApplicationProduct} from the current session and passes it to the
+   * product-scoped {@code isActive} check. Use for enums whose valid values differ per product
+   * (e.g. Department). Defaults to {@code false} (product-agnostic check).
+   */
+  boolean productScoped() default false;
+
   String message() default "{validation.enum.key.invalid}";
 
   Class<?>[] groups() default {};

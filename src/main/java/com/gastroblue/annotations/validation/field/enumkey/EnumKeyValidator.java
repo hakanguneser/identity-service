@@ -1,6 +1,7 @@
 package com.gastroblue.annotations.validation.field.enumkey;
 
 import com.gastroblue.model.base.SessionUser;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Language;
 import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
@@ -24,10 +25,12 @@ public class EnumKeyValidator implements ConstraintValidator<ValidEnumKey, Strin
   @Autowired private EnumConfigurationService enumConfigurationService;
 
   private String enumType;
+  private boolean productScoped;
 
   @Override
   public void initialize(ValidEnumKey annotation) {
     this.enumType = annotation.enumType();
+    this.productScoped = annotation.productScoped();
   }
 
   @Override
@@ -39,6 +42,13 @@ public class EnumKeyValidator implements ConstraintValidator<ValidEnumKey, Strin
     SessionUser sessionUser = IJwtService.findSessionUser();
     String companyGroupId = sessionUser != null ? sessionUser.companyGroupId() : null;
     Language language = IJwtService.getSessionLanguage();
+
+    if (productScoped) {
+      ApplicationProduct product =
+          sessionUser != null ? sessionUser.getApplicationProduct() : null;
+      return product != null
+          && enumConfigurationService.isActive(companyGroupId, enumType, value, language, product);
+    }
 
     return enumConfigurationService.isActive(companyGroupId, enumType, value, language);
   }

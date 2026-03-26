@@ -1,5 +1,6 @@
 package com.gastroblue.model.response;
 
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Language;
 import lombok.Builder;
 
@@ -14,4 +15,5 @@ public record EnumConfigurationResponse(
     boolean active,
     Integer displayOrder,
     String parentKey,
-    String parentEnumType) {}
+    String parentEnumType,
+    ApplicationProduct product) {}

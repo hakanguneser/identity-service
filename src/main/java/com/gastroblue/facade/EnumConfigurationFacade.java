@@ -1,6 +1,7 @@
 package com.gastroblue.facade;
 
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.response.EnumConfigurationResponse;
@@ -56,6 +57,33 @@ public class EnumConfigurationFacade {
         .orElse(null);
   }
 
+  /** Product-scoped dropdown — for enums whose values differ per product (e.g. Department). */
+  public List<ResolvedEnum> getDropdownValues(String enumType, ApplicationProduct product) {
+    return getDropdownValues(
+        enumType, IJwtService.findSessionUserOrThrow().companyGroupId(), product);
+  }
+
+  public List<ResolvedEnum> getDropdownValues(
+      String enumType, String companyGroupId, ApplicationProduct product) {
+    return enumConfigurationService.getDropdownValues(
+        enumType, companyGroupId, IJwtService.getSessionLanguage(), product);
+  }
+
+  /**
+   * Product-scoped resolve — returns the {@link ResolvedEnum} for a single key within a specific
+   * product context.
+   */
+  public ResolvedEnum resolve(
+      String enumType, String enumKey, String companyGroupId, ApplicationProduct product) {
+    if (enumKey == null) {
+      return null;
+    }
+    return getDropdownValues(enumType, companyGroupId, product).stream()
+        .filter(resolved -> Objects.equals(resolved.getKey(), enumKey))
+        .findFirst()
+        .orElse(null);
+  }
+
   public List<ResolvedEnum> getChildDropdownValues(
       String enumType, String parentEnumType, String parentKey, String companyGroupId) {
     return enumConfigurationService.getChildDropdownValues(
@@ -74,6 +102,7 @@ public class EnumConfigurationFacade {
         .displayOrder(entity.getDisplayOrder())
         .parentKey(entity.getParentKey())
         .parentEnumType(entity.getParentEnumType())
+        .product(entity.getProduct())
         .build();
   }
 }
