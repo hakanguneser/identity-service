@@ -9,12 +9,15 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Resolves the current session's company group and language, then delegates to {@link
- * EnumConfigurationService#validateOrInsert} which either confirms the key is active or
- * auto-registers it as a new global default.
+ * Validates that the string value is a known, active enum key for the caller's company group.
  *
- * <p>Spring Boot's {@code LocalValidatorFactoryBean} manages validator instances through
- * {@code SpringConstraintValidatorFactory}, so {@code @Autowired} injection works here.
+ * <p>Resolves company group and language from the current {@link
+ * com.gastroblue.model.base.SessionUser} and delegates to {@link
+ * EnumConfigurationService#isActive}. Unknown keys (not yet defined in {@code
+ * ENUM_VALUE_CONFIGURATIONS}) and explicitly deactivated keys are both rejected.
+ *
+ * <p>Spring Boot's {@code LocalValidatorFactoryBean} manages validator instances through {@code
+ * SpringConstraintValidatorFactory}, so {@code @Autowired} injection works here.
  */
 public class EnumKeyValidator implements ConstraintValidator<ValidEnumKey, String> {
 
@@ -37,6 +40,6 @@ public class EnumKeyValidator implements ConstraintValidator<ValidEnumKey, Strin
     String companyGroupId = sessionUser != null ? sessionUser.companyGroupId() : null;
     Language language = IJwtService.getSessionLanguage();
 
-    return enumConfigurationService.validateOrInsert(enumType, value, companyGroupId, language);
+    return enumConfigurationService.isActive(companyGroupId, enumType, value, language);
   }
 }
