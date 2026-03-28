@@ -183,6 +183,7 @@ public class AuthenticationFacade {
   public void signEula() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity user = userDefinitionService.findUserByUserName(sessionUser.username());
+    eulaContentService.getActiveEulaContent(sessionUser);
     userProductService
         .findByUserIdAndProduct(user.getId(), sessionUser.getApplicationProduct())
         .orElseThrow();

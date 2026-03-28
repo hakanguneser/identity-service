@@ -1,11 +1,9 @@
 package com.gastroblue.model.request;
 
-import com.gastroblue.annotations.validation.field.enumkey.ValidEnumKey;
 import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
 import com.gastroblue.annotations.validation.request.ValidDepartmentsForProduct;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
-import com.gastroblue.model.enums.EnumTypes;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +15,7 @@ import java.util.List;
  * which uses {@link #product} from this same request — not the caller's session product — so that
  * an ADMIN can create users for any product context.
  */
-@ValidDepartmentsForProduct
+//@ValidDepartmentsForProduct TODO validate departments
 public record UserSaveRequest(
     @Size(min = 5, max = 100, message = "{validation.username.size.5.100}")
         @NotBlank(message = "{validation.username.check.null}")
@@ -34,6 +32,6 @@ public record UserSaveRequest(
         String surname,
     @ValidPhoneNumber String phone,
     @Email(message = "{validation.email}") String email,
-    @ValidEnumKey(enumType = EnumTypes.GENDER) String gender,
-    @ValidEnumKey(enumType = EnumTypes.ZONE) String zone,
+    String gender, // TODO Validate It Later
+    String zone, // TODO Validate It Later
     ApplicationProduct product) {}

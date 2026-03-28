@@ -26,7 +26,4 @@ public class CompanyDefinitionResponse {
   private ResolvedEnum segment4;
   private ResolvedEnum segment5;
   private Boolean isActive;
-  private boolean checkEnabled;
-  private boolean formflowEnabled;
-  private boolean trackerEnabled;
 }

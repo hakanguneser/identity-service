@@ -89,7 +89,7 @@ public class CompanyGroupDefinitionController {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findZones(companyGroupId));
   }
 
-  @GetMapping("/{companyGroupId}/dropdown/countries")
+  @GetMapping("/{companyGroupId}/dropdown/country")
   public ResponseEntity<List<ResolvedEnum>> findCountries(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCountries(companyGroupId));

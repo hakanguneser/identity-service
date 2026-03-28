@@ -34,8 +34,8 @@ public interface EnumValueConfigurationRepository
       String id, String companyGroupId);
 
   /**
-   * Same two-tier lookup as {@link #findForGroupWithDefaults} but strictly scoped to a given
-   * {@link ApplicationProduct}. Used for product-specific enums (e.g. Department).
+   * Same two-tier lookup as {@link #findForGroupWithDefaults} but strictly scoped to a given {@link
+   * ApplicationProduct}. Used for product-specific enums (e.g. Department).
    */
   @Query(
       "SELECT e FROM EnumValueConfigurationEntity e "

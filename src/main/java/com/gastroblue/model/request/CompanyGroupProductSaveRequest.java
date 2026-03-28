@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record CompanyGroupProductSaveRequest(
     @NotNull(message = "{validation.product.check.null}") ApplicationProduct product,
-    @NotNull(message = "{validation.enabled.check.null}") Boolean enabled,
     String apiUrl,
     String apiVersion,
     String notes) {}

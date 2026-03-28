@@ -74,7 +74,7 @@ public class CompanyGroupDefinitionFacade {
         CompanyGroupProductEntity.builder()
             .companyGroupId(companyGroupId)
             .product(request.product())
-            .enabled(request.enabled())
+            .enabled(true)
             .apiUrl(request.apiUrl())
             .apiVersion(request.apiVersion())
             .notes(request.notes())

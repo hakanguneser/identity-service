@@ -28,7 +28,11 @@ import lombok.NoArgsConstructor;
       @UniqueConstraint(
           name = "UK_EVC_GROUP_TYPE_LANG_KEY_PROD",
           columnNames = {
-            "COMPANY_GROUP_ID", "ENUM_TYPE", "LANGUAGE", "ENUM_KEY", "APPLICATION_PRODUCT"
+            "COMPANY_GROUP_ID",
+            "ENUM_TYPE",
+            "LANGUAGE",
+            "ENUM_KEY",
+            "APPLICATION_PRODUCT"
           })
     },
     indexes = {

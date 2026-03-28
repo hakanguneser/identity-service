@@ -79,10 +79,14 @@ public class EnumConfigurationService {
       value = "enum_dropdown_configs",
       key = "{#enumType, #companyGroupId, #sessionLanguage, #product}")
   public List<ResolvedEnum> getDropdownValues(
-      String enumType, String companyGroupId, Language sessionLanguage, ApplicationProduct product) {
+      String enumType,
+      String companyGroupId,
+      Language sessionLanguage,
+      ApplicationProduct product) {
 
     List<EnumValueConfigurationEntity> rows =
-        repository.findForGroupWithDefaultsByProduct(enumType, companyGroupId, sessionLanguage, product);
+        repository.findForGroupWithDefaultsByProduct(
+            enumType, companyGroupId, sessionLanguage, product);
 
     LinkedHashMap<String, EnumValueConfigurationEntity> merged = new LinkedHashMap<>();
     rows.stream()

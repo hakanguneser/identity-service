@@ -36,7 +36,7 @@ public class EnumKeyValidator implements ConstraintValidator<ValidEnumKey, Strin
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
     if (value == null || value.isBlank()) {
-      return true; // null / blank checked by @NotNull / @NotBlank separately
+      return true;
     }
 
     SessionUser sessionUser = IJwtService.findSessionUser();
@@ -44,8 +44,7 @@ public class EnumKeyValidator implements ConstraintValidator<ValidEnumKey, Strin
     Language language = IJwtService.getSessionLanguage();
 
     if (productScoped) {
-      ApplicationProduct product =
-          sessionUser != null ? sessionUser.getApplicationProduct() : null;
+      ApplicationProduct product = sessionUser != null ? sessionUser.getApplicationProduct() : null;
       return product != null
           && enumConfigurationService.isActive(companyGroupId, enumType, value, language, product);
     }
