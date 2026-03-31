@@ -1,7 +1,6 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,9 +23,8 @@ import org.hibernate.annotations.NaturalId;
 public class ErrorMessageEntity extends Auditable {
 
   @NaturalId
-  @Enumerated(EnumType.STRING)
   @Column(name = "ERROR_CODE", nullable = false, length = 500, updatable = false)
-  private ErrorCode errorCode;
+  private String errorCode;
 
   @NaturalId
   @Column(name = "LANGUAGE", nullable = false, length = 5, updatable = false)

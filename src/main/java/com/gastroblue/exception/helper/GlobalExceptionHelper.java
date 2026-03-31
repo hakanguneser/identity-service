@@ -54,7 +54,7 @@ public class GlobalExceptionHelper {
         ex.getMessage());
     ErrorMessageEntity errorProp =
         errorMessageService.findOrCreatePropertyValue(
-            ex.getErrorCode(), IJwtService.getSessionLanguage());
+            ex.getErrorCode().name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -84,7 +84,7 @@ public class GlobalExceptionHelper {
         origin);
     ErrorMessageEntity errorProp =
         errorMessageService.findOrCreatePropertyValue(
-            ex.getErrorCode(), IJwtService.getSessionLanguage());
+            ex.getErrorCode().name(), IJwtService.getSessionLanguage());
     return ResponseEntity.status(status)
         .body(
             ApplicationError.builder()
@@ -105,7 +105,7 @@ public class GlobalExceptionHelper {
         "ApplicationException | errorCode={} | message={}", ex.getErrorCode(), ex.getMessage());
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            ex.getErrorCode(), IJwtService.getSessionLanguage());
+            ex.getErrorCode().name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -129,7 +129,7 @@ public class GlobalExceptionHelper {
     log.warn("BadCredentialsException — authentication failed");
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            UNAUTHORIZED_USER, IJwtService.getSessionLanguage());
+            UNAUTHORIZED_USER.name(), IJwtService.getSessionLanguage());
 
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
@@ -157,7 +157,11 @@ public class GlobalExceptionHelper {
                     ValidationError.builder()
                         .field(error.getField())
                         .rejectedValue(error.getRejectedValue())
-                        .message(error.getDefaultMessage())
+                        .message(
+                            errorMessageService
+                                .findOrCreatePropertyValue(
+                                    error.getDefaultMessage(), IJwtService.getSessionLanguage())
+                                .getMessage())
                         .build())
             .toList();
 
@@ -167,7 +171,7 @@ public class GlobalExceptionHelper {
 
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            INVALID_REQUEST_BODY, IJwtService.getSessionLanguage());
+            INVALID_REQUEST_BODY.name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -192,7 +196,7 @@ public class GlobalExceptionHelper {
     log.error("DataIntegrityViolationException", ex);
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            DATA_INTEGRITY_VIOLATION, IJwtService.getSessionLanguage());
+            DATA_INTEGRITY_VIOLATION.name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -217,7 +221,7 @@ public class GlobalExceptionHelper {
         "HttpMessageNotReadableException (invalid enum or unreadable JSON): {}", ex.getMessage());
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            INVALID_ENUM_VALUE, IJwtService.getSessionLanguage());
+            INVALID_ENUM_VALUE.name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
