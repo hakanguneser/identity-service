@@ -66,12 +66,10 @@ public class UserMapper {
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
         .applicationRole(
-            userProduct != null
-                ? facade.resolve(
-                    "ApplicationRole",
-                    userProduct.getApplicationRole().name(),
-                    entity.getCompanyGroupId())
-                : null)
+            userProduct
+                .getApplicationRole()
+                .toResolvedEnum()) // TODO: fix burada ApplicationRoleun REsolvedEnum'e
+        // dönüştürülmesi gerekiyor
         .language(
             facade.resolve(
                 EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))

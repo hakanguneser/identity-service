@@ -1,5 +1,6 @@
 package com.gastroblue.model.enums;
 
+import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.Locale;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -63,5 +64,9 @@ public enum ApplicationRole {
     } catch (IllegalArgumentException ex) {
       return null;
     }
+  }
+
+  public ResolvedEnum toResolvedEnum() {
+    return new ResolvedEnum(this.name(), this.name(), 1);
   }
 }
