@@ -8,6 +8,7 @@ import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.repository.CompanyGroupEulaContentRepository;
+import com.gastroblue.service.IJwtService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -40,13 +41,7 @@ public class CompanyGroupEulaContentService {
     // Validate company group exists (optional check for consistency)
     companyGroupService.findByIdOrThrow(companyGroupId);
 
-    CompanyGroupEulaContentEntity entity = findByIdOrThrow(id);
-
-    if (!entity.getCompanyGroupId().equals(companyGroupId)) {
-      throw new IllegalDefinitionException(
-          ErrorCode.EULA_CONTENT_NOT_FOUND,
-          "EULA Content does not belong to the specified Company Group");
-    }
+    CompanyGroupEulaContentEntity entity = findByCompanyGroupIdAndId(companyGroupId, id);
 
     if (request.eulaVersion() != null) {
       entity.setEulaVersion(request.eulaVersion());
@@ -73,9 +68,9 @@ public class CompanyGroupEulaContentService {
     return eulaContentRepository.save(entity);
   }
 
-  public CompanyGroupEulaContentEntity findByIdOrThrow(String id) {
+  public CompanyGroupEulaContentEntity findByCompanyGroupIdAndId(String companyGroupId, String id) {
     return eulaContentRepository
-        .findById(id)
+        .findByCompanyGroupIdAndId(companyGroupId, id)
         .orElseThrow(
             () -> {
               log.debug("EULA Content not found with id: {}", id);
@@ -92,17 +87,12 @@ public class CompanyGroupEulaContentService {
   @Transactional
   public void delete(String companyGroupId, String id) {
     companyGroupService.findByIdOrThrow(companyGroupId);
-    CompanyGroupEulaContentEntity entity = findByIdOrThrow(id);
-
-    if (!entity.getCompanyGroupId().equals(companyGroupId)) {
-      throw new IllegalDefinitionException(
-          ErrorCode.EULA_CONTENT_NOT_FOUND,
-          "EULA Content does not belong to the specified Company Group");
-    }
+    CompanyGroupEulaContentEntity entity = findByCompanyGroupIdAndId(companyGroupId, id);
     eulaContentRepository.delete(entity);
   }
 
-  public String getActiveEulaContent(final SessionUser sessionUser) {
+  public String getActiveEulaContentForSessionUser() {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     log.info("SessionUser when get Active Eula: {}", sessionUser.toString());
     return eulaContentRepository
         .findActiveContent(

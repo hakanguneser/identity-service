@@ -74,7 +74,7 @@ public interface IJwtService {
     SessionUser sessionUser = findSessionUser();
     if (sessionUser == null) {
       throw new AccessDeniedException(
-          ErrorCode.ACCESS_DENIED, "No authenticated session found in SecurityContext");
+          ErrorCode.USER_NOT_INITIALIZED, "No authenticated session found in SecurityContext");
     }
     return sessionUser;
   }

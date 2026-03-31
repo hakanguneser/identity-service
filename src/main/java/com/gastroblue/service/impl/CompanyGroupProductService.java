@@ -42,7 +42,8 @@ public class CompanyGroupProductService {
                   companyGroupId,
                   product);
               return new IllegalDefinitionException(
-                  ErrorCode.COMPANY_GROUP_NOT_FOUND, "Product not defined for company group");
+                  ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND,
+                  "Product not defined for company group");
             });
   }
 
@@ -53,7 +54,8 @@ public class CompanyGroupProductService {
             .orElseThrow(
                 () ->
                     new IllegalDefinitionException(
-                        ErrorCode.COMPANY_GROUP_NOT_FOUND, "CompanyGroupProduct not found"));
+                        ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND,
+                        "CompanyGroupProduct not found"));
     existing.setEnabled(updated.getEnabled());
     existing.setApiUrl(updated.getApiUrl());
     existing.setApiVersion(updated.getApiVersion());

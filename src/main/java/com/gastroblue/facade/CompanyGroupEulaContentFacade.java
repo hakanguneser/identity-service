@@ -1,9 +1,7 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupEulaContentMapper;
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
-import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupEulaContentResponse;
@@ -31,12 +29,8 @@ public class CompanyGroupEulaContentFacade {
   }
 
   public CompanyGroupEulaContentResponse findById(String companyGroupId, String id) {
-    CompanyGroupEulaContentEntity entity = eulaContentService.findByIdOrThrow(id);
-    if (!entity.getCompanyGroupId().equals(companyGroupId)) {
-      throw new IllegalDefinitionException(
-          ErrorCode.EULA_CONTENT_NOT_FOUND,
-          "EULA Content does not belong to the specified Company Group");
-    }
+    CompanyGroupEulaContentEntity entity =
+        eulaContentService.findByCompanyGroupIdAndId(companyGroupId, id);
     return CompanyGroupEulaContentMapper.toResponse(entity);
   }
 

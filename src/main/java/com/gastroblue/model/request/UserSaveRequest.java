@@ -4,10 +4,7 @@ import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
 import com.gastroblue.annotations.validation.request.ValidDepartmentsForProduct;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 /**
@@ -19,6 +16,9 @@ import java.util.List;
 public record UserSaveRequest(
     @Size(min = 5, max = 100, message = "{validation.username.size.5.100}")
         @NotBlank(message = "{validation.username.check.null}")
+        @Pattern(
+            regexp = "^[a-zA-Z0-9](?:[a-zA-Z0-9._-]{3,98}[a-zA-Z0-9])?$",
+            message = "{validation.username.invalid.format}")
         String username,
     String companyGroupId,
     String companyId,

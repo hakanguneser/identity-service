@@ -17,6 +17,9 @@ public interface CompanyGroupEulaContentRepository
 
   List<CompanyGroupEulaContentEntity> findAllByCompanyGroupId(String companyGroupId);
 
+  Optional<CompanyGroupEulaContentEntity> findByCompanyGroupIdAndId(
+      String companyGroupId, String id);
+
   @Query(
       """
       select

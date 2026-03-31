@@ -75,14 +75,14 @@ public class AuthenticationFacade {
             .orElseThrow(
                 () ->
                     new AccessDeniedException(
-                        ErrorCode.ACCESS_DENIED,
+                        ErrorCode.COMPANY_PRODUCT_NOT_FOUND,
                         "No product record for userId="
                             + userEntity.getId()
                             + " product="
                             + product));
     if (!userProduct.isActive()) {
       throw new AccessDeniedException(
-          ErrorCode.ACCESS_DENIED,
+          ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE,
           "UserProduct is inactive for userId=" + userEntity.getId() + " product=" + product);
     }
 
@@ -184,7 +184,7 @@ public class AuthenticationFacade {
   public void signEula() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity user = userDefinitionService.findUserByUserName(sessionUser.username());
-    eulaContentService.getActiveEulaContent(sessionUser);
+    eulaContentService.getActiveEulaContentForSessionUser();
     userProductService
         .findByUserIdAndProduct(user.getId(), sessionUser.getApplicationProduct())
         .orElseThrow();
@@ -192,8 +192,7 @@ public class AuthenticationFacade {
   }
 
   public EulaResponse getEula() {
-    String activeEulaContent =
-        eulaContentService.getActiveEulaContent(IJwtService.findSessionUserOrThrow());
+    String activeEulaContent = eulaContentService.getActiveEulaContentForSessionUser();
     return new EulaResponse(activeEulaContent);
   }
 
@@ -204,7 +203,7 @@ public class AuthenticationFacade {
             cp -> {
               if (Boolean.FALSE.equals(cp.getEnabled())) {
                 throw new AccessDeniedException(
-                    ErrorCode.ACCESS_DENIED,
+                    ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE,
                     "Product disabled at company level for companyId="
                         + companyId
                         + " product="
@@ -212,7 +211,7 @@ public class AuthenticationFacade {
               }
               if (cp.getLicenseExpiresAt() != null
                   && cp.getLicenseExpiresAt().isBefore(LocalDate.now())) {
-                throw new AccessDeniedException(ErrorCode.LICENSE_EXPIRED);
+                throw new AccessDeniedException(ErrorCode.COMPANY_PRODUCT_LICENSE_EXPIRED);
               }
               if (cp.getAgreedUserCount() != null) {
                 long activeCount =
@@ -232,7 +231,7 @@ public class AuthenticationFacade {
     return companyGroupProductService
         .findByCompanyGroupIdAndProduct(userEntity.getCompanyGroupId(), product)
         .map(p -> buildApiInfo(product, p.getEnabled(), p.getApiUrl(), p.getApiVersion()))
-        .orElseThrow(() -> new AccessDeniedException(ErrorCode.ACCESS_DENIED));
+        .orElseThrow(() -> new AccessDeniedException(ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND));
   }
 
   private ApiInfoDto buildApiInfo(
@@ -246,7 +245,7 @@ public class AuthenticationFacade {
               ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
         default:
           throw new AccessDeniedException(
-              ErrorCode.ACCESS_DENIED,
+              ErrorCode.PRODUCT_NOT_SELECTED,
               "Product not enabled or apiUrl missing for product=" + product);
       }
     }

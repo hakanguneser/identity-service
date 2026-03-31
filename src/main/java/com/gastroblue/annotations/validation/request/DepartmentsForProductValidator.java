@@ -23,7 +23,9 @@ public class DepartmentsForProductValidator
 
   @Override
   public boolean isValid(UserSaveRequest request, ConstraintValidatorContext context) {
-    if (request == null) {
+    if (request == null
+        || request.applicationRole() == null
+        || request.applicationRole().isAdministrator()) {
       return true;
     }
 
@@ -31,7 +33,6 @@ public class DepartmentsForProductValidator
     if (departments == null || departments.isEmpty() || request.product() == null) {
       return true;
     }
-
     String companyGroupId = request.companyGroupId();
 
     boolean allValid =

@@ -173,7 +173,7 @@ public class UserDefinitionFacade {
     if (sessionUser.getApplicationRole().isAdministrator()) {
       if (requestedProduct == null) {
         throw new ValidationException(
-            ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
+            ErrorCode.PRODUCT_NOT_ALLOWED_FOR_REGISTRATION,
             String.format(
                 "Requested user %s has Admin role, but no product is assigned. ApplicationRole: %s, companyGroupId is null",
                 sessionUser.username(), sessionUser.applicationRole()));
@@ -212,7 +212,7 @@ public class UserDefinitionFacade {
       toAddress.add(createdUserEntity.getEmail());
       ccAddress.add(managerUserEntity.getEmail());
     }
-    Map<MailParameters, Object> mailParams = new HashMap<>();
+    Map<MailParameters, Object> mailParams = new EnumMap<>(MailParameters.class);
 
     mailParams.put(FULL_NAME, createdUserEntity.getFullName());
     mailParams.put(USERNAME, createdUserEntity.getUsername());
@@ -373,7 +373,8 @@ public class UserDefinitionFacade {
 
     userService.updateUser(userEntity);
   }
-  //TODO: burada ApplicationRole'un ResolvedEnum'e dönüştürülmesi gerekiyor
+
+  // TODO: burada ApplicationRole'un ResolvedEnum'e dönüştürülmesi gerekiyor
   public List<ResolvedEnum> findAllApplicationRoles() {
     List<ResolvedEnum> resolvedRoles = new ArrayList<>();
 
