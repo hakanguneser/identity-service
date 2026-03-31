@@ -2,6 +2,7 @@ package com.gastroblue.util;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.enums.ErrorCode;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -47,5 +48,11 @@ public class EmailDomainValidator {
 
     String domain = mail.substring(atIndex + 1).toLowerCase();
     return allowedDomains.contains(domain);
+  }
+
+  public static boolean isDomainAllowed(String mail, String allowedDomains) {
+    Set<String> normalizedAllowedDomains =
+        new HashSet<>(DelimitedStringUtil.splitClean(allowedDomains));
+    return isDomainAllowed(mail, normalizedAllowedDomains);
   }
 }

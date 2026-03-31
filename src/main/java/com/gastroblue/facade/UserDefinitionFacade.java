@@ -9,6 +9,7 @@ import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
+import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
@@ -36,6 +37,7 @@ import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.service.impl.UserProductService;
 import com.gastroblue.util.DelimitedStringUtil;
+import com.gastroblue.util.EmailDomainValidator;
 import com.gastroblue.util.PasswordGenerator;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -72,9 +74,16 @@ public class UserDefinitionFacade {
 
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
+    UserProductEntity userProduct = resolveUserProduct(userId);
+
+    if (!userProduct.getApplicationRole().isAdministrator()) {
+      CompanyGroup companyGroup =
+          companyGroupService.findCompanyByIdOrThrow(existingEntity.getCompanyGroupId());
+      EmailDomainValidator.isDomainAllowed(request.mail(), companyGroup.getMailDomains());
+    }
+
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
-    UserProductEntity userProduct = resolveUserProduct(userId);
     return UserMapper.toResponse(updatedEntity, userProduct, enumFacade);
   }
 
@@ -131,6 +140,7 @@ public class UserDefinitionFacade {
     UserEntity managerUser = checkRegisteredUserRole(request);
     CompanyGroupEntity companyGroup = getRegistrationCompanyGroup(request);
     CompanyEntity company = getRegistrationCompany(request);
+    EmailDomainValidator.isDomainAllowed(request.email(), companyGroup.getMailDomains());
     String generatedPassword = PasswordGenerator.generate();
     UserEntity entityToBeSaved =
         UserMapper.toEntity(
