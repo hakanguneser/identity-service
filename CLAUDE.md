@@ -1,3 +1,9 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
+
 # Identity Service — Claude Code Kuralları
 
 ## Proje Bağlamı
@@ -10,6 +16,35 @@ GastroBlue çatısı altında geliştirilen tüm ürünlerin (Tracker, FormFlow,
 - **Port:** 7102
 - **DB:** PostgreSQL (JPA/Hibernate, `ddl-auto: update`)
 - **Auth:** JWT HS256, audience = `ApplicationProduct`
+
+---
+
+## Geliştirme Komutları
+
+```bash
+# Derleme + Spotless formatlaması uygula
+mvn clean package
+
+# Testleri çalıştır
+mvn test
+
+# Tek bir test sınıfı çalıştır
+mvn test -Dtest=MyServiceTest
+
+# Spotless formatlamasını build olmadan uygula
+mvn spotless:apply
+
+# Uygulamayı lokal başlat (port 7102)
+mvn spring-boot:run
+
+# Docker image oluştur ve çalıştır
+docker build -t identity:latest .
+docker-compose up
+```
+
+Swagger UI (swagger aktifken): `http://localhost:7102/swagger-ui.html`  
+Actuator endpoints: `/actuator/health`, `/actuator/prometheus`, `/actuator/metrics`  
+Debug port (Docker): `17102`
 
 ---
 
@@ -78,6 +113,8 @@ ADMIN > GROUP_MANAGER > ZONE_MANAGER > COMPANY_MANAGER > SUPERVISOR > STAFF
 | `CompanyGroupEulaContentEntity` | `COMPANY_GROUP_EULA_CONTENTS` | EULA versiyonları |
 | `EnumValueConfigurationEntity` | `ENUM_VALUE_CONFIGURATIONS` | Dinamik enum değerleri |
 | `ErrorMessageEntity` | `ERROR_MESSAGES` | Dil bazlı hata mesajları |
+| `CompanyProductEntity` | `COMPANY_PRODUCTS` | Şirketin ürün erişim tanımı |
+| `OutgoingMailLogEntity` | `OUTGOING_MAIL_LOGS` | Gönderilen e-postaların kaydı |
 
 ---
 
@@ -159,6 +196,33 @@ src/main/java/com/gastroblue/
 
 ---
 
+## Mapper Katmanı
+
+`mapper/` altında yalnızca üç mapper vardır — entity↔DTO dönüşümü burada yapılır:
+- `UserMapper` — `UserEntity` / `UserProductEntity` ↔ response DTO'ları
+- `CompanyGroupMapper` — `CompanyGroupEntity` ↔ response DTO'ları
+- `CompanyGroupEulaContentMapper` — EULA entity ↔ response DTO'ları
+
+Yeni bir domain için mapper gerekiyorsa aynı pakette yeni bir sınıf oluştur.
+
+---
+
+## Ortam Değişkenleri (Zorunlu — production)
+
+| Değişken | Açıklama |
+|----------|----------|
+| `DATABASE_HOST/PORT/NAME/USERNAME/PASSWORD` | PostgreSQL bağlantısı |
+| `JWT_SECRET_KEY` | HS256 imzalama anahtarı |
+| `MAIL_FROM`, `MAIL_PASSWORD` | SMTP kimlik bilgileri |
+| `MAIL_ADMIN_REDIRECT_ADDRESS` | Admin bildirim adresi |
+| `APP_ADMIN_REGISTRATION_ENABLED` | İlk ADMIN kaydına izin ver/verme |
+| `APP_SWAGGER_ENABLED` | Swagger UI aç/kapa |
+| `TT_TOKEN`, `FF_TOKEN`, `ADMIN_TOKEN` | Servisler arası sistem token'ları |
+
+Lokal geliştirmede `application.yaml` içindeki varsayılan değerler kullanılır.
+
+---
+
 ## Önemli Notlar
 
 - `HELP.md` Maven/Spring Boot referans dosyasıdır — proje dökümantasyonu `README.md`'dedir
@@ -166,3 +230,4 @@ src/main/java/com/gastroblue/
 - Request tracing: Her istek için UUID trace ID üretilir, response header'da `X-Trace-Id` olarak dönülür
 - Mail loglama: Her gönderim `OutgoingMailLogEntity`'ye kaydedilir
 - Sistem token'ları (TT_TOKEN, FF_TOKEN, ADMIN_TOKEN): Servisler arası iletişim için kullanılır, JWT filtresi bunları tanır
+- `EnumTypes` enum'u dinamik enum'ların tiplerini listeler; `EnumValueConfigurationEntity` bu tip + companyGroup + değer üçlüsüyle kayıt tutar
