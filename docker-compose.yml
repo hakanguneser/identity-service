@@ -8,7 +8,9 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:7102:7102"
+      - "127.0.0.1:17102:17102"
     environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:17102"
       TZ: Europe/Istanbul
 
       DATABASE_HOST: ${DATABASE_HOST}
