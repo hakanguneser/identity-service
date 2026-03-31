@@ -13,6 +13,7 @@ import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.AuthLoginRequest;
+import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
@@ -262,5 +263,15 @@ public class AuthenticationFacade {
               .toList();
       default -> List.of(userEntity.getCompanyId());
     };
+  }
+
+  public void pushToken(PushTokenRequest request) {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    UserProductEntity userProduct =
+        userProductService
+            .findByUserIdAndProduct(sessionUser.username(), sessionUser.getApplicationProduct())
+            .orElseThrow();
+    userProduct.setPushToken(request.token());
+    userProductService.save(userProduct);
   }
 }

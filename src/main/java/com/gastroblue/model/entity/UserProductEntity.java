@@ -44,8 +44,8 @@ public class UserProductEntity extends Auditable {
   @Column(name = "LAST_SUCCESS_LOGIN")
   private LocalDateTime lastSuccessLogin;
 
-  @Column(name = "NOTIFICATION_TOKEN", length = 512)
-  private String notificationToken;
+  @Column(name = "PUSH_TOKEN", length = 1000)
+  private String pushToken;
 
   @Column(name = "EULA_ACCEPTED_AT")
   private LocalDateTime eulaAcceptedAt;

@@ -15,7 +15,7 @@ import java.util.List;
  * which uses {@link #product} from this same request — not the caller's session product — so that
  * an ADMIN can create users for any product context.
  */
-//@ValidDepartmentsForProduct TODO validate departments
+// @ValidDepartmentsForProduct TODO validate departments
 public record UserSaveRequest(
     @Size(min = 5, max = 100, message = "{validation.username.size.5.100}")
         @NotBlank(message = "{validation.username.check.null}")
