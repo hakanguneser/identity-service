@@ -373,19 +373,16 @@ public class UserDefinitionFacade {
 
     userService.updateUser(userEntity);
   }
-
+  //TODO: burada ApplicationRole'un ResolvedEnum'e dönüştürülmesi gerekiyor
   public List<ResolvedEnum> findAllApplicationRoles() {
-    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-    ApplicationRole sessionRole = sessionUser.getApplicationRole();
-    if (sessionRole == null) return List.of();
+    List<ResolvedEnum> resolvedRoles = new ArrayList<>();
 
-    return enumFacade.getDropdownValues("ApplicationRole").stream()
-        .filter(
-            resolved -> {
-              ApplicationRole role = ApplicationRole.fromString(resolved.getKey());
-              return role != null && role.getLevel() > sessionRole.getLevel();
-            })
-        .toList();
+    resolvedRoles.add(ApplicationRole.ZONE_MANAGER.toResolvedEnum());
+    resolvedRoles.add(ApplicationRole.COMPANY_MANAGER.toResolvedEnum());
+    resolvedRoles.add(ApplicationRole.SUPERVISOR.toResolvedEnum());
+    resolvedRoles.add(ApplicationRole.STAFF.toResolvedEnum());
+
+    return resolvedRoles;
   }
 
   public List<ResolvedEnum> findAllDepartments() {
