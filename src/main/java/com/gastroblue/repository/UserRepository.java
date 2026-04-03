@@ -42,4 +42,23 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
       """)
   void updatePasswordCheckAfterLogin(
       @Param("username") String username, @Param("now") LocalDateTime now);
+
+  @Query(
+      """
+      select u from UserEntity u
+      where u.companyGroupId = :companyGroupId
+        and u.companyId = :companyId
+        and u.active = true
+        and exists (
+          select 1 from UserProductEntity up
+          where up.userId = u.id
+            and up.product = :product
+            and up.active = true
+        )
+      order by u.username
+      """)
+  List<UserEntity> findActiveByCompanyGroupIdAndCompanyIdAndProduct(
+      @Param("companyGroupId") String companyGroupId,
+      @Param("companyId") String companyId,
+      @Param("product") ApplicationProduct product);
 }

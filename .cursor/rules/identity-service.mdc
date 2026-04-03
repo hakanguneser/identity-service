@@ -30,6 +30,7 @@ Controller  →  Facade  →  Service  →  Repository
 - Bir `Service` yalnızca **tek bir** `Repository` ile çalışır
 - `Controller` yalnızca **DTO** (request/response) alır ve verir — entity yasak
 - Her `Service` kendi request/response modellerini kullanır — paylaşımlı response yasak
+- **REST API kök yanıt gövdesi:** Controller dönüş tipinde ham koleksiyon veya ilkel kök tip kullanılmaz (`ResponseEntity<List<…>>`, `ResponseEntity<String>` vb.). Her endpoint, kökte **tek bir** kök DTO döner; liste veya ek alanlar bu DTO’nun içindedir (ör. `TrackerCompanyUsersResponse { users: [...] }`). Ürün/API özel uçlar için modeller kendi paketinde tanımlanır (`model.response.tracker` gibi); **kök** istek/yanıt modelleri adında `Request` / `Response` soneki kullanılır; iç içe (sub) nesnelerde bu sonek **olmaz** (`TrackerUser`, `TrackerCompany` vb.).
 - İş mantığı **Facade**'da toplanır; Controller sadece HTTP yönlendirmesi yapar
 - `@Transactional` sadece `Service` metodlarında kullanılır
 
@@ -70,6 +71,7 @@ ADMIN > GROUP_MANAGER > ZONE_MANAGER > COMPANY_MANAGER > SUPERVISOR > STAFF
 
 - Lombok: `@Data`, `@RequiredArgsConstructor`, `@Slf4j`, `@Builder`, `@Getter/@Setter`
 - Spotless (Google Java Format) — her `mvn package`'da çalışır, formata uy
+- **DTO adlandırma — kök `Request` / `Response`, iç nesneler soneksiz:** HTTP **istek gövdesi** için kök DTO adı `…Request` ile biter (`UserSaveRequest`). HTTP **yanıt gövdesi** için **kök** (en dış) DTO adı `…Response` ile biter (`TrackerCompanyUsersResponse`, `TrackerCompanyContextResponse`). Aynı API sözleşmesindeki **iç içe (sub) nesnelerde** `Request` / `Response` soneki **kullanılmaz** (`TrackerUser`, `TrackerCompany`, `TrackerCompanyGroup`). Mevcut paylaşımlı sınıflar (`UserDefinitionResponse` vb.) bu çerçevede kalır.
 - Request DTO validasyonu: `@NotBlank`, `@NotNull`, `@Valid`, `@Size` vb. (Jakarta Validation)
 - Oturum bilgisi: `@AuthenticationPrincipal SessionUser sessionUser`
 - `SessionUser` bir record'dur — immutable, doğrudan kullan
@@ -101,6 +103,7 @@ ADMIN > GROUP_MANAGER > ZONE_MANAGER > COMPANY_MANAGER > SUPERVISOR > STAFF
 | Entity | `src/main/java/com/gastroblue/model/entity/` |
 | Request DTO | `src/main/java/com/gastroblue/model/request/` |
 | Response DTO | `src/main/java/com/gastroblue/model/response/` |
+| Ürün özel response (ör. Tracker) | `src/main/java/com/gastroblue/model/response/<ürün>/` |
 | Enum | `src/main/java/com/gastroblue/model/enums/` |
 | Config | `src/main/java/com/gastroblue/config/` |
 | Util | `src/main/java/com/gastroblue/util/` |

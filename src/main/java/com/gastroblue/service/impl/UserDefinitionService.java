@@ -56,6 +56,12 @@ public class UserDefinitionService {
                     String.format("User not found (username=%s)", username)));
   }
 
+  public List<UserEntity> findActiveByCompanyGroupIdAndCompanyIdAndProduct(
+      String companyGroupId, String companyId, ApplicationProduct product) {
+    return userRepository.findActiveByCompanyGroupIdAndCompanyIdAndProduct(
+        companyGroupId, companyId, product);
+  }
+
   public List<UserEntity> findAccessibleUser(
       Set<ApplicationRole> applicationRoles, ApplicationProduct product) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();

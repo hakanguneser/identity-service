@@ -57,6 +57,11 @@ public class SecurityConfig {
                   .requestMatchers("/api/v1/definition/company-groups/context")
                   .hasAnyRole(ApplicationRole.APP_CLIENT.name());
 
+              // Tracker backend ↔ identity (TT_TOKEN → APP_CLIENT + TRACKER aud)
+              authorize
+                  .requestMatchers("/api/v1/tracker/**")
+                  .hasRole(ApplicationRole.APP_CLIENT.name());
+
               // 🔒 Everything else
               authorize.anyRequest().authenticated();
             })
