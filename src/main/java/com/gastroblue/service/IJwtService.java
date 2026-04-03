@@ -21,6 +21,7 @@ public interface IJwtService {
   String JWT_COMPANY_IDS = "cIds";
   String JWT_APPLICATION_PRODUCT = "aud";
   String JWT_DEPARTMENTS = "dpts";
+  String JWT_USER_ID = "uid";
 
   String generateToken(String username, HashMap<String, Object> extraClaims, long expiration);
 
@@ -34,6 +35,7 @@ public interface IJwtService {
     extraClaims.put(JWT_APPLICATION_PRODUCT, sessionUser.applicationProduct());
     extraClaims.put(JWT_LANGUAGE, sessionUser.language());
     extraClaims.put(JWT_DEPARTMENTS, sessionUser.departments());
+    extraClaims.put(JWT_USER_ID, sessionUser.userId());
     return extraClaims;
   }
 
@@ -47,6 +49,7 @@ public interface IJwtService {
       ApplicationProduct product,
       List<String> companyIds) {
     HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(JWT_USER_ID, userEntity.getId());
     extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
     extraClaims.put(JWT_ROLE, userProduct != null ? userProduct.getApplicationRole().name() : null);
     extraClaims.put(JWT_COMPANY_IDS, companyIds);

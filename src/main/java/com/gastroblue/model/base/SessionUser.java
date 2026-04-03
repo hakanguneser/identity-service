@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public record SessionUser(
+    String userId,
     String applicationProduct,
     String applicationRole,
     List<String> departments,

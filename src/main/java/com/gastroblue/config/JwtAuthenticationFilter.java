@@ -107,6 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     Date now = new Date();
     Date expiresAt = new Date(now.getTime() + 1000L * 60 * 60 * 24 * 365);
     return new SessionUser(
+        null,
         product.name(),
         role.name(),
         List.of(),
