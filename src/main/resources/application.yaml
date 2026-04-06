@@ -58,6 +58,9 @@ app:
   admin:
     registration:
       enabled: ${APP_ADMIN_REGISTRATION_ENABLED:true}
+  expo:
+    base-url: ${EXPO_PUSH_BASE_URL:https://exp.host}
+    access-token: ${EXPO_ACCESS_TOKEN:}
 
 mail:
   enabled: ${MAIL_ENABLED:true}

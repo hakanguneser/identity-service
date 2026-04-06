@@ -1,5 +1,6 @@
 package com.gastroblue.facade;
 
+import com.gastroblue.client.TrackerPushNotificationDispatcher;
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.TrackerMapper;
@@ -10,6 +11,8 @@ import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.request.PushNotificationRequest;
+import com.gastroblue.model.response.tracker.PushNotificationAcceptedResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyUsersResponse;
 import com.gastroblue.model.response.tracker.TrackerUser;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
@@ -35,6 +39,7 @@ public class TrackerFacade {
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
   private final EnumConfigurationFacade enumConfigurationFacade;
+  private final TrackerPushNotificationDispatcher trackerPushNotificationDispatcher;
 
   public TrackerCompanyUsersResponse findCompanyUsers(String companyGroupId, String companyId) {
     requireTrackerProduct();
@@ -77,6 +82,25 @@ public class TrackerFacade {
           "Company not found in group: " + companyGroupCode + " / " + companyCode);
     }
     return TrackerMapper.toCompanyContextResponse(group, company, enumConfigurationFacade);
+  }
+
+  public PushNotificationAcceptedResponse enqueuePushNotifications(
+      PushNotificationRequest request) {
+    requireTrackerProduct();
+    List<UserProductEntity> userProducts =
+        userProductService.findByUserIdInAndProduct(
+            request.userIdList(), ApplicationProduct.TRACKER);
+    List<String> tokens =
+        userProducts.stream()
+            .map(UserProductEntity::getPushToken)
+            .filter(StringUtils::hasText)
+            .map(String::trim)
+            .distinct()
+            .toList();
+    if (!tokens.isEmpty()) {
+      trackerPushNotificationDispatcher.dispatch(tokens, request.title(), request.body());
+    }
+    return PushNotificationAcceptedResponse.builder().recipientCount(tokens.size()).build();
   }
 
   private static void requireTrackerProduct() {
