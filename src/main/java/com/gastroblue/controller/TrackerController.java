@@ -2,6 +2,7 @@ package com.gastroblue.controller;
 
 import com.gastroblue.facade.TrackerFacade;
 import com.gastroblue.model.request.PushNotificationRequest;
+import com.gastroblue.model.request.TrackerUsersByIdsRequest;
 import com.gastroblue.model.response.tracker.PushNotificationAcceptedResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyUsersResponse;
@@ -30,7 +31,7 @@ public class TrackerController {
     return ResponseEntity.ok(trackerFacade.findCompanyUsers(companyGroupId, companyId));
   }
 
-  @GetMapping("/context")
+  @GetMapping("/context/by-codes")
   public ResponseEntity<TrackerCompanyContextResponse> findCompanyContext(
       @RequestParam("companyGroupCode") String companyGroupCode,
       @RequestParam("companyCode") String companyCode) {
@@ -38,9 +39,15 @@ public class TrackerController {
         trackerFacade.findCompanyContextByCodes(companyGroupCode, companyCode));
   }
 
-  @PostMapping("/users/push-notification")
+  @PostMapping("/users/push-notifications")
   public ResponseEntity<PushNotificationAcceptedResponse> pushNotification(
       @Valid @RequestBody PushNotificationRequest request) {
     return ResponseEntity.accepted().body(trackerFacade.enqueuePushNotifications(request));
+  }
+
+  @PostMapping("/users/by-ids")
+  public ResponseEntity<TrackerCompanyUsersResponse> findUsersByIds(
+      @Valid @RequestBody TrackerUsersByIdsRequest request) {
+    return ResponseEntity.ok(trackerFacade.findUsersByIds(request));
   }
 }

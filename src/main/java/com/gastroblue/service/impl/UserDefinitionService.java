@@ -62,6 +62,14 @@ public class UserDefinitionService {
         companyGroupId, companyId, product);
   }
 
+  /** Returns persisted users for the given ids (missing ids are omitted). */
+  public List<UserEntity> findAllByIdIn(List<String> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return List.of();
+    }
+    return userRepository.findAllById(userIds);
+  }
+
   public List<UserEntity> findAccessibleUser(
       Set<ApplicationRole> applicationRoles, ApplicationProduct product) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
