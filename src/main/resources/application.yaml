@@ -36,10 +36,10 @@ application:
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
       sys-tokens:
         tt:
-          token: ${TT_TOKEN:tt-token}
+          token: ${TRACKER_TOKEN:tracker-token}
           product: TRACKER
         ff:
-          token: ${FF_TOKEN:ff-token}
+          token: ${FORMFLOW_TOKEN:formflow-token}
           product: FORMFLOW
         admin:
           token: ${ADMIN_TOKEN:admin-token}
