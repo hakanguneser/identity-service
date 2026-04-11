@@ -1,6 +1,5 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.model.enums.*;
 import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.List;
 import lombok.*;
@@ -16,9 +15,9 @@ public class AuthUserCompanyResponse {
   private String companyCode;
   private String companyName;
   private List<String> companyMail;
-  private Country country;
-  private City city;
-  private Zone zone;
+  private String country;
+  private String city;
+  private String zone;
   private ResolvedEnum segment1;
   private ResolvedEnum segment2;
   private ResolvedEnum segment3;

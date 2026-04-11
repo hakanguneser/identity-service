@@ -1,6 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
+import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.Language;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,11 +23,27 @@ import lombok.NoArgsConstructor;
 @Table(
     name = "ENUM_VALUE_CONFIGURATIONS",
     uniqueConstraints = {
+      // UK_ENUM_VALUE_CONFIGURATIONS (old, without product) must be dropped manually:
+      //   ALTER TABLE ENUM_VALUE_CONFIGURATIONS DROP CONSTRAINT UK_ENUM_VALUE_CONFIGURATIONS;
       @UniqueConstraint(
-          name = "UK_ENUM_VALUE_CONFIGURATIONS",
-          columnNames = {"COMPANY_GROUP_ID", "ENUM_TYPE", "LANGUAGE", "ENUM_KEY"})
+          name = "UK_EVC_GROUP_TYPE_LANG_KEY_PROD",
+          columnNames = {
+            "COMPANY_GROUP_ID",
+            "ENUM_TYPE",
+            "LANGUAGE",
+            "ENUM_KEY",
+            "APPLICATION_PRODUCT"
+          })
     },
-    indexes = {@Index(name = "IDX_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")})
+    indexes = {
+      @Index(name = "IDX_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID"),
+      @Index(
+          name = "IDX_ENUM_CONFIG_TYPE_LANG_GROUP",
+          columnList = "ENUM_TYPE, LANGUAGE, COMPANY_GROUP_ID"),
+      @Index(
+          name = "IDX_ENUM_CONFIG_PRODUCT",
+          columnList = "ENUM_TYPE, APPLICATION_PRODUCT, COMPANY_GROUP_ID")
+    })
 public class EnumValueConfigurationEntity extends Auditable {
   @Column(name = "COMPANY_GROUP_ID", length = 36)
   private String companyGroupId;
@@ -49,4 +66,19 @@ public class EnumValueConfigurationEntity extends Auditable {
 
   @Column(name = "DISPLAY_ORDER")
   private Integer displayOrder;
+
+  @Column(name = "PARENT_KEY", length = 50)
+  private String parentKey;
+
+  @Column(name = "PARENT_ENUM_TYPE", length = 50)
+  private String parentEnumType;
+
+  /**
+   * Scopes this enum value to a specific product. {@code null} means the value applies to all
+   * products (used by non-product-specific enums such as City, Country, Zone…). For
+   * product-specific enums such as Department the product must always be set.
+   */
+  @Column(name = "APPLICATION_PRODUCT", length = 30)
+  @Enumerated(EnumType.STRING)
+  private ApplicationProduct product;
 }

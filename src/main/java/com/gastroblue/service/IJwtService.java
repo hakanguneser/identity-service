@@ -1,14 +1,13 @@
 package com.gastroblue.service;
 
-import static com.gastroblue.util.DelimitedStringUtil.splitToEnumList;
-
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
+import com.gastroblue.util.DelimitedStringUtil;
 import java.util.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +21,7 @@ public interface IJwtService {
   String JWT_COMPANY_IDS = "cIds";
   String JWT_APPLICATION_PRODUCT = "aud";
   String JWT_DEPARTMENTS = "dpts";
+  String JWT_USER_ID = "uid";
 
   String generateToken(String username, HashMap<String, Object> extraClaims, long expiration);
 
@@ -30,24 +30,36 @@ public interface IJwtService {
   static HashMap<String, Object> toExtraClaims(SessionUser sessionUser) {
     HashMap<String, Object> extraClaims = new HashMap<>();
     extraClaims.put(JWT_COMPANY_GROUP_ID, sessionUser.companyGroupId());
-    extraClaims.put(JWT_ROLE, sessionUser.getApplicationRole());
+    extraClaims.put(JWT_ROLE, sessionUser.applicationRole());
     extraClaims.put(JWT_COMPANY_IDS, sessionUser.companyIds());
     extraClaims.put(JWT_APPLICATION_PRODUCT, sessionUser.applicationProduct());
     extraClaims.put(JWT_LANGUAGE, sessionUser.language());
     extraClaims.put(JWT_DEPARTMENTS, sessionUser.departments());
+    extraClaims.put(JWT_USER_ID, sessionUser.userId());
     return extraClaims;
   }
 
+  /**
+   * Builds JWT claims from UserEntity (identity) + UserProductEntity (per-product role/dept). Used
+   * during login after the product-specific record is loaded.
+   */
   static HashMap<String, Object> toExtraClaims(
-      UserEntity userEntity, ApplicationProduct product, List<String> companyIds) {
+      UserEntity userEntity,
+      UserProductEntity userProduct,
+      ApplicationProduct product,
+      List<String> companyIds) {
     HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(JWT_USER_ID, userEntity.getId());
     extraClaims.put(JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
-    extraClaims.put(JWT_ROLE, userEntity.getApplicationRole());
+    extraClaims.put(JWT_ROLE, userProduct != null ? userProduct.getApplicationRole().name() : null);
     extraClaims.put(JWT_COMPANY_IDS, companyIds);
     extraClaims.put(JWT_APPLICATION_PRODUCT, product);
     extraClaims.put(JWT_LANGUAGE, userEntity.getLanguage().name());
     extraClaims.put(
-        JWT_DEPARTMENTS, splitToEnumList(userEntity.getDepartments(), Department.class));
+        JWT_DEPARTMENTS,
+        userProduct != null
+            ? DelimitedStringUtil.splitClean(userProduct.getDepartments())
+            : List.of());
     return extraClaims;
   }
 
@@ -64,7 +76,8 @@ public interface IJwtService {
   static SessionUser findSessionUserOrThrow() {
     SessionUser sessionUser = findSessionUser();
     if (sessionUser == null) {
-      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+      throw new AccessDeniedException(
+          ErrorCode.USER_NOT_INITIALIZED, "No authenticated session found in SecurityContext");
     }
     return sessionUser;
   }

@@ -4,10 +4,12 @@ import com.gastroblue.facade.ErrorMessageFacade;
 import com.gastroblue.model.request.ErrorMessageSaveRequest;
 import com.gastroblue.model.request.ErrorMessageUpdateRequest;
 import com.gastroblue.model.response.ErrorMessageResponse;
+import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,5 +45,10 @@ public class ErrorMessageController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable String id) {
     facade.delete(id);
+  }
+
+  @GetMapping("dropdown/languages")
+  public ResponseEntity<List<ResolvedEnum>> findAllLanguages() {
+    return ResponseEntity.ok(facade.getLanguages()); // TODO: Language support
   }
 }

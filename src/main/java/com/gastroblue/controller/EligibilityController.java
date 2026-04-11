@@ -1,6 +1,7 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.EligibilityFacade;
+import com.gastroblue.model.response.UserEligibilityResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,10 @@ public class EligibilityController {
 
   private final EligibilityFacade eligibilityFacade;
 
-  @GetMapping("/add-user")
+  @GetMapping("/tracker/add-user")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<Void> addUser() {
-    eligibilityFacade.addUser();
-    return ResponseEntity.ok().build();
+  public ResponseEntity<UserEligibilityResponse> addUser() {
+    UserEligibilityResponse response = eligibilityFacade.trackerAddUser();
+    return ResponseEntity.ok(response);
   }
 }

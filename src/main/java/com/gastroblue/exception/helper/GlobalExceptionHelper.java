@@ -3,6 +3,7 @@ package com.gastroblue.exception.helper;
 import static com.gastroblue.model.enums.ErrorCode.*;
 
 import com.gastroblue.config.tracing.TraceIdConstants;
+import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.exception.base.AbstractRuntimeException;
 import com.gastroblue.model.entity.ErrorMessageEntity;
@@ -53,7 +54,7 @@ public class GlobalExceptionHelper {
         ex.getMessage());
     ErrorMessageEntity errorProp =
         errorMessageService.findOrCreatePropertyValue(
-            ex.getErrorCode(), IJwtService.getSessionLanguage());
+            ex.getErrorCode().name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -67,6 +68,36 @@ public class GlobalExceptionHelper {
             .build());
   }
 
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<Object> handleAccessDenied(final AccessDeniedException ex) {
+    HttpStatus status =
+        (ex.getErrorCode() == INVALID_USERNAME_OR_PASSWORD
+                || ex.getErrorCode() == EXPIRED_JWT_TOKEN)
+            ? HttpStatus.UNAUTHORIZED
+            : HttpStatus.FORBIDDEN;
+    StackTraceElement origin = findThrowOrigin(ex);
+    log.warn(
+        "AccessDeniedException | errorCode={} | status={} | reason={} | at={}",
+        ex.getErrorCode(),
+        status.value(),
+        ex.getMessage(),
+        origin);
+    ErrorMessageEntity errorProp =
+        errorMessageService.findOrCreatePropertyValue(
+            ex.getErrorCode().name(), IJwtService.getSessionLanguage());
+    return ResponseEntity.status(status)
+        .body(
+            ApplicationError.builder()
+                .errorMessage(errorProp.getMessage())
+                .errorCode(ex.getErrorCode())
+                .referenceId(errorProp.getId())
+                .httpStatus(status)
+                .timeStamp(LocalDateTime.now())
+                .debugContext(ex.getMessage())
+                .traceId(currentTraceId())
+                .build());
+  }
+
   @ExceptionHandler(AbstractRuntimeException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Object> handleAbstractRuntime(final AbstractRuntimeException ex) {
@@ -74,7 +105,7 @@ public class GlobalExceptionHelper {
         "ApplicationException | errorCode={} | message={}", ex.getErrorCode(), ex.getMessage());
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            ex.getErrorCode(), IJwtService.getSessionLanguage());
+            ex.getErrorCode().name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -98,7 +129,7 @@ public class GlobalExceptionHelper {
     log.warn("BadCredentialsException — authentication failed");
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            UNAUTHORIZED_USER, IJwtService.getSessionLanguage());
+            UNAUTHORIZED_USER.name(), IJwtService.getSessionLanguage());
 
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(
@@ -126,7 +157,11 @@ public class GlobalExceptionHelper {
                     ValidationError.builder()
                         .field(error.getField())
                         .rejectedValue(error.getRejectedValue())
-                        .message(error.getDefaultMessage())
+                        .message(
+                            errorMessageService
+                                .findOrCreatePropertyValue(
+                                    error.getDefaultMessage(), IJwtService.getSessionLanguage())
+                                .getMessage())
                         .build())
             .toList();
 
@@ -136,7 +171,7 @@ public class GlobalExceptionHelper {
 
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            INVALID_REQUEST_BODY, IJwtService.getSessionLanguage());
+            INVALID_REQUEST_BODY.name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -161,7 +196,7 @@ public class GlobalExceptionHelper {
     log.error("DataIntegrityViolationException", ex);
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            DATA_INTEGRITY_VIOLATION, IJwtService.getSessionLanguage());
+            DATA_INTEGRITY_VIOLATION.name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -186,7 +221,7 @@ public class GlobalExceptionHelper {
         "HttpMessageNotReadableException (invalid enum or unreadable JSON): {}", ex.getMessage());
     ErrorMessageEntity propertyEntity =
         errorMessageService.findOrCreatePropertyValue(
-            INVALID_ENUM_VALUE, IJwtService.getSessionLanguage());
+            INVALID_ENUM_VALUE.name(), IJwtService.getSessionLanguage());
 
     return badRequest(
         ApplicationError.builder()
@@ -241,6 +276,22 @@ public class GlobalExceptionHelper {
    */
   private String currentTraceId() {
     return MDC.get(TraceIdConstants.MDC_TRACE_ID_KEY);
+  }
+
+  /**
+   * Walks the stack trace and returns the first frame from application code (com.gastroblue),
+   * skipping exception and helper classes. This pinpoints exactly where the exception was thrown.
+   */
+  private static StackTraceElement findThrowOrigin(Throwable ex) {
+    for (StackTraceElement frame : ex.getStackTrace()) {
+      String cls = frame.getClassName();
+      if (cls.startsWith("com.gastroblue")
+          && !cls.contains("Exception")
+          && !cls.contains("GlobalException")) {
+        return frame;
+      }
+    }
+    return ex.getStackTrace().length > 0 ? ex.getStackTrace()[0] : null;
   }
 
   private ResponseEntity<Object> badRequest(ApplicationError error) {

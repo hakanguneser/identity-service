@@ -1,0 +1,5 @@
+INSERT INTO public.users
+(id, created_by, created_date, last_modified_by, last_modified_date, "version", is_active, company_group_id, company_id, email, gender, "language", "name", "password", password_change_required, password_expires_at, phone, surname, username, "zone")
+VALUES('0320ad49-43ec-4fed-a512-9911e875e4f2', 'admin', '2026-03-24 23:35:10.486', 'admin', '2026-03-24 23:35:10.486', 0, true, '', NULL, 'hakanguneser@gmail.com', 'MALE', 'TR', 'hakan', '$2a$10$1g4t0Vgb5XBMLVC.Sn0/yuS9z4TFa1f.JD9sfTk9WERM5hVlI/.SK', false, '2027-03-24 23:23:15.726', NULL, 'guneser', 'admin', NULL);NSERT INTO public.user_products
+(id, created_by, created_date, last_modified_by, last_modified_date, "version", is_active, application_role, departments, eula_accepted_at, last_success_login, notification_token, product, user_id)
+VALUES('0320ad49-43ec-4fed-a512-9911e875e4f1', 'a', '2026-03-24 23:35:10.486', NULL, NULL, 0, true, 'ADMIN', 'MANAGEMENT', NULL, NULL, NULL, 'ADMIN_PANEL', '0320ad49-43ec-4fed-a512-9911e875e4f2');

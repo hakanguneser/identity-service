@@ -8,7 +8,9 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:7102:7102"
+      - "127.0.0.1:17102:17102"
     environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:17102"
       TZ: Europe/Istanbul
 
       DATABASE_HOST: ${DATABASE_HOST}
@@ -18,12 +20,6 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
 
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
-      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL}
-      OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES}
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: none
 
       APP_ADMIN_REGISTRATION_ENABLED: ${APP_ADMIN_REGISTRATION_ENABLED}
       APP_SWAGGER_ENABLED: ${APP_SWAGGER_ENABLED}

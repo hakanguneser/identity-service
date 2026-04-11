@@ -1,7 +1,5 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.model.enums.ApplicationProduct.FORMFLOW;
-import static com.gastroblue.model.enums.ApplicationProduct.TRACKER;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.exception.AccessDeniedException;
@@ -11,14 +9,16 @@ import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.*;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.AuthLoginRequest;
+import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +43,9 @@ public class AuthenticationFacade {
   private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
+  private final CompanyGroupProductService companyGroupProductService;
+  private final CompanyProductService companyProductService;
+  private final UserProductService userProductService;
 
   @Value("${application.security.jwt.token-validity-in-minutes}")
   private Long jwtTokenValidityMinutes;
@@ -50,27 +53,49 @@ public class AuthenticationFacade {
   @Value("${application.security.jwt.refresh-token-validity-in-days}")
   private Long jwtRefreshTokenValidityDays;
 
-  public AuthLoginResponse login(AuthLoginRequest loginRequest) {
-    log.info("Login request: {}", loginRequest.toString());
-    Authentication authentication;
-    UserEntity userEntity = null;
+  public AuthLoginResponse login(AuthLoginRequest request) {
+    log.info("Login request: {}", request.toString());
+    UserEntity userEntity;
     try {
-      authentication =
+      Authentication authentication =
           authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(
-                  loginRequest.username(), loginRequest.password()));
+              new UsernamePasswordAuthenticationToken(request.username(), request.password()));
       userEntity = (UserEntity) authentication.getPrincipal();
     } catch (BadCredentialsException e) {
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     } catch (RuntimeException e) {
-      log.error("Authentication failed: {}", e.getMessage());
+      log.error("Authentication failed unexpectedly: {}", e.getMessage(), e);
+      throw e;
     }
-    if (userEntity == null) {
-      throw new BadCredentialsException("User not found");
+
+    ApplicationProduct product = request.product();
+    UserProductEntity userProduct =
+        userProductService
+            .findByUserIdAndProduct(userEntity.getId(), product)
+            .orElseThrow(
+                () ->
+                    new AccessDeniedException(
+                        ErrorCode.COMPANY_PRODUCT_NOT_FOUND,
+                        "No product record for userId="
+                            + userEntity.getId()
+                            + " product="
+                            + product));
+    if (!userProduct.isActive()) {
+      throw new AccessDeniedException(
+          ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE,
+          "UserProduct is inactive for userId=" + userEntity.getId() + " product=" + product);
     }
-    updateUserAfterSuccessfulLogin(userEntity, loginRequest.product());
-    ApiInfoDto apiInfo = getApiInfo(userEntity, loginRequest.product());
-    HashMap<String, Object> extraClaims = toExtraClaims(userEntity, loginRequest.product());
+
+    if (!userProduct.getApplicationRole().isAdministrator()) {
+      validateLicense(userEntity.getCompanyId(), product);
+    }
+
+    userService.updatePasswordCheckAfterLogin(userEntity.getUsername());
+    userProductService.updateLastSuccessLogin(userEntity.getId(), product);
+    ApiInfoDto apiInfo = getApiInfo(userEntity, userProduct, product);
+    HashMap<String, Object> extraClaims =
+        IJwtService.toExtraClaims(
+            userEntity, userProduct, product, getResponsibleCompanyIds(userEntity, userProduct));
     String token =
         jwtService.generateToken(
             userEntity.getUsername(),
@@ -81,13 +106,12 @@ public class AuthenticationFacade {
             userEntity.getUsername(),
             extraClaims,
             TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
+
     return AuthLoginResponse.builder()
         .token(token)
         .refreshToken(refreshToken)
         .passwordChangeRequired(userEntity.isPasswordChangeRequired())
-        .eulaRequired(
-            userEntity.getEulaAcceptedAt() == null
-                || userEntity.getEulaAcceptedAt().isBefore(LocalDateTime.now()))
+        .eulaRequired(userProduct.getEulaAcceptedAt() == null)
         .apiInfo(apiInfo)
         .build();
   }
@@ -107,7 +131,17 @@ public class AuthenticationFacade {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AuthUserInfoResponse response = new AuthUserInfoResponse();
     UserEntity userEntityByUserName = userService.findUserByUserName(sessionUser.username());
-    response.setUser(UserMapper.toResponse(userEntityByUserName, enumConfigurationFacade));
+
+    UserProductEntity userProduct =
+        sessionUser.getApplicationProduct() != null
+            ? userProductService
+                .findByUserIdAndProduct(
+                    userEntityByUserName.getId(), sessionUser.getApplicationProduct())
+                .orElse(null)
+            : null;
+
+    response.setUser(
+        UserMapper.toResponse(userEntityByUserName, userProduct, enumConfigurationFacade));
     if (sessionUser.companyGroupId() != null) {
       try {
         CompanyGroup companyGroup =
@@ -116,7 +150,7 @@ public class AuthenticationFacade {
       } catch (IllegalDefinitionException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
       }
-      List<Company> companyList = null;
+      List<Company> companyList;
       if (sessionUser.companyIds() != null) {
         companyList =
             companyService.findByBaseIdIn(sessionUser.companyIds()).stream()
@@ -128,10 +162,8 @@ public class AuthenticationFacade {
                 .map(CompanyGroupMapper::toBase)
                 .toList();
       }
-
       response.setCompany(companyList);
     }
-
     return response;
   }
 
@@ -150,36 +182,56 @@ public class AuthenticationFacade {
   }
 
   public void signEula() {
-    userDefinitionService.signEula(IJwtService.findSessionUserOrThrow().username());
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    UserEntity user = userDefinitionService.findUserByUserName(sessionUser.username());
+    eulaContentService.getActiveEulaContentForSessionUser();
+    userProductService
+        .findByUserIdAndProduct(user.getId(), sessionUser.getApplicationProduct())
+        .orElseThrow();
+    userProductService.updateEulaAcceptedAt(user.getId(), sessionUser.getApplicationProduct());
   }
 
   public EulaResponse getEula() {
-    String activeEulaContent =
-        eulaContentService.getActiveEulaContent(IJwtService.findSessionUserOrThrow());
+    String activeEulaContent = eulaContentService.getActiveEulaContentForSessionUser();
     return new EulaResponse(activeEulaContent);
   }
 
-  private ApiInfoDto getApiInfo(UserEntity userEntity, ApplicationProduct product) {
-    if (userEntity.getApplicationRole().isAdministrator()) {
+  private void validateLicense(String companyId, ApplicationProduct product) {
+    companyProductService
+        .findByCompanyIdAndProduct(companyId, product)
+        .ifPresent(
+            cp -> {
+              if (Boolean.FALSE.equals(cp.getEnabled())) {
+                throw new AccessDeniedException(
+                    ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE,
+                    "Product disabled at company level for companyId="
+                        + companyId
+                        + " product="
+                        + product);
+              }
+              if (cp.getLicenseExpiresAt() != null
+                  && cp.getLicenseExpiresAt().isBefore(LocalDate.now())) {
+                throw new AccessDeniedException(ErrorCode.COMPANY_PRODUCT_LICENSE_EXPIRED);
+              }
+              if (cp.getAgreedUserCount() != null) {
+                long activeCount =
+                    userProductService.countActiveByCompanyIdAndProduct(companyId, product);
+                if (activeCount > cp.getAgreedUserCount()) {
+                  throw new AccessDeniedException(ErrorCode.LICENSE_USER_LIMIT_EXCEEDED);
+                }
+              }
+            });
+  }
+
+  private ApiInfoDto getApiInfo(
+      UserEntity userEntity, UserProductEntity userProduct, ApplicationProduct product) {
+    if (userProduct.getApplicationRole().isAdministrator()) {
       return ApiInfoDto.builder().build();
     }
-    CompanyGroup companyGroup =
-        companyGroupService.findCompanyByIdOrThrow(userEntity.getCompanyGroupId());
-    return switch (product) {
-      case TRACKER ->
-          buildApiInfo(
-              TRACKER,
-              companyGroup.isThermometerTrackerEnabled(),
-              companyGroup.getThermometerTrackerApiUrl(),
-              companyGroup.getThermometerTrackerApiVersion());
-      case FORMFLOW ->
-          buildApiInfo(
-              FORMFLOW,
-              companyGroup.isFormflowEnabled(),
-              companyGroup.getFormflowApiUrl(),
-              companyGroup.getFormflowApiVersion());
-      case ADMIN_PANEL -> ApiInfoDto.builder().build();
-    };
+    return companyGroupProductService
+        .findByCompanyGroupIdAndProduct(userEntity.getCompanyGroupId(), product)
+        .map(p -> buildApiInfo(product, p.getEnabled(), p.getApiUrl(), p.getApiVersion()))
+        .orElseThrow(() -> new AccessDeniedException(ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND));
   }
 
   private ApiInfoDto buildApiInfo(
@@ -192,28 +244,33 @@ public class AuthenticationFacade {
           throw new AccessDeniedException(
               ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
         default:
-          throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+          throw new AccessDeniedException(
+              ErrorCode.PRODUCT_NOT_SELECTED,
+              "Product not enabled or apiUrl missing for product=" + product);
       }
     }
     return ApiInfoDto.builder().url(url).version(version).build();
   }
 
-  private HashMap<String, Object> toExtraClaims(UserEntity userEntity, ApplicationProduct product) {
-    return IJwtService.toExtraClaims(userEntity, product, getResponsibleCompanyIds(userEntity));
-  }
-
-  private List<String> getResponsibleCompanyIds(UserEntity sessionUser) {
-    return switch (sessionUser.getApplicationRole()) {
+  private List<String> getResponsibleCompanyIds(
+      UserEntity userEntity, UserProductEntity userProduct) {
+    return switch (userProduct.getApplicationRole()) {
       case ADMIN, GROUP_MANAGER -> List.of();
       case ZONE_MANAGER ->
-          companyService.findByCompanyGroupId(sessionUser.getCompanyGroupId()).stream()
+          companyService.findByCompanyGroupId(userEntity.getCompanyGroupId()).stream()
               .map(CompanyEntity::getId)
               .toList();
-      default -> List.of(sessionUser.getCompanyId());
+      default -> List.of(userEntity.getCompanyId());
     };
   }
 
-  private void updateUserAfterSuccessfulLogin(UserEntity userEntity, ApplicationProduct product) {
-    userService.updateLoginStats(userEntity.getUsername(), product);
+  public void pushToken(PushTokenRequest request) {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    UserProductEntity userProduct =
+        userProductService
+            .findByUserIdAndProduct(sessionUser.username(), sessionUser.getApplicationProduct())
+            .orElseThrow();
+    userProduct.setPushToken(request.token());
+    userProductService.save(userProduct);
   }
 }

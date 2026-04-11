@@ -1,6 +1,6 @@
 package com.gastroblue.model.enums;
 
-import com.gastroblue.model.base.ConfigurableEnum;
+import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.Locale;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRole implements ConfigurableEnum {
+public enum ApplicationRole {
   ADMIN(1),
   APP_CLIENT(1),
   GROUP_MANAGER(2),
@@ -21,6 +21,10 @@ public enum ApplicationRole implements ConfigurableEnum {
 
   public boolean isAdministrator() {
     return this == ADMIN;
+  }
+
+  public boolean isClient() {
+    return this == APP_CLIENT;
   }
 
   public boolean isSupervisor() {
@@ -55,11 +59,14 @@ public enum ApplicationRole implements ConfigurableEnum {
     if (value == null || value.isBlank()) {
       return null;
     }
-
     try {
       return ApplicationRole.valueOf(value.trim().toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException ex) {
       return null;
     }
+  }
+
+  public ResolvedEnum toResolvedEnum() {
+    return new ResolvedEnum(this.name(), this.name(), 1);
   }
 }

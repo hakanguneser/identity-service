@@ -1,7 +1,6 @@
 package com.gastroblue.repository;
 
 import com.gastroblue.model.entity.CompanyEntity;
-import com.gastroblue.model.enums.Zone;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +13,5 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, String> 
 
   List<CompanyEntity> findByIdIn(List<String> companyIdList);
 
-  List<CompanyEntity> findByCompanyGroupIdAndZone(String companyGroupId, Zone zone);
+  List<CompanyEntity> findByCompanyGroupIdAndZone(String companyGroupId, String zone);
 }

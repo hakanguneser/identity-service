@@ -2,7 +2,6 @@ package com.gastroblue.model.base;
 
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ApplicationRole;
-import com.gastroblue.model.enums.Department;
 import com.gastroblue.model.enums.Language;
 import java.util.Collection;
 import java.util.Date;
@@ -11,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public record SessionUser(
+    String userId,
     String applicationProduct,
     String applicationRole,
     List<String> departments,
@@ -23,10 +23,6 @@ public record SessionUser(
 
   public Collection<? extends GrantedAuthority> authorities() {
     return List.of(new SimpleGrantedAuthority("ROLE_" + applicationRole));
-  }
-
-  public List<Department> getDepartments() {
-    return departments.stream().map(Department::fromString).toList();
   }
 
   public Language getLanguage() {

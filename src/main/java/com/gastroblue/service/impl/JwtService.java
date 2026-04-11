@@ -57,11 +57,12 @@ public class JwtService implements IJwtService {
   private SessionUser extractSessionUser(String token) {
     Claims claims = extractAllClaims(token);
     return new SessionUser(
+        claims.get(JWT_USER_ID, String.class),
         claims.get(JWT_APPLICATION_PRODUCT, String.class),
         claims.get(JWT_ROLE, String.class),
-        getClaimList(claims, JWT_DEPARTMENTS),
+        getClaimList(JWT_DEPARTMENTS, claims),
         claims.get(JWT_COMPANY_GROUP_ID, String.class),
-        getClaimList(claims, JWT_COMPANY_IDS),
+        getClaimList(JWT_COMPANY_IDS, claims),
         claims.get(JWT_LANGUAGE, String.class),
         claims.get(SUBJECT, String.class),
         claims.get(ISSUED_AT, Date.class),
@@ -69,7 +70,7 @@ public class JwtService implements IJwtService {
   }
 
   @SuppressWarnings("unchecked")
-  private List<String> getClaimList(Claims claims, String key) {
+  private List<String> getClaimList(String key, Claims claims) {
     Object value = claims.get(key);
     if (value instanceof List<?> list) {
       return list.stream().filter(Objects::nonNull).map(Object::toString).toList();

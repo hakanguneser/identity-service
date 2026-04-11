@@ -1,6 +1,5 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.model.enums.*;
 import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.List;
 import lombok.AllArgsConstructor;

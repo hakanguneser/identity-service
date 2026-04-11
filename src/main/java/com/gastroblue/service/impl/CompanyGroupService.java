@@ -2,7 +2,6 @@ package com.gastroblue.service.impl;
 
 import static com.gastroblue.util.DelimitedStringUtil.join;
 
-import com.gastroblue.exception.DefinitionNotFoundException;
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
@@ -38,21 +37,12 @@ public class CompanyGroupService {
             .orElseThrow(
                 () -> {
                   log.debug("Company Group not found for update with id: {}", companyGroupId);
-                  return new DefinitionNotFoundException(ErrorCode.COMPANY_GROUP_NOT_FOUND);
+                  return new IllegalDefinitionException(
+                      ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
                 });
     entityToBeUpdate.setName(request.name());
     entityToBeUpdate.setGroupMail(join(request.groupMails()));
     entityToBeUpdate.setLogoUrl(request.logoUrl());
-    if (request.thermometerTrackerEnabled() != null) {
-      entityToBeUpdate.setThermometerTrackerEnabled(request.thermometerTrackerEnabled());
-      entityToBeUpdate.setThermometerTrackerApiUrl(request.thermometerTrackerApiUrl());
-      entityToBeUpdate.setThermometerTrackerApiVersion(request.thermometerTrackerApiVersion());
-    }
-    if (request.formflowEnabled() != null) {
-      entityToBeUpdate.setFormflowEnabled(request.formflowEnabled());
-      entityToBeUpdate.setFormflowApiUrl(request.formflowApiUrl());
-      entityToBeUpdate.setFormflowApiVersion(request.formflowApiVersion());
-    }
     entityToBeUpdate.setMailDomains(join(request.mailDomains()));
     return companyGroupRepository.save(entityToBeUpdate);
   }

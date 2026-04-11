@@ -1,7 +1,6 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.model.entity.ErrorMessageEntity;
-import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
 import com.gastroblue.repository.ErrorMessageEntityRepository;
 import java.util.List;
@@ -17,15 +16,15 @@ public class ErrorMessageService {
 
   private final ErrorMessageEntityRepository repository;
 
-  @Cacheable(value = "errorMessages", key = "#errorCode.name() + '_' + #language.name()")
-  public ErrorMessageEntity findOrCreatePropertyValue(ErrorCode errorCode, Language language) {
+  @Cacheable(value = "errorMessages", key = "#errorCode + '_' + #language.name()")
+  public ErrorMessageEntity findOrCreatePropertyValue(String errorCode, Language language) {
     log.info("Resolving code {} for locale {}", errorCode, language.name());
     return repository
         .findByErrorCodeAndLanguage(errorCode, language)
         .orElseGet(() -> addFirst(errorCode, language));
   }
 
-  private ErrorMessageEntity addFirst(ErrorCode errorCode, Language language) {
+  private ErrorMessageEntity addFirst(String errorCode, Language language) {
     log.info("Creating property for {}-{}", errorCode, language.name());
     ErrorMessageEntity entityToBeSave =
         ErrorMessageEntity.builder()

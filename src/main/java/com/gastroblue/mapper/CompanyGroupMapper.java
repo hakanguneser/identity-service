@@ -8,12 +8,17 @@ import com.gastroblue.model.base.Company;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
+import com.gastroblue.model.entity.CompanyGroupProductEntity;
+import com.gastroblue.model.entity.CompanyProductEntity;
+import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
 import com.gastroblue.model.response.AuthUserCompanyResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.response.CompanyGroupProductResponse;
+import com.gastroblue.model.response.CompanyProductResponse;
 import com.gastroblue.util.DelimitedStringUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -27,15 +32,6 @@ public class CompanyGroupMapper {
         .groupCode(request.groupCode())
         .groupMail(join(request.groupMails()))
         .logoUrl(request.logoUrl())
-        .thermometerTrackerApiUrl(request.thermometerTrackerApiUrl())
-        .thermometerTrackerApiVersion(request.thermometerTrackerApiVersion())
-        .thermometerTrackerEnabled(
-            request.thermometerTrackerEnabled() != null
-                ? request.thermometerTrackerEnabled()
-                : false)
-        .formflowApiUrl(request.formflowApiUrl())
-        .formflowApiVersion(request.formflowApiVersion())
-        .formflowEnabled(request.formflowEnabled() != null ? request.formflowEnabled() : false)
         .mailDomains(DelimitedStringUtil.join(request.mailDomains()))
         .build();
   }
@@ -47,12 +43,6 @@ public class CompanyGroupMapper {
         .name(entity.getName())
         .groupMails(split(entity.getGroupMail()))
         .logoUrl(entity.getLogoUrl())
-        .thermometerTrackerApiUrl(entity.getThermometerTrackerApiUrl())
-        .thermometerTrackerApiVersion(entity.getThermometerTrackerApiVersion())
-        .thermometerTrackerEnabled(entity.getThermometerTrackerEnabled())
-        .formflowApiUrl(entity.getFormflowApiUrl())
-        .formflowApiVersion(entity.getFormflowApiVersion())
-        .formflowEnabled(entity.getFormflowEnabled())
         .mailDomains(split(entity.getMailDomains()))
         .build();
   }
@@ -95,31 +85,37 @@ public class CompanyGroupMapper {
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(entity.getCity() != null ? entity.getCity().resolve(facade, companyGroupId) : null)
+        .city(
+            entity.getCity() != null
+                ? facade.resolve(EnumTypes.CITY, entity.getCity(), companyGroupId)
+                : null)
         .country(
             entity.getCountry() != null
-                ? entity.getCountry().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.COUNTRY, entity.getCountry(), companyGroupId)
                 : null)
-        .zone(entity.getZone() != null ? entity.getZone().resolve(facade, companyGroupId) : null)
+        .zone(
+            entity.getZone() != null
+                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), companyGroupId)
+                : null)
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), companyGroupId)
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), companyGroupId)
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), companyGroupId)
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), companyGroupId)
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(facade, companyGroupId)
+                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), companyGroupId)
                 : null)
         .isActive(entity.isActive())
         .build();
@@ -138,23 +134,23 @@ public class CompanyGroupMapper {
         .zone(entity.getZone())
         .segment1(
             entity.getSegment1() != null
-                ? entity.getSegment1().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), entity.getId())
                 : null)
         .segment2(
             entity.getSegment2() != null
-                ? entity.getSegment2().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), entity.getId())
                 : null)
         .segment3(
             entity.getSegment3() != null
-                ? entity.getSegment3().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), entity.getId())
                 : null)
         .segment4(
             entity.getSegment4() != null
-                ? entity.getSegment4().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), entity.getId())
                 : null)
         .segment5(
             entity.getSegment5() != null
-                ? entity.getSegment5().resolve(facade, entity.getId())
+                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), entity.getId())
                 : null)
         .isActive(entity.isActive())
         .build();
@@ -179,6 +175,29 @@ public class CompanyGroupMapper {
         .build();
   }
 
+  public static CompanyGroupProductResponse toResponse(CompanyGroupProductEntity entity) {
+    return CompanyGroupProductResponse.builder()
+        .id(entity.getId())
+        .companyGroupId(entity.getCompanyGroupId())
+        .product(entity.getProduct())
+        .enabled(entity.getEnabled())
+        .apiUrl(entity.getApiUrl())
+        .apiVersion(entity.getApiVersion())
+        .notes(entity.getNotes())
+        .build();
+  }
+
+  public static CompanyProductResponse toResponse(CompanyProductEntity entity) {
+    return CompanyProductResponse.builder()
+        .id(entity.getId())
+        .companyId(entity.getCompanyId())
+        .product(entity.getProduct())
+        .enabled(entity.getEnabled())
+        .licenseExpiresAt(entity.getLicenseExpiresAt())
+        .agreedUserCount(entity.getAgreedUserCount())
+        .build();
+  }
+
   public static CompanyGroup toBase(CompanyGroupEntity entity) {
     return CompanyGroup.builder()
         .companyGroupId(entity.getId())
@@ -186,12 +205,7 @@ public class CompanyGroupMapper {
         .groupCode(entity.getGroupCode())
         .groupMails(split(entity.getGroupMail()))
         .logoUrl(entity.getLogoUrl())
-        .thermometerTrackerApiUrl(entity.getThermometerTrackerApiUrl())
-        .thermometerTrackerApiVersion(entity.getThermometerTrackerApiVersion())
-        .thermometerTrackerEnabled(entity.getThermometerTrackerEnabled())
-        .formflowApiUrl(entity.getFormflowApiUrl())
-        .formflowApiVersion(entity.getFormflowApiVersion())
-        .formflowEnabled(entity.getFormflowEnabled())
+        .mailDomains(entity.getMailDomains())
         .build();
   }
 }

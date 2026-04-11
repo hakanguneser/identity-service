@@ -2,6 +2,7 @@ package com.gastroblue.controller;
 
 import com.gastroblue.facade.AuthenticationFacade;
 import com.gastroblue.model.request.AuthLoginRequest;
+import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import jakarta.validation.Valid;
@@ -54,6 +55,12 @@ public class AuthenticationController {
   @PatchMapping("/eula")
   public ResponseEntity<Void> signEula() {
     authenticationFacade.signEula();
+    return ResponseEntity.noContent().build();
+  }
+
+  @PatchMapping("/push-token")
+  public ResponseEntity<Void> pushToken(@RequestBody PushTokenRequest request) {
+    authenticationFacade.pushToken(request);
     return ResponseEntity.noContent().build();
   }
 }
