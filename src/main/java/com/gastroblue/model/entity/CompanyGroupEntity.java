@@ -16,7 +16,7 @@ import lombok.*;
     uniqueConstraints = {
       @UniqueConstraint(name = "UK_COMPANY_GROUPS_COMPANY_CODE", columnNames = "GROUP_CODE")
     },
-    indexes = {@Index(name = "IDX_COMPANY_GROUPS_COMPANY_CODE", columnList = "GROUP_CODE")})
+    indexes = {})
 public class CompanyGroupEntity extends Auditable {
 
   @Column(name = "NAME", length = 100)

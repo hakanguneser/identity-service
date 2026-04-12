@@ -6,19 +6,18 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
 
-/**
- * Persisted record of every email attempt.
- *
- * <p>Intentionally does NOT extend {@code Auditable} – auditing would require an active security
- * context, which is not available during async background processing.
- */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "OUTGOING_MAIL_LOG")
+@Table(
+    name = "OUTGOING_MAIL_LOG",
+    indexes = {
+      @Index(name = "IDX_MAIL_LOG_STATUS", columnList = "STATUS"),
+      @Index(name = "IDX_MAIL_LOG_SENT_AT", columnList = "SENT_AT")
+    })
 public class OutgoingMailLogEntity extends Auditable {
 
   /** JSON-serialised list of primary recipients. */

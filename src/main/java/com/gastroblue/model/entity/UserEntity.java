@@ -22,15 +22,16 @@ import org.springframework.security.core.userdetails.UserDetails;
     name = "USERS",
     uniqueConstraints = {@UniqueConstraint(name = "UK_USERS", columnNames = "USERNAME")},
     indexes = {
-      @Index(name = "IDX_USERS", columnList = "USERNAME"),
-      @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")
+      @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID"),
+      @Index(name = "IDX_USERS_COMPANY_ID_ACTIVE", columnList = "COMPANY_ID, IS_ACTIVE"),
+      @Index(name = "IDX_USERS_PASSWORD_EXPIRES_AT", columnList = "PASSWORD_EXPIRES_AT")
     })
 public class UserEntity extends Auditable implements UserDetails {
 
-  @Column(name = "COMPANY_ID", length = 36)
+  @Column(name = "COMPANY_ID", nullable = false, length = 36)
   private String companyId;
 
-  @Column(name = "COMPANY_GROUP_ID", length = 36)
+  @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)
   private String companyGroupId;
 
   @Column(name = "USERNAME", length = 100)

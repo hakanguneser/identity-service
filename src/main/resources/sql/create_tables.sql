@@ -1,0 +1,255 @@
+-- ============================================================
+-- GastroBlue Identity Service — Table Create Scripts
+-- PostgreSQL
+-- Generated: 2026-04-12
+-- ============================================================
+
+-- ============================================================
+-- COMPANY_GROUPS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS COMPANY_GROUPS
+(
+    ID                 VARCHAR(36)  NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT       NOT NULL,
+    NAME               VARCHAR(100),
+    GROUP_CODE         VARCHAR(25),
+    GROUP_MAIL         VARCHAR(500),
+    LOGO_URL           VARCHAR(100),
+    MAIL_DOMAINS       TEXT,
+    CONSTRAINT PK_COMPANY_GROUPS PRIMARY KEY (ID),
+    CONSTRAINT UK_COMPANY_GROUPS_COMPANY_CODE UNIQUE (GROUP_CODE)
+    );
+
+-- ============================================================
+-- COMPANIES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS COMPANIES
+(
+    ID                 VARCHAR(36)  NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT       NOT NULL,
+    COMPANY_GROUP_ID   VARCHAR(36)  NOT NULL,
+    COMPANY_CODE       VARCHAR(50),
+    COMPANY_NAME       VARCHAR(250),
+    COMPANY_MAIL       VARCHAR(500),
+    COUNTRY            VARCHAR(50),
+    CITY               VARCHAR(50),
+    ZONE               VARCHAR(50),
+    SEGMENT_1          VARCHAR(50),
+    SEGMENT_2          VARCHAR(50),
+    SEGMENT_3          VARCHAR(50),
+    SEGMENT_4          VARCHAR(50),
+    SEGMENT_5          VARCHAR(50),
+    IS_ACTIVE          BOOLEAN,
+    CONSTRAINT PK_COMPANIES PRIMARY KEY (ID),
+    CONSTRAINT UK_COMPANIES_COMPANY_CODE UNIQUE (COMPANY_CODE)
+    );
+
+CREATE INDEX IF NOT EXISTS IDX_COMPANIES_GROUP_ID_ZONE ON COMPANIES (COMPANY_GROUP_ID, ZONE);
+
+-- ============================================================
+-- USERS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS USERS
+(
+    ID                       VARCHAR(36)  NOT NULL,
+    CREATED_BY               VARCHAR(100),
+    CREATED_DATE             TIMESTAMP,
+    LAST_MODIFIED_BY         VARCHAR(100),
+    LAST_MODIFIED_DATE       TIMESTAMP,
+    VERSION                  BIGINT       NOT NULL,
+    COMPANY_GROUP_ID         VARCHAR(36)  NOT NULL,
+    COMPANY_ID               VARCHAR(36)  NOT NULL,
+    USERNAME                 VARCHAR(100),
+    PASSWORD                 VARCHAR(500),
+    EMAIL                    VARCHAR(500),
+    LANGUAGE                 VARCHAR(5),
+    NAME                     VARCHAR(100),
+    SURNAME                  VARCHAR(100),
+    PHONE                    VARCHAR(10),
+    GENDER                   VARCHAR(10),
+    ZONE                     VARCHAR(10),
+    PASSWORD_CHANGE_REQUIRED BOOLEAN      NOT NULL,
+    PASSWORD_EXPIRES_AT      TIMESTAMP,
+    IS_ACTIVE                BOOLEAN,
+    CONSTRAINT PK_USERS PRIMARY KEY (ID),
+    CONSTRAINT UK_USERS UNIQUE (USERNAME)
+    );
+
+CREATE INDEX IF NOT EXISTS IDX_USERS_COMPANY_GROUP_ID      ON USERS (COMPANY_GROUP_ID);
+CREATE INDEX IF NOT EXISTS IDX_USERS_COMPANY_ID_ACTIVE     ON USERS (COMPANY_ID, IS_ACTIVE);
+CREATE INDEX IF NOT EXISTS IDX_USERS_PASSWORD_EXPIRES_AT   ON USERS (PASSWORD_EXPIRES_AT);
+
+-- ============================================================
+-- COMPANY_GROUP_PRODUCTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS COMPANY_GROUP_PRODUCTS
+(
+    ID                 VARCHAR(36)  NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT       NOT NULL,
+    COMPANY_GROUP_ID   VARCHAR(36)  NOT NULL,
+    PRODUCT            VARCHAR(36)  NOT NULL,
+    ENABLED            BOOLEAN      NOT NULL,
+    API_URL            VARCHAR(512),
+    API_VERSION        VARCHAR(16),
+    NOTES              VARCHAR(500),
+    CONSTRAINT PK_COMPANY_GROUP_PRODUCTS PRIMARY KEY (ID),
+    CONSTRAINT UK_COMPANY_GROUP_PRODUCTS UNIQUE (COMPANY_GROUP_ID, PRODUCT)
+    );
+
+-- ============================================================
+-- COMPANY_PRODUCTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS COMPANY_PRODUCTS
+(
+    ID                 VARCHAR(36)  NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT       NOT NULL,
+    COMPANY_ID         VARCHAR(36)  NOT NULL,
+    PRODUCT            VARCHAR(36)  NOT NULL,
+    ENABLED            BOOLEAN      NOT NULL,
+    LICENSE_EXPIRES_AT DATE,
+    AGREED_USER_COUNT  INTEGER,
+    CONSTRAINT PK_COMPANY_PRODUCTS PRIMARY KEY (ID),
+    CONSTRAINT UK_COMPANY_PRODUCTS UNIQUE (COMPANY_ID, PRODUCT)
+    );
+
+-- ============================================================
+-- USER_PRODUCTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS USER_PRODUCTS
+(
+    ID                 VARCHAR(36)   NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT        NOT NULL,
+    USER_ID            VARCHAR(36)   NOT NULL,
+    PRODUCT            VARCHAR(36)   NOT NULL,
+    APPLICATION_ROLE   VARCHAR(50)   NOT NULL,
+    DEPARTMENTS        VARCHAR(1000) NOT NULL,
+    LAST_SUCCESS_LOGIN TIMESTAMP,
+    PUSH_TOKEN         VARCHAR(1000),
+    EULA_ACCEPTED_AT   TIMESTAMP,
+    IS_ACTIVE          BOOLEAN       NOT NULL,
+    CONSTRAINT PK_USER_PRODUCTS PRIMARY KEY (ID),
+    CONSTRAINT UK_USER_PRODUCTS UNIQUE (USER_ID, PRODUCT)
+    );
+
+-- ============================================================
+-- COMPANY_GROUP_EULA_CONTENT
+-- ============================================================
+CREATE TABLE IF NOT EXISTS COMPANY_GROUP_EULA_CONTENT
+(
+    ID                 VARCHAR(36)  NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT       NOT NULL,
+    COMPANY_GROUP_ID   VARCHAR(36)  NOT NULL,
+    PRODUCT            VARCHAR(36)  NOT NULL,
+    EULA_VERSION       VARCHAR(36)  NOT NULL,
+    LANGUAGE           VARCHAR(5)   NOT NULL,
+    CONTENT            TEXT         NOT NULL,
+    START_DATE         DATE         NOT NULL,
+    END_DATE           DATE,
+    CONSTRAINT PK_COMPANY_GROUP_EULA_CONTENT PRIMARY KEY (ID),
+    CONSTRAINT UK_CG_EULA_CONTENT UNIQUE (COMPANY_GROUP_ID, PRODUCT, LANGUAGE, EULA_VERSION)
+    );
+
+CREATE INDEX IF NOT EXISTS IDX_CG_EULA_ACTIVE_RANGE
+    ON COMPANY_GROUP_EULA_CONTENT (COMPANY_GROUP_ID, PRODUCT, LANGUAGE, START_DATE, END_DATE);
+
+-- ============================================================
+-- ENUM_VALUE_CONFIGURATIONS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ENUM_VALUE_CONFIGURATIONS
+(
+    ID                  VARCHAR(36)  NOT NULL,
+    CREATED_BY          VARCHAR(100),
+    CREATED_DATE        TIMESTAMP,
+    LAST_MODIFIED_BY    VARCHAR(100),
+    LAST_MODIFIED_DATE  TIMESTAMP,
+    VERSION             BIGINT       NOT NULL,
+    COMPANY_GROUP_ID    VARCHAR(36),
+    ENUM_TYPE           VARCHAR(50),
+    ENUM_KEY            VARCHAR(50),
+    LANGUAGE            VARCHAR(5),
+    LABEL               VARCHAR(500),
+    DISPLAY_ORDER       INTEGER,
+    PARENT_KEY          VARCHAR(50),
+    PARENT_ENUM_TYPE    VARCHAR(50),
+    APPLICATION_PRODUCT VARCHAR(30),
+    IS_ACTIVE           BOOLEAN,
+    CONSTRAINT PK_ENUM_VALUE_CONFIGURATIONS PRIMARY KEY (ID),
+    CONSTRAINT UK_EVC_GROUP_TYPE_LANG_KEY_PROD
+    UNIQUE (COMPANY_GROUP_ID, ENUM_TYPE, LANGUAGE, ENUM_KEY, APPLICATION_PRODUCT)
+    );
+
+CREATE INDEX IF NOT EXISTS IDX_COMPANY_GROUP_ID
+    ON ENUM_VALUE_CONFIGURATIONS (COMPANY_GROUP_ID);
+CREATE INDEX IF NOT EXISTS IDX_ENUM_CONFIG_TYPE_LANG_GROUP
+    ON ENUM_VALUE_CONFIGURATIONS (ENUM_TYPE, LANGUAGE, COMPANY_GROUP_ID);
+CREATE INDEX IF NOT EXISTS IDX_ENUM_CONFIG_PRODUCT
+    ON ENUM_VALUE_CONFIGURATIONS (ENUM_TYPE, APPLICATION_PRODUCT, COMPANY_GROUP_ID);
+CREATE INDEX IF NOT EXISTS IDX_EVC_PARENT_KEY
+    ON ENUM_VALUE_CONFIGURATIONS (PARENT_ENUM_TYPE, PARENT_KEY, COMPANY_GROUP_ID, LANGUAGE);
+
+-- ============================================================
+-- ERROR_MESSAGES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ERROR_MESSAGES
+(
+    ID                 VARCHAR(36)   NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT        NOT NULL,
+    ERROR_CODE         VARCHAR(500)  NOT NULL,
+    LANGUAGE           VARCHAR(5)    NOT NULL,
+    MESSAGE            VARCHAR(1000) NOT NULL,
+    CONSTRAINT PK_ERROR_MESSAGES PRIMARY KEY (ID),
+    CONSTRAINT UK_APP_PROPERTIES_KEY_LANG UNIQUE (ERROR_CODE, LANGUAGE)
+    );
+
+-- ============================================================
+-- OUTGOING_MAIL_LOG
+-- ============================================================
+CREATE TABLE IF NOT EXISTS OUTGOING_MAIL_LOG
+(
+    ID                 VARCHAR(36)  NOT NULL,
+    CREATED_BY         VARCHAR(100),
+    CREATED_DATE       TIMESTAMP,
+    LAST_MODIFIED_BY   VARCHAR(100),
+    LAST_MODIFIED_DATE TIMESTAMP,
+    VERSION            BIGINT       NOT NULL,
+    TO_ADDRESSES       TEXT         NOT NULL,
+    CC_ADDRESSES       TEXT,
+    BCC_ADDRESSES      TEXT,
+    TEMPLATE_NAME      VARCHAR(100) NOT NULL,
+    TEMPLATE_PARAMS    TEXT,
+    STATUS             VARCHAR(20)  NOT NULL,
+    ERROR_MESSAGE      TEXT,
+    SENT_AT            TIMESTAMP,
+    CONSTRAINT PK_OUTGOING_MAIL_LOG PRIMARY KEY (ID)
+    );
+
+CREATE INDEX IF NOT EXISTS IDX_MAIL_LOG_STATUS  ON OUTGOING_MAIL_LOG (STATUS);
+CREATE INDEX IF NOT EXISTS IDX_MAIL_LOG_SENT_AT ON OUTGOING_MAIL_LOG (SENT_AT);

@@ -18,17 +18,17 @@ import lombok.*;
     name = "COMPANY_GROUP_EULA_CONTENT",
     indexes = {
       @Index(
-          name = "İDX_CG_EULA_ACTİVE_RANGE",
-          columnList = "COMPANY_GROUP_ID,PRODUCT, LANGUAGE, START_DATE, END_DATE")
+          name = "IDX_CG_EULA_ACTIVE_RANGE",
+          columnList = "COMPANY_GROUP_ID, PRODUCT, LANGUAGE, START_DATE, END_DATE")
     },
     uniqueConstraints = {
       @UniqueConstraint(
           name = "UK_CG_EULA_CONTENT",
-          columnNames = {"COMPANY_GROUP_ID", "PRODUCT"})
+          columnNames = {"COMPANY_GROUP_ID", "PRODUCT", "LANGUAGE", "EULA_VERSION"})
     })
 public class CompanyGroupEulaContentEntity extends Auditable {
 
-  @Column(name = "COMPANY_GROUP_ID", length = 36)
+  @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)
   private String companyGroupId;
 
   @Enumerated(EnumType.STRING)

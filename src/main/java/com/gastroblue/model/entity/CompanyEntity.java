@@ -17,8 +17,7 @@ import lombok.*;
       @UniqueConstraint(name = "UK_COMPANIES_COMPANY_CODE", columnNames = "COMPANY_CODE")
     },
     indexes = {
-      @Index(name = "IDX_COMPANIES_COMPANY_CODE", columnList = "COMPANY_CODE"),
-      @Index(name = "IDX_COMPANIES_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")
+      @Index(name = "IDX_COMPANIES_GROUP_ID_ZONE", columnList = "COMPANY_GROUP_ID, ZONE")
     })
 public class CompanyEntity extends Auditable {
 
@@ -28,7 +27,7 @@ public class CompanyEntity extends Auditable {
   @Column(name = "COMPANY_NAME", length = 250)
   private String companyName;
 
-  @Column(name = "COMPANY_GROUP_ID", length = 36)
+  @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)
   private String companyGroupId;
 
   @Column(name = "COMPANY_MAIL", length = 500)
