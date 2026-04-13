@@ -51,6 +51,9 @@ public class EmailDomainValidator {
   }
 
   public static boolean isDomainAllowed(String mail, String allowedDomains) {
+    if (mail == null || allowedDomains == null) {
+      return false;
+    }
     Set<String> normalizedAllowedDomains =
         new HashSet<>(DelimitedStringUtil.splitClean(allowedDomains));
     return isDomainAllowed(mail, normalizedAllowedDomains);

@@ -234,7 +234,11 @@ public class UserDefinitionFacade {
     }
 
     mailParams.put(
-        DEPARTMENT, createdUser.getDepartments().stream().map(ResolvedEnum::getDisplay).toList());
+        DEPARTMENT,
+        createdUser.getDepartments().stream()
+            .filter(Objects::nonNull)
+            .map(ResolvedEnum::getDisplay)
+            .toList());
     if (createdUser.getZone() != null) {
       mailParams.put(ZONE, createdUser.getZone().getDisplay());
     }
