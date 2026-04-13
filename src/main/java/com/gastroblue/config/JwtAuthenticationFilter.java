@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final IJwtService jwtService;
   private final Map<String, ApplicationProduct> sysTokenProductMap;
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
 
   @Override
   protected void doFilterInternal(
