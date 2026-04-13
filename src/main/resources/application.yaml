@@ -35,10 +35,10 @@ application:
       token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
       sys-tokens:
-        tt:
+        tracker:
           token: ${TRACKER_TOKEN:tracker-token}
           product: TRACKER
-        ff:
+        formflow:
           token: ${FORMFLOW_TOKEN:formflow-token}
           product: FORMFLOW
         admin:

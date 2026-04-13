@@ -68,7 +68,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String jwtToken = authHeader.substring(BEARER.length());
 
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
-
+        System.out.println("input jwt " + jwtToken);
+        for (Map.Entry<String, ApplicationProduct> entry : sysTokenProductMap.entrySet()) {
+          System.out.println("key=" + entry.getKey() + ", value=" + entry.getValue());
+        }
         SessionUser sessionUser =
             sysTokenProductMap.containsKey(jwtToken)
                 ? buildSysTokenSession(sysTokenProductMap.get(jwtToken))
