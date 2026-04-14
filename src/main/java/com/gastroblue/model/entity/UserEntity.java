@@ -31,7 +31,7 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "COMPANY_ID", length = 36)
   private String companyId;
 
-  @Column(name = "COMPANY_GROUP_ID",length = 36)
+  @Column(name = "COMPANY_GROUP_ID", length = 36)
   private String companyGroupId;
 
   @Column(name = "USERNAME", length = 100)
@@ -71,9 +71,14 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "PASSWORD_EXPIRES_AT")
   private LocalDateTime passwordExpiresAt;
 
+  /**
+   * Returns a placeholder authority used only during the initial username/password authentication
+   * step. For JWT-authenticated requests, the real role is carried in the token and resolved via
+   * {@link com.gastroblue.model.base.SessionUser#authorities()}.
+   */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    return List.of(new SimpleGrantedAuthority("ROLE_AUTHENTICATED"));
   }
 
   @Override
