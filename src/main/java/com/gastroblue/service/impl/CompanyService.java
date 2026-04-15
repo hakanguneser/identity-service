@@ -9,6 +9,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +55,7 @@ public class CompanyService {
                         companyId, companyGroupId)));
   }
 
+  @Transactional
   public CompanyEntity toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity entity =
         findById(companyId)

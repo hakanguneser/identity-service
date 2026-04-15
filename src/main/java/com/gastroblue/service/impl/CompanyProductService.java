@@ -10,6 +10,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ public class CompanyProductService {
     return companyProductRepository.findAllByCompanyId(companyId);
   }
 
+  @Transactional
   public CompanyProductEntity update(String id, CompanyProductEntity updated) {
     CompanyProductEntity existing =
         companyProductRepository
