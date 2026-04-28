@@ -1,7 +1,7 @@
 package com.gastroblue.model.entity;
 
-import com.gastroblue.model.entity.base.Auditable;
 import com.gastroblue.model.enums.MailStatus;
+import io.gastroblue.commons.helper.persistence.model.base.Auditable;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;

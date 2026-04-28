@@ -83,3 +83,5 @@ gastroblue:
         name: Hakan Guneser
         email: hakanguneser@gastroblueapp.com
         url: https://www.gastrobluecheckapp.com/
+    persistence:
+      enabled: true
