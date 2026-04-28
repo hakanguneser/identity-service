@@ -3,8 +3,6 @@ package com.gastroblue.config;
 import static com.gastroblue.model.enums.ErrorCode.EXPIRED_JWT_TOKEN;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_JWT_TOKEN;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.exception.ApplicationError;
@@ -36,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -44,8 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private static final String BEARER = "Bearer ";
 
-  private static final ObjectMapper OBJECT_MAPPER =
-      new ObjectMapper().registerModule(new JavaTimeModule());
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  // new ObjectMapper().registerModule(new JavaTimeModule()); TODO JAVA 17 DEPRECATION
 
   private final IJwtService jwtService;
   private final Map<String, ApplicationProduct> sysTokenProductMap;

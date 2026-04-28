@@ -53,8 +53,6 @@ management:
 
 
 app:
-  swagger:
-    enabled: ${APP_SWAGGER_ENABLED:true}
   admin:
     registration:
       enabled: ${APP_ADMIN_REGISTRATION_ENABLED:true}
@@ -76,3 +74,12 @@ gastroblue:
   commons:
     tracing:
       enabled: true
+    swagger:
+      enabled: true
+      title: Identity Service API
+      version: 1.0
+      description: GastroBlue kimlik doğrulama servisi
+      contact:
+        name: Hakan Guneser
+        email: hakanguneser@gastroblueapp.com
+        url: https://www.gastrobluecheckapp.com/

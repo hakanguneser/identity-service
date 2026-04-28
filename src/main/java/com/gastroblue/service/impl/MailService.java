@@ -2,8 +2,6 @@ package com.gastroblue.service.impl;
 
 import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gastroblue.model.entity.OutgoingMailLogEntity;
 import com.gastroblue.model.enums.MailParameters;
 import com.gastroblue.model.enums.MailStatus;
@@ -27,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Async implementation of {@link IMailService}.
@@ -173,7 +172,7 @@ public class MailService implements IMailService {
     if (value == null) return null;
     try {
       return objectMapper.writeValueAsString(value);
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       log.warn("mail.log serialisation failed for value type={}", value.getClass().getSimpleName());
       return value.toString();
     }

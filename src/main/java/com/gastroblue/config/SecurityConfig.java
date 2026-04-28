@@ -21,7 +21,7 @@ public class SecurityConfig {
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final AuthenticationProvider authenticationProvider;
 
-  @Value("${app.swagger.enabled}")
+  @Value("${gastroblue.commons.swagger.enabled}")
   private boolean swaggerEnabled;
 
   @Bean
