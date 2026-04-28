@@ -7,7 +7,7 @@ import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.Language;
-import com.gastroblue.util.DelimitedStringUtil;
+import io.gastroblue.commons.shared.util.DelimitedStringUtil;
 import java.util.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

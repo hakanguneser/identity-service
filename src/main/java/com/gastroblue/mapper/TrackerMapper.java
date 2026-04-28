@@ -1,6 +1,7 @@
 package com.gastroblue.mapper;
 
-import static com.gastroblue.util.DelimitedStringUtil.splitClean;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.split;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -13,7 +14,6 @@ import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyGroup;
 import com.gastroblue.model.response.tracker.TrackerUser;
 import com.gastroblue.model.shared.ResolvedEnum;
-import com.gastroblue.util.DelimitedStringUtil;
 import java.util.Collections;
 import java.util.List;
 import lombok.AccessLevel;
@@ -65,9 +65,9 @@ public class TrackerMapper {
         .companyGroupId(entity.getId())
         .groupCode(entity.getGroupCode())
         .name(entity.getName())
-        .groupMails(DelimitedStringUtil.split(entity.getGroupMail()))
+        .groupMails(split(entity.getGroupMail()))
         .logoUrl(entity.getLogoUrl())
-        .mailDomains(DelimitedStringUtil.split(entity.getMailDomains()))
+        .mailDomains(split(entity.getMailDomains()))
         .build();
   }
 
@@ -78,7 +78,7 @@ public class TrackerMapper {
         .companyGroupId(companyGroupId)
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
-        .companyMail(DelimitedStringUtil.split(entity.getCompanyMail()))
+        .companyMail(split(entity.getCompanyMail()))
         .city(
             entity.getCity() != null
                 ? facade.resolve(EnumTypes.CITY, entity.getCity(), companyGroupId)

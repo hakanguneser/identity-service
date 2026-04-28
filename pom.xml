@@ -122,8 +122,19 @@
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.gastroblue</groupId>
+			<artifactId>gastroblue-commons</artifactId>
+			<version>1.3.0</version>
+		</dependency>
 	</dependencies>
 
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/hakanguneser/gastroblue-commons</url>
+		</repository>
+	</repositories>
 	<build>
 		<plugins>
 				<plugin>

@@ -1,7 +1,7 @@
 package com.gastroblue.mapper;
 
-import static com.gastroblue.util.DelimitedStringUtil.join;
-import static com.gastroblue.util.DelimitedStringUtil.split;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.base.Company;
@@ -19,7 +19,6 @@ import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
-import com.gastroblue.util.DelimitedStringUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -32,7 +31,7 @@ public class CompanyGroupMapper {
         .groupCode(request.groupCode())
         .groupMail(join(request.groupMails()))
         .logoUrl(request.logoUrl())
-        .mailDomains(DelimitedStringUtil.join(request.mailDomains()))
+        .mailDomains(join(request.mailDomains()))
         .build();
   }
 

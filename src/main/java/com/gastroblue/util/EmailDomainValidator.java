@@ -1,5 +1,8 @@
 package com.gastroblue.util;
 
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
+
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.enums.ErrorCode;
 import java.util.HashSet;
@@ -35,8 +38,7 @@ public class EmailDomainValidator {
             .toList();
 
     if (!invalidMails.isEmpty()) {
-      throw new IllegalDefinitionException(
-          ErrorCode.INVALID_MAIL_DOMAINS, DelimitedStringUtil.join(invalidMails));
+      throw new IllegalDefinitionException(ErrorCode.INVALID_MAIL_DOMAINS, join(invalidMails));
     }
   }
 
@@ -54,8 +56,7 @@ public class EmailDomainValidator {
     if (mail == null || allowedDomains == null) {
       return false;
     }
-    Set<String> normalizedAllowedDomains =
-        new HashSet<>(DelimitedStringUtil.splitClean(allowedDomains));
+    Set<String> normalizedAllowedDomains = new HashSet<>(splitClean(allowedDomains));
     return isDomainAllowed(mail, normalizedAllowedDomains);
   }
 }

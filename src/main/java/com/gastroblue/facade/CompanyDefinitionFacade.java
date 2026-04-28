@@ -1,7 +1,7 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.util.DelimitedStringUtil.join;
-import static com.gastroblue.util.DelimitedStringUtil.split;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;

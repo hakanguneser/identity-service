@@ -1,6 +1,6 @@
 package com.gastroblue.mapper;
 
-import static com.gastroblue.util.DelimitedStringUtil.splitClean;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.UserEntity;

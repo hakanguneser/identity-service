@@ -1,5 +1,7 @@
 package com.gastroblue.service.impl;
 
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gastroblue.model.entity.OutgoingMailLogEntity;
@@ -9,7 +11,6 @@ import com.gastroblue.model.enums.MailTemplate;
 import com.gastroblue.model.properties.MailProperties;
 import com.gastroblue.repository.OutgoingMailLogRepository;
 import com.gastroblue.service.IMailService;
-import com.gastroblue.util.DelimitedStringUtil;
 import com.gastroblue.util.MailTemplateRenderer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -150,9 +151,9 @@ public class MailService implements IMailService {
       MailTemplate template,
       Map<MailParameters, Object> params) {
     return OutgoingMailLogEntity.builder()
-        .toAddresses(DelimitedStringUtil.join(to))
-        .ccAddresses(DelimitedStringUtil.join(cc))
-        .bccAddresses(DelimitedStringUtil.join(bcc))
+        .toAddresses(join(to))
+        .ccAddresses(join(cc))
+        .bccAddresses(join(bcc))
         .templateName(template.getTemplateName())
         .templateParams(toJson(params))
         .status(MailStatus.PENDING)

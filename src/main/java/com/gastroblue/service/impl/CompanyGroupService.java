@@ -1,6 +1,6 @@
 package com.gastroblue.service.impl;
 
-import static com.gastroblue.util.DelimitedStringUtil.join;
+import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.mapper.CompanyGroupMapper;
