@@ -1,8 +1,8 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.Language;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.Language;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.*;

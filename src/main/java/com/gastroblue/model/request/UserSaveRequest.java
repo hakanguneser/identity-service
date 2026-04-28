@@ -2,8 +2,8 @@ package com.gastroblue.model.request;
 
 import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
 import com.gastroblue.annotations.validation.request.ValidDepartmentsForProduct;
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ApplicationRole;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.ApplicationRole;
 import jakarta.validation.constraints.*;
 import java.util.List;
 

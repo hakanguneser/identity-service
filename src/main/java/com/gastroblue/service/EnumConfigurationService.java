@@ -2,13 +2,13 @@ package com.gastroblue.service;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
-import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.Language;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;

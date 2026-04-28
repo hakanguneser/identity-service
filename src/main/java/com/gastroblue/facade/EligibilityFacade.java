@@ -2,10 +2,10 @@ package com.gastroblue.facade;
 
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
-import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.response.UserEligibilityResponse;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
+import io.gastroblue.commons.shared.enums.ApplicationRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

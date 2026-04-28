@@ -1,7 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.persistence.*;
 import lombok.*;
 

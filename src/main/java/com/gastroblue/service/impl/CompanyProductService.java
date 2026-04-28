@@ -2,9 +2,9 @@ package com.gastroblue.service.impl;
 
 import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.model.entity.CompanyProductEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.CompanyProductRepository;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

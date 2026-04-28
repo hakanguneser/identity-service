@@ -1,9 +1,9 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.model.enums.ApplicationRole.*;
 import static com.gastroblue.model.enums.MailParameters.*;
 import static com.gastroblue.model.enums.MailTemplate.INITIAL_PASSWORD;
 import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
+import static io.gastroblue.commons.shared.enums.ApplicationRole.*;
 
 import com.gastroblue.exception.AccessDeniedException;
 import com.gastroblue.exception.ValidationException;
@@ -15,8 +15,6 @@ import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ApplicationRole;
 import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.enums.MailParameters;
@@ -38,6 +36,8 @@ import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.service.impl.UserProductService;
 import com.gastroblue.util.EmailDomainValidator;
 import com.gastroblue.util.PasswordGenerator;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.ApplicationRole;
 import io.gastroblue.commons.shared.util.DelimitedStringUtil;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -391,11 +391,11 @@ public class UserDefinitionFacade {
   // TODO: burada ApplicationRole'un ResolvedEnum'e dönüştürülmesi gerekiyor
   public List<ResolvedEnum> findAllApplicationRoles() {
     List<ResolvedEnum> resolvedRoles = new ArrayList<>();
-
-    resolvedRoles.add(ApplicationRole.ZONE_MANAGER.toResolvedEnum());
-    resolvedRoles.add(ApplicationRole.COMPANY_MANAGER.toResolvedEnum());
-    resolvedRoles.add(ApplicationRole.SUPERVISOR.toResolvedEnum());
-    resolvedRoles.add(ApplicationRole.STAFF.toResolvedEnum());
+    // TODO RESOLVEDENUM
+    // resolvedRoles.add(ZONE_MANAGER.toResolvedEnum());
+    // resolvedRoles.add(COMPANY_MANAGER.toResolvedEnum());
+    // resolvedRoles.add(ApplicationRole.SUPERVISOR.toResolvedEnum());
+    // resolvedRoles.add(ApplicationRole.STAFF.toResolvedEnum());
 
     return resolvedRoles;
   }

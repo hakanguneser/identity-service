@@ -6,11 +6,11 @@ import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.EnumTypes;
-import com.gastroblue.model.enums.Language;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.enums.Language;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -67,10 +67,8 @@ public class UserMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        .applicationRole(
-            userProduct
-                .getApplicationRole()
-                .toResolvedEnum()) // TODO: fix burada ApplicationRoleun REsolvedEnum'e
+        // .applicationRole(            userProduct                .getApplicationRole()
+        //    .toResolvedEnum()) //TODO RESOLVEDENUM
         // dönüştürülmesi gerekiyor
         .language(
             facade.resolve(

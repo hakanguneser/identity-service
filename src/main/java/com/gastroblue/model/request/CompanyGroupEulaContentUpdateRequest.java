@@ -1,6 +1,6 @@
 package com.gastroblue.model.request;
 
-import com.gastroblue.model.enums.Language;
+import io.gastroblue.commons.shared.enums.Language;
 import java.time.LocalDate;
 
 public record CompanyGroupEulaContentUpdateRequest(

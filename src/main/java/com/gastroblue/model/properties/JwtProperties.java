@@ -1,6 +1,6 @@
 package com.gastroblue.model.properties;
 
-import com.gastroblue.model.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;

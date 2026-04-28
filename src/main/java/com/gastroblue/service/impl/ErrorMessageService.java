@@ -1,8 +1,8 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.model.entity.ErrorMessageEntity;
-import com.gastroblue.model.enums.Language;
 import com.gastroblue.repository.ErrorMessageEntityRepository;
+import io.gastroblue.commons.shared.enums.Language;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

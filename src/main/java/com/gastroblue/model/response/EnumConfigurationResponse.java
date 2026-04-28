@@ -1,7 +1,7 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.Language;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.Language;
 import lombok.Builder;
 
 @Builder

@@ -1,6 +1,6 @@
 package com.gastroblue.config;
 
-import com.gastroblue.model.enums.ApplicationRole;
+import io.gastroblue.commons.shared.enums.ApplicationRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

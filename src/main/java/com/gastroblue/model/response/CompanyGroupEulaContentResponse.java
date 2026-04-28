@@ -1,6 +1,6 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.model.enums.Language;
+import io.gastroblue.commons.shared.enums.Language;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;

@@ -1,7 +1,7 @@
 package com.gastroblue.model.entity;
 
 import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.Language;
+import io.gastroblue.commons.shared.enums.Language;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;

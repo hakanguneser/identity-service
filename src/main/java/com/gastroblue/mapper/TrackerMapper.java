@@ -39,8 +39,8 @@ public class TrackerMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        .applicationRole(
-            userProduct != null ? userProduct.getApplicationRole().toResolvedEnum() : null)
+        // .applicationRole(userProduct != null ? userProduct.getApplicationRole().toResolvedEnum()
+        // : null)//TODO RESOLVEDENUM
         .language(
             facade.resolve(
                 EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))

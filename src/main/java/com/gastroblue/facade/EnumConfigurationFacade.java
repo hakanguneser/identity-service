@@ -1,13 +1,13 @@
 package com.gastroblue.facade;
 
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.response.EnumConfigurationResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;

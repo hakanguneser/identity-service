@@ -1,7 +1,7 @@
 package com.gastroblue.repository;
 
 import com.gastroblue.model.entity.CompanyProductEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

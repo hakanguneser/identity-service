@@ -1,8 +1,8 @@
 package com.gastroblue.repository;
 
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.Language;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.Language;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;

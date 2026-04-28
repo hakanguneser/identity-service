@@ -1,6 +1,6 @@
 package com.gastroblue.model.request;
 
-import com.gastroblue.model.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 

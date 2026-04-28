@@ -1,7 +1,6 @@
 package com.gastroblue.controller;
 
 import com.gastroblue.facade.CompanyGroupDefinitionFacade;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
@@ -9,6 +8,7 @@ import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
 import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
