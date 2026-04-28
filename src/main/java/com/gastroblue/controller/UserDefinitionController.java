@@ -7,7 +7,7 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -86,32 +86,32 @@ public class UserDefinitionController {
   }
 
   @GetMapping("dropdown/application-roles")
-  public ResponseEntity<List<ResolvedEnum>> findAllApplicationRoles() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAllApplicationRoles() {
     return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")
-  public ResponseEntity<List<ResolvedEnum>> findAllDepartments() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAllDepartments() {
     return ResponseEntity.ok(userFacade.findAllDepartments());
   }
 
   @GetMapping("dropdown/genders")
-  public ResponseEntity<List<ResolvedEnum>> findAllGenders() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAllGenders() {
     return ResponseEntity.ok(userFacade.findAllGenders());
   }
 
   @GetMapping("dropdown/zones")
-  public ResponseEntity<List<ResolvedEnum>> findAllZones() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
   }
 
   @GetMapping("dropdown/company-groups")
-  public ResponseEntity<List<ResolvedEnum>> findAvailableCompanyGroups() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAvailableCompanyGroups() {
     return ResponseEntity.ok(userFacade.findAvailableCompanyGroups());
   }
 
   @GetMapping("dropdown/companies")
-  public ResponseEntity<List<ResolvedEnum>> findAvailableCompanies() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAvailableCompanies() {
     return ResponseEntity.ok(userFacade.findAvailableCompanies());
   }
 }

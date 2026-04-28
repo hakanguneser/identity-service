@@ -1,7 +1,7 @@
 package com.gastroblue.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.List;
 import lombok.*;
 
@@ -21,10 +21,10 @@ public class UserDefinitionResponse {
   private String name;
   private String surname;
   private String phone;
-  private ResolvedEnum language;
-  private ResolvedEnum gender;
-  private ResolvedEnum zone;
-  private ResolvedEnum applicationRole;
-  private List<ResolvedEnum> departments;
+  private DisplayableLookupValue language;
+  private DisplayableLookupValue gender;
+  private DisplayableLookupValue zone;
+  private DisplayableLookupValue applicationRole;
+  private List<DisplayableLookupValue> departments;
   @JsonIgnore List<String> departmentsList;
 }

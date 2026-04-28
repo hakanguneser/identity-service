@@ -7,8 +7,8 @@ import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -84,50 +84,50 @@ public class CompanyGroupDefinitionController {
   }
 
   @GetMapping("/{companyGroupId}/dropdown/zones")
-  public ResponseEntity<List<ResolvedEnum>> findZones(
+  public ResponseEntity<List<DisplayableLookupValue>> findZones(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findZones(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/country")
-  public ResponseEntity<List<ResolvedEnum>> findCountries(
+  public ResponseEntity<List<DisplayableLookupValue>> findCountries(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCountries(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/country/{country}/cities")
-  public ResponseEntity<List<ResolvedEnum>> findCities(
+  public ResponseEntity<List<DisplayableLookupValue>> findCities(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "country") final String country) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCities(companyGroupId, country));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment1")
-  public ResponseEntity<List<ResolvedEnum>> findSegment1(
+  public ResponseEntity<List<DisplayableLookupValue>> findSegment1(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment1(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment2")
-  public ResponseEntity<List<ResolvedEnum>> findSegment2(
+  public ResponseEntity<List<DisplayableLookupValue>> findSegment2(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment2(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment3")
-  public ResponseEntity<List<ResolvedEnum>> findSegment3(
+  public ResponseEntity<List<DisplayableLookupValue>> findSegment3(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment3(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment4")
-  public ResponseEntity<List<ResolvedEnum>> findSegment4(
+  public ResponseEntity<List<DisplayableLookupValue>> findSegment4(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment4(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment5")
-  public ResponseEntity<List<ResolvedEnum>> findSegment5(
+  public ResponseEntity<List<DisplayableLookupValue>> findSegment5(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment5(companyGroupId));
   }

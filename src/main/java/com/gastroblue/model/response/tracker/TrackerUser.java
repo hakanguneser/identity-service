@@ -1,6 +1,6 @@
 package com.gastroblue.model.response.tracker;
 
-import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +21,9 @@ public class TrackerUser {
   private String name;
   private String surname;
   private String phone;
-  private ResolvedEnum language;
-  private ResolvedEnum gender;
-  private ResolvedEnum zone;
-  private ResolvedEnum applicationRole;
-  private List<ResolvedEnum> departments;
+  private DisplayableLookupValue language;
+  private DisplayableLookupValue gender;
+  private DisplayableLookupValue zone;
+  private DisplayableLookupValue applicationRole;
+  private List<DisplayableLookupValue> departments;
 }

@@ -13,7 +13,7 @@ import com.gastroblue.model.response.tracker.TrackerCompany;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyGroup;
 import com.gastroblue.model.response.tracker.TrackerUser;
-import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Collections;
 import java.util.List;
 import lombok.AccessLevel;
@@ -29,7 +29,7 @@ public class TrackerMapper {
     }
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
-    List<ResolvedEnum> resolvedDepartmentList =
+    List<DisplayableLookupValue> resolvedDepartmentList =
         departmentKeys.stream()
             .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
             .toList();
@@ -39,8 +39,7 @@ public class TrackerMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        // .applicationRole(userProduct != null ? userProduct.getApplicationRole().toResolvedEnum()
-        // : null)//TODO RESOLVEDENUM
+        .applicationRole(userProduct != null ? userProduct.getApplicationRole().toDisplay() : null)
         .language(
             facade.resolve(
                 EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))

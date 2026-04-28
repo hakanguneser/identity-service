@@ -12,11 +12,11 @@ import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.impl.CompanyGroupProductService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.util.EmailDomainValidator;
 import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,36 +98,37 @@ public class CompanyGroupDefinitionFacade {
         companyGroupProductService.update(existing.getId(), updated));
   }
 
-  public List<ResolvedEnum> findZones(final String companyGroupId) {
+  public List<DisplayableLookupValue> findZones(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.ZONE, companyGroupId);
   }
 
-  public List<ResolvedEnum> findCountries(final String companyGroupId) {
+  public List<DisplayableLookupValue> findCountries(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.COUNTRY, companyGroupId);
   }
 
-  public List<ResolvedEnum> findCities(final String companyGroupId, final String country) {
+  public List<DisplayableLookupValue> findCities(
+      final String companyGroupId, final String country) {
     return enumConfigurationFacade.getChildDropdownValues(
         EnumTypes.CITY, EnumTypes.COUNTRY, country, companyGroupId);
   }
 
-  public List<ResolvedEnum> findSegment1(final String companyGroupId) {
+  public List<DisplayableLookupValue> findSegment1(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_1, companyGroupId);
   }
 
-  public List<ResolvedEnum> findSegment2(final String companyGroupId) {
+  public List<DisplayableLookupValue> findSegment2(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_2, companyGroupId);
   }
 
-  public List<ResolvedEnum> findSegment3(final String companyGroupId) {
+  public List<DisplayableLookupValue> findSegment3(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_3, companyGroupId);
   }
 
-  public List<ResolvedEnum> findSegment4(final String companyGroupId) {
+  public List<DisplayableLookupValue> findSegment4(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_4, companyGroupId);
   }
 
-  public List<ResolvedEnum> findSegment5(final String companyGroupId) {
+  public List<DisplayableLookupValue> findSegment5(final String companyGroupId) {
     return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_5, companyGroupId);
   }
 }

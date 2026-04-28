@@ -4,7 +4,7 @@ import com.gastroblue.facade.ErrorMessageFacade;
 import com.gastroblue.model.request.ErrorMessageSaveRequest;
 import com.gastroblue.model.request.ErrorMessageUpdateRequest;
 import com.gastroblue.model.response.ErrorMessageResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class ErrorMessageController {
   }
 
   @GetMapping("dropdown/languages")
-  public ResponseEntity<List<ResolvedEnum>> findAllLanguages() {
+  public ResponseEntity<List<DisplayableLookupValue>> findAllLanguages() {
     return ResponseEntity.ok(facade.getLanguages()); // TODO: Language support
   }
 }

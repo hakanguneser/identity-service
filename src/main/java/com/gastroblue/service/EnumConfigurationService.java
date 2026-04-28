@@ -5,10 +5,10 @@ import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
-import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
 import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import io.gastroblue.commons.shared.enums.Language;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ public class EnumConfigurationService {
   @Cacheable(
       value = "enum_dropdown_configs",
       key = "{#enumType, #companyGroupId, #sessionLanguage}")
-  public List<ResolvedEnum> getDropdownValues(
+  public List<DisplayableLookupValue> getDropdownValues(
       String enumType, final String companyGroupId, Language sessionLanguage) {
 
     List<EnumValueConfigurationEntity> rows =
@@ -55,7 +55,7 @@ public class EnumConfigurationService {
         .sorted(Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
         .map(
             e ->
-                ResolvedEnum.builder()
+                DisplayableLookupValue.builder()
                     .key(e.getEnumKey())
                     .display(e.getLabel())
                     .displayOrder(e.getDisplayOrder())
@@ -78,7 +78,7 @@ public class EnumConfigurationService {
   @Cacheable(
       value = "enum_dropdown_configs",
       key = "{#enumType, #companyGroupId, #sessionLanguage, #product}")
-  public List<ResolvedEnum> getDropdownValues(
+  public List<DisplayableLookupValue> getDropdownValues(
       String enumType,
       String companyGroupId,
       Language sessionLanguage,
@@ -101,7 +101,7 @@ public class EnumConfigurationService {
         .sorted(Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
         .map(
             e ->
-                ResolvedEnum.builder()
+                DisplayableLookupValue.builder()
                     .key(e.getEnumKey())
                     .display(e.getLabel())
                     .displayOrder(e.getDisplayOrder())
@@ -179,7 +179,7 @@ public class EnumConfigurationService {
   @Cacheable(
       value = "enum_dropdown_configs",
       key = "{#enumType, #companyGroupId, #sessionLanguage, #parentKey}")
-  public List<ResolvedEnum> getChildDropdownValues(
+  public List<DisplayableLookupValue> getChildDropdownValues(
       String enumType,
       String companyGroupId,
       Language sessionLanguage,
@@ -202,7 +202,7 @@ public class EnumConfigurationService {
         .sorted(Comparator.comparingInt(e -> Optional.ofNullable(e.getDisplayOrder()).orElse(99)))
         .map(
             e ->
-                ResolvedEnum.builder()
+                DisplayableLookupValue.builder()
                     .key(e.getEnumKey())
                     .display(e.getLabel())
                     .displayOrder(e.getDisplayOrder())

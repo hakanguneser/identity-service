@@ -9,8 +9,8 @@ import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import io.gastroblue.commons.shared.enums.Language;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -54,7 +54,7 @@ public class UserMapper {
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
 
-    List<ResolvedEnum> resolvedDepartmentList =
+    List<DisplayableLookupValue> resolvedDepartmentList =
         departmentKeys.stream()
             .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
             .filter(Objects::nonNull)
@@ -67,9 +67,8 @@ public class UserMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        // .applicationRole(            userProduct                .getApplicationRole()
-        //    .toResolvedEnum()) //TODO RESOLVEDENUM
-        // dönüştürülmesi gerekiyor
+        .applicationRole(
+            userProduct.getApplicationRole().toDisplay()) // TODO DisplayableLookupValue
         .language(
             facade.resolve(
                 EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))

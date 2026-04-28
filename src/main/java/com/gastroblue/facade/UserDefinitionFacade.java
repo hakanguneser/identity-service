@@ -27,7 +27,6 @@ import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.CompanyGroupService;
@@ -38,6 +37,7 @@ import com.gastroblue.util.EmailDomainValidator;
 import com.gastroblue.util.PasswordGenerator;
 import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import io.gastroblue.commons.shared.enums.ApplicationRole;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import io.gastroblue.commons.shared.util.DelimitedStringUtil;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -237,7 +237,7 @@ public class UserDefinitionFacade {
         DEPARTMENT,
         createdUser.getDepartments().stream()
             .filter(Objects::nonNull)
-            .map(ResolvedEnum::getDisplay)
+            .map(DisplayableLookupValue::getDisplay)
             .toList());
     if (createdUser.getZone() != null) {
       mailParams.put(ZONE, createdUser.getZone().getDisplay());
@@ -388,31 +388,31 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  // TODO: burada ApplicationRole'un ResolvedEnum'e dönüştürülmesi gerekiyor
-  public List<ResolvedEnum> findAllApplicationRoles() {
-    List<ResolvedEnum> resolvedRoles = new ArrayList<>();
-    // TODO RESOLVEDENUM
-    // resolvedRoles.add(ZONE_MANAGER.toResolvedEnum());
-    // resolvedRoles.add(COMPANY_MANAGER.toResolvedEnum());
-    // resolvedRoles.add(ApplicationRole.SUPERVISOR.toResolvedEnum());
-    // resolvedRoles.add(ApplicationRole.STAFF.toResolvedEnum());
+  // TODO: burada ApplicationRole'un DisplayableLookupValue'e dönüştürülmesi gerekiyor
+  public List<DisplayableLookupValue> findAllApplicationRoles() {
+    List<DisplayableLookupValue> resolvedRoles = new ArrayList<>();
+    // TODO DisplayableLookupValue
+    resolvedRoles.add(ZONE_MANAGER.toDisplay());
+    resolvedRoles.add(COMPANY_MANAGER.toDisplay());
+    resolvedRoles.add(ApplicationRole.SUPERVISOR.toDisplay());
+    resolvedRoles.add(ApplicationRole.STAFF.toDisplay());
 
     return resolvedRoles;
   }
 
-  public List<ResolvedEnum> findAllDepartments() {
+  public List<DisplayableLookupValue> findAllDepartments() {
     return enumFacade.getDropdownValues(EnumTypes.DEPARTMENT);
   }
 
-  public List<ResolvedEnum> findAllZones() {
+  public List<DisplayableLookupValue> findAllZones() {
     return enumFacade.getDropdownValues(EnumTypes.ZONE);
   }
 
-  public List<ResolvedEnum> findAllGenders() {
+  public List<DisplayableLookupValue> findAllGenders() {
     return enumFacade.getDropdownValues(EnumTypes.GENDER);
   }
 
-  public List<ResolvedEnum> findAvailableCompanies() {
+  public List<DisplayableLookupValue> findAvailableCompanies() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
     return companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
@@ -427,14 +427,14 @@ public class UserDefinitionFacade {
                 c -> (c.getCompanyCode() + " - " + c.getCompanyName()).toLowerCase()))
         .map(
             company ->
-                new ResolvedEnum(
+                new DisplayableLookupValue(
                     company.getId(),
                     company.getCompanyCode() + " - " + company.getCompanyName(),
                     index.getAndIncrement()))
         .toList();
   }
 
-  public List<ResolvedEnum> findAvailableCompanyGroups() {
+  public List<DisplayableLookupValue> findAvailableCompanyGroups() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
     return companyGroupService.findAll().stream()
@@ -447,7 +447,7 @@ public class UserDefinitionFacade {
                 c -> c.getGroupCode().toLowerCase() + " - " + c.getName().toLowerCase()))
         .map(
             companyGroup ->
-                new ResolvedEnum(
+                new DisplayableLookupValue(
                     companyGroup.getId(),
                     companyGroup.getGroupCode() + " - " + companyGroup.getName(),
                     index.getAndIncrement()))

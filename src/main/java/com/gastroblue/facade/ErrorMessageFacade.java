@@ -4,8 +4,8 @@ import com.gastroblue.model.entity.ErrorMessageEntity;
 import com.gastroblue.model.request.ErrorMessageSaveRequest;
 import com.gastroblue.model.request.ErrorMessageUpdateRequest;
 import com.gastroblue.model.response.ErrorMessageResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import com.gastroblue.service.impl.ErrorMessageService;
+import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -56,9 +56,11 @@ public class ErrorMessageFacade {
         .build();
   }
 
-  public List<ResolvedEnum> getLanguages() {
-    ResolvedEnum build = ResolvedEnum.builder().key("EN").display("English").build();
-    ResolvedEnum build2 = ResolvedEnum.builder().key("TR").display("Turkish").build();
+  public List<DisplayableLookupValue> getLanguages() {
+    DisplayableLookupValue build =
+        DisplayableLookupValue.builder().key("EN").display("English").build();
+    DisplayableLookupValue build2 =
+        DisplayableLookupValue.builder().key("TR").display("Turkish").build();
     return Arrays.asList(build, build2);
   }
 }
