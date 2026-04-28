@@ -71,3 +71,8 @@ mail:
     port: ${MAIL_SMTP_PORT:587}
     username: ${MAIL_FROM}
     password: ${MAIL_PASSWORD}
+
+gastroblue:
+  commons:
+    tracing:
+      enabled: true

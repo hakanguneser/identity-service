@@ -5,11 +5,11 @@ import static com.gastroblue.model.enums.ErrorCode.INVALID_JWT_TOKEN;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.gastroblue.config.tracing.TraceIdConstants;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.service.IJwtService;
+import io.gastroblue.commons.helper.tracing.common.TraceIdConstants;
 import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import io.gastroblue.commons.shared.enums.ApplicationRole;
 import io.jsonwebtoken.ExpiredJwtException;

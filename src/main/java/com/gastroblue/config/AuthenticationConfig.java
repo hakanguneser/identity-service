@@ -1,5 +1,6 @@
 package com.gastroblue.config;
 
+import com.gastroblue.exception.IllegalDefinitionException;
 import com.gastroblue.service.impl.UserDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,7 +22,13 @@ public class AuthenticationConfig {
 
   @Bean
   public UserDetailsService userDetailsService() {
-    return userService::findUserByUserName;
+    return username -> {
+      try {
+        return userService.findUserByUserName(username);
+      } catch (IllegalDefinitionException e) {
+        throw new UsernameNotFoundException(e.getMessage(), e);
+      }
+    };
   }
 
   @Bean
