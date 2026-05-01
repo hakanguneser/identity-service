@@ -22,7 +22,7 @@ spring:
     open-in-view: false
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
 server:
   port: ${SERVER_PORT:7102}
@@ -74,6 +74,8 @@ gastroblue:
   commons:
     tracing:
       enabled: true
+    exception:
+      enabled: false
     swagger:
       enabled: true
       title: Identity Service API
@@ -83,5 +85,3 @@ gastroblue:
         name: Hakan Guneser
         email: hakanguneser@gastroblueapp.com
         url: https://www.gastrobluecheckapp.com/
-    persistence:
-      enabled: true

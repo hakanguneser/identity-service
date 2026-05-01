@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public record SessionUser(
     String userId,
@@ -19,10 +20,26 @@ public record SessionUser(
     String language,
     String username,
     Date issuedAt,
-    Date expiresAt) {
+    Date expiresAt)
+    implements UserDetails {
+
+  @Override
+  public String getUsername() {
+    return userId;
+  }
+
+  @Override
+  public String getPassword() {
+    return null;
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority("ROLE_" + applicationRole));
+  }
 
   public Collection<? extends GrantedAuthority> authorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_" + applicationRole));
+    return getAuthorities();
   }
 
   public Language getLanguage() {
@@ -35,6 +52,26 @@ public record SessionUser(
 
   public ApplicationProduct getApplicationProduct() {
     return ApplicationProduct.fromString(applicationProduct);
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return expiresAt == null || expiresAt.after(new Date());
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return isAccountNonExpired();
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return true;
   }
 
   public String getCompanyId() {
