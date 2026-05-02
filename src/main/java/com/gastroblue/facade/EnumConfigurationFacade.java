@@ -1,6 +1,6 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.commons.helper.jwt.service.IJwtService;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;

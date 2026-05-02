@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>com.gastroblue</groupId>
 			<artifactId>gastroblue-commons</artifactId>
-			<version>1.4.5</version>
+			<version>1.4.6</version>
 		</dependency>
 
 	</dependencies>

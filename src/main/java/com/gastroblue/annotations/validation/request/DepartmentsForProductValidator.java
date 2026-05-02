@@ -1,6 +1,6 @@
 package com.gastroblue.annotations.validation.request;
 
-import com.gastroblue.commons.helper.jwt.service.IJwtService;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.service.EnumConfigurationService;

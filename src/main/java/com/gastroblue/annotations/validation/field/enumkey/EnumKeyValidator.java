@@ -1,7 +1,7 @@
 package com.gastroblue.annotations.validation.field.enumkey;
 
-import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
-import com.gastroblue.commons.helper.jwt.service.IJwtService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.enums.Language;
 import com.gastroblue.service.EnumConfigurationService;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Validates that the string value is a known, active enum key for the caller's company group.
  *
  * <p>Resolves company group and language from the current {@link
- * com.gastroblue.model.base.SessionUser} and delegates to {@link
+ * com.gastroblue.commons.helper.security.model.dto.SessionUser} and delegates to {@link
  * EnumConfigurationService#isActive}. Unknown keys (not yet defined in {@code
  * ENUM_VALUE_CONFIGURATIONS}) and explicitly deactivated keys are both rejected.
  *

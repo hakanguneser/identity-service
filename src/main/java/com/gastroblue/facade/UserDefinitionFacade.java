@@ -7,8 +7,8 @@ import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
 
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
-import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
-import com.gastroblue.commons.helper.jwt.service.IJwtService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
 import com.gastroblue.commons.shared.model.DisplayableLookupValue;

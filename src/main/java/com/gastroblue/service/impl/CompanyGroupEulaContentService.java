@@ -1,8 +1,8 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
-import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
-import com.gastroblue.commons.helper.jwt.service.IJwtService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.mapper.CompanyGroupEulaContentMapper;
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
 import com.gastroblue.model.enums.ErrorCode;

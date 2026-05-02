@@ -1,6 +1,6 @@
 package com.gastroblue.service.token;
 
-import com.gastroblue.commons.helper.jwt.model.properties.JwtProperties;
+import com.gastroblue.commons.helper.security.model.properties.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;

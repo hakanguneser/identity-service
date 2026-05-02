@@ -4,9 +4,9 @@ import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
-import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
-import com.gastroblue.commons.helper.jwt.model.properties.JwtProperties;
-import com.gastroblue.commons.helper.jwt.service.IJwtService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
+import com.gastroblue.commons.helper.security.model.properties.JwtProperties;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.util.DelimitedStringUtil;
 import com.gastroblue.mapper.CompanyGroupMapper;
