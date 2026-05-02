@@ -28,23 +28,6 @@ server:
   port: ${SERVER_PORT:7102}
 
 
-application:
-  security:
-    jwt:
-      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-      token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
-      refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
-      sys-tokens:
-        tracker:
-          token: ${TRACKER_TOKEN:TRACKER_TOKEN_NOT_CONFIGURED}
-          product: TRACKER
-        formflow:
-          token: ${FORMFLOW_TOKEN:FORMFLOW_TOKEN_NOT_CONFIGURED}
-          product: FORMFLOW
-        admin:
-          token: ${ADMIN_TOKEN:ADMIN_TOKEN_NOT_CONFIGURED}
-          product: CHECK
-
 management:
   endpoints:
     web:
@@ -72,6 +55,21 @@ mail:
 
 gastroblue:
   commons:
+    jwt:
+      enabled: false
+      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
+      refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
+      sys-tokens:
+        tracker:
+          token: ${TRACKER_TOKEN:TRACKER_TOKEN_NOT_CONFIGURED}
+          product: TRACKER
+        formflow:
+          token: ${FORMFLOW_TOKEN:FORMFLOW_TOKEN_NOT_CONFIGURED}
+          product: FORMFLOW
+        admin:
+          token: ${ADMIN_TOKEN:ADMIN_TOKEN_NOT_CONFIGURED}
+          product: CHECK
     tracing:
       enabled: true
     exception:

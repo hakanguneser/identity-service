@@ -1,10 +1,10 @@
 package com.gastroblue.facade;
 
+import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
+import com.gastroblue.commons.helper.jwt.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.response.UserEligibilityResponse;
-import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

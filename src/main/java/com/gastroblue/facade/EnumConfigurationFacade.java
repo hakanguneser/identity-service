@@ -1,5 +1,6 @@
 package com.gastroblue.facade;
 
+import com.gastroblue.commons.helper.jwt.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
@@ -7,7 +8,6 @@ import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.model.response.EnumConfigurationResponse;
 import com.gastroblue.service.EnumConfigurationService;
-import com.gastroblue.service.IJwtService;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;

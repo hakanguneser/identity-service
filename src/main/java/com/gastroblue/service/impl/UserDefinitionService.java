@@ -1,13 +1,13 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
+import com.gastroblue.commons.helper.jwt.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.UserRepository;
-import com.gastroblue.service.IJwtService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;

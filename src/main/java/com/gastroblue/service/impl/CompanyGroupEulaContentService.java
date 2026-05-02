@@ -1,14 +1,14 @@
 package com.gastroblue.service.impl;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
+import com.gastroblue.commons.helper.jwt.service.IJwtService;
 import com.gastroblue.mapper.CompanyGroupEulaContentMapper;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.repository.CompanyGroupEulaContentRepository;
-import com.gastroblue.service.IJwtService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -4,7 +4,11 @@ import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
+import com.gastroblue.commons.helper.jwt.model.properties.JwtProperties;
+import com.gastroblue.commons.helper.jwt.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.util.DelimitedStringUtil;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.*;
@@ -16,14 +20,12 @@ import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
-import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,7 +37,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AuthenticationFacade {
 
-  private final JwtService jwtService;
+  private final IJwtService jwtService;
+  private final JwtProperties jwtProperties;
   private final AuthenticationManager authenticationManager;
   private final UserDefinitionService userService;
   private final CompanyService companyService;
@@ -45,12 +48,6 @@ public class AuthenticationFacade {
   private final CompanyGroupProductService companyGroupProductService;
   private final CompanyProductService companyProductService;
   private final UserProductService userProductService;
-
-  @Value("${application.security.jwt.token-validity-in-minutes}")
-  private Long jwtTokenValidityMinutes;
-
-  @Value("${application.security.jwt.refresh-token-validity-in-days}")
-  private Long jwtRefreshTokenValidityDays;
 
   public AuthLoginResponse login(AuthLoginRequest request) {
     log.info("Login request: {}", request.toString());
@@ -93,18 +90,18 @@ public class AuthenticationFacade {
     userProductService.updateLastSuccessLogin(userEntity.getId(), product);
     ApiInfoDto apiInfo = getApiInfo(userEntity, userProduct, product);
     HashMap<String, Object> extraClaims =
-        IJwtService.toExtraClaims(
+        buildExtraClaims(
             userEntity, userProduct, product, getResponsibleCompanyIds(userEntity, userProduct));
     String token =
         jwtService.generateToken(
             userEntity.getUsername(),
             extraClaims,
-            TimeUnit.MINUTES.toMillis(jwtTokenValidityMinutes));
+            TimeUnit.MINUTES.toMillis(jwtProperties.getTokenValidityInMinutes()));
     String refreshToken =
         jwtService.generateToken(
             userEntity.getUsername(),
             extraClaims,
-            TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
+            TimeUnit.DAYS.toMillis(jwtProperties.getRefreshTokenValidityInDays()));
 
     return AuthLoginResponse.builder()
         .token(token)
@@ -122,7 +119,7 @@ public class AuthenticationFacade {
         jwtService.generateToken(
             sessionUser.username(),
             extraClaims,
-            TimeUnit.DAYS.toMillis(jwtRefreshTokenValidityDays));
+            TimeUnit.DAYS.toMillis(jwtProperties.getRefreshTokenValidityInDays()));
     return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 
@@ -249,6 +246,27 @@ public class AuthenticationFacade {
       }
     }
     return ApiInfoDto.builder().url(url).version(version).build();
+  }
+
+  private static HashMap<String, Object> buildExtraClaims(
+      UserEntity userEntity,
+      UserProductEntity userProduct,
+      ApplicationProduct product,
+      List<String> companyIds) {
+    HashMap<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(IJwtService.JWT_USER_ID, userEntity.getId());
+    extraClaims.put(IJwtService.JWT_COMPANY_GROUP_ID, userEntity.getCompanyGroupId());
+    extraClaims.put(
+        IJwtService.JWT_ROLE, userProduct != null ? userProduct.getApplicationRole().name() : null);
+    extraClaims.put(IJwtService.JWT_COMPANY_IDS, companyIds);
+    extraClaims.put(IJwtService.JWT_APPLICATION_PRODUCT, product);
+    extraClaims.put(IJwtService.JWT_LANGUAGE, userEntity.getLanguage().name());
+    extraClaims.put(
+        IJwtService.JWT_DEPARTMENTS,
+        userProduct != null
+            ? DelimitedStringUtil.splitClean(userProduct.getDepartments())
+            : List.of());
+    return extraClaims;
   }
 
   private List<String> getResponsibleCompanyIds(

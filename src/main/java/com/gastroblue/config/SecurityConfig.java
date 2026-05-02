@@ -1,7 +1,9 @@
 package com.gastroblue.config;
 
+import com.gastroblue.commons.helper.jwt.filter.JwtAuthenticationFilter;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +20,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final JwtAuthenticationFilter jwtAuthFilter;
+  @Autowired(required = false)
+  private JwtAuthenticationFilter jwtAuthFilter;
+
   private final AuthenticationProvider authenticationProvider;
 
   @Value("${gastroblue.commons.swagger.enabled}")
   private boolean swaggerEnabled;
+
+  @Value("${gastroblue.commons.jwt.enabled:false}")
+  private boolean jwtEnabled;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,6 +37,10 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             authorize -> {
+              if (!jwtEnabled) {
+                authorize.anyRequest().permitAll();
+                return;
+              }
               authorize
                   .requestMatchers(
                       "/api/v1/auth/login", "/api/v1/auth/refresh", "/actuator/health/**")
@@ -57,8 +68,11 @@ public class SecurityConfig {
         .sessionManagement(
             sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider)
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        .authenticationProvider(authenticationProvider);
+
+    if (jwtAuthFilter != null) {
+      http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    }
 
     return http.build();
   }

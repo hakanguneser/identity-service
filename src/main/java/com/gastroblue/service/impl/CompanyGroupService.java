@@ -3,15 +3,15 @@ package com.gastroblue.service.impl;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.jwt.model.dto.SessionUser;
+import com.gastroblue.commons.helper.jwt.service.IJwtService;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
 import com.gastroblue.repository.CompanyGroupRepository;
-import com.gastroblue.service.IJwtService;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
