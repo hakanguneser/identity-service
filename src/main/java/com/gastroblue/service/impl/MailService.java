@@ -1,6 +1,6 @@
 package com.gastroblue.service.impl;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 
 import com.gastroblue.model.entity.OutgoingMailLogEntity;
 import com.gastroblue.model.enums.MailParameters;

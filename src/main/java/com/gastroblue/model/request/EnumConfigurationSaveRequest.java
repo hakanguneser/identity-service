@@ -1,7 +1,7 @@
 package com.gastroblue.model.request;
 
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.Language;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.Language;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

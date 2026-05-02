@@ -1,8 +1,8 @@
 package com.gastroblue.repository;
 
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationRole;
 import com.gastroblue.model.entity.UserEntity;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.ApplicationRole;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

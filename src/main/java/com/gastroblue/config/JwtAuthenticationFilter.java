@@ -3,13 +3,13 @@ package com.gastroblue.config;
 import static com.gastroblue.model.enums.ErrorCode.EXPIRED_JWT_TOKEN;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_JWT_TOKEN;
 
+import com.gastroblue.commons.helper.tracing.common.TraceIdConstants;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationRole;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.exception.ApplicationError;
 import com.gastroblue.service.IJwtService;
-import io.gastroblue.commons.helper.tracing.common.TraceIdConstants;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.ApplicationRole;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

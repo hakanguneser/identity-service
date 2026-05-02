@@ -1,6 +1,6 @@
 package com.gastroblue.config;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.service.impl.UserDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +25,7 @@ public class AuthenticationConfig {
     return username -> {
       try {
         return userService.findUserByUserName(username);
-      } catch (IllegalDefinitionException e) {
+      } catch (NotFoundException e) {
         throw new UsernameNotFoundException(e.getMessage(), e);
       }
     };

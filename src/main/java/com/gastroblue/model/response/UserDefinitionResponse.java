@@ -1,7 +1,7 @@
 package com.gastroblue.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.List;
 import lombok.*;
 

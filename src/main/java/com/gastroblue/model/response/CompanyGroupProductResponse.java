@@ -1,6 +1,6 @@
 package com.gastroblue.model.response;
 
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import lombok.*;
 
 @Getter

@@ -1,6 +1,6 @@
 package com.gastroblue.model.entity;
 
-import io.gastroblue.commons.helper.persistence.model.base.Auditable;
+import com.gastroblue.commons.helper.persistence.model.base.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
 

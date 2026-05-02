@@ -2,8 +2,9 @@ package com.gastroblue.facade;
 
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
-import com.gastroblue.exception.AccessDeniedException;
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.*;
@@ -17,7 +18,6 @@ import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.IJwtService;
 import com.gastroblue.service.impl.*;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -146,7 +146,7 @@ public class AuthenticationFacade {
         CompanyGroup companyGroup =
             companyGroupService.findCompanyByIdOrThrow(sessionUser.companyGroupId());
         response.setCompanyGroup(companyGroup);
-      } catch (IllegalDefinitionException exception) {
+      } catch (NotFoundException exception) {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
       }
       List<Company> companyList;

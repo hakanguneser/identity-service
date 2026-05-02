@@ -75,7 +75,7 @@ gastroblue:
     tracing:
       enabled: true
     exception:
-      enabled: false
+      enabled: true
     swagger:
       enabled: true
       title: Identity Service API

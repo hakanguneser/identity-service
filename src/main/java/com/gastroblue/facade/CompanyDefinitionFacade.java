@@ -1,9 +1,10 @@
 package com.gastroblue.facade;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.split;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
@@ -21,7 +22,6 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyProductService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +105,7 @@ public class CompanyDefinitionFacade {
         .findByCompanyIdAndProduct(companyId, request.product())
         .ifPresent(
             existing -> {
-              throw new IllegalDefinitionException(
+              throw new NotFoundException(
                   ErrorCode.COMPANY_PRODUCT_ALREADY_EXISTS,
                   "Product already assigned to company: " + request.product());
             });
@@ -153,7 +153,7 @@ public class CompanyDefinitionFacade {
             .orElseThrow(
                 () -> {
                   log.debug("Company not found with code: {}", companyCode);
-                  return new IllegalDefinitionException(
+                  return new NotFoundException(
                       ErrorCode.COMPANY_NOT_FOUND, "Company not found: " + companyCode);
                 });
 

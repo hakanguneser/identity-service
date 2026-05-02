@@ -1,10 +1,10 @@
 package com.gastroblue.annotations.validation.field.enumkey;
 
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.Language;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.service.EnumConfigurationService;
 import com.gastroblue.service.IJwtService;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.Language;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.gastroblue.service.impl;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.mapper.CompanyGroupEulaContentMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
@@ -74,7 +74,7 @@ public class CompanyGroupEulaContentService {
         .orElseThrow(
             () -> {
               log.debug("EULA Content not found with id: {}", id);
-              return new IllegalDefinitionException(
+              return new NotFoundException(
                   ErrorCode.EULA_CONTENT_NOT_FOUND, "EULA Content not found id: " + id);
             });
   }
@@ -102,7 +102,7 @@ public class CompanyGroupEulaContentService {
             LocalDate.now())
         .orElseThrow(
             () ->
-                new IllegalDefinitionException(
+                new NotFoundException(
                     ErrorCode.EULA_CONTENT_NOT_FOUND,
                     String.format(
                         "No active EULA content for companyGroupId=%s product=%s language=%s",

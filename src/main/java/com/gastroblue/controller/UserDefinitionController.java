@@ -1,5 +1,6 @@
 package com.gastroblue.controller;
 
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.facade.UserDefinitionFacade;
 import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
@@ -7,7 +8,6 @@ import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;

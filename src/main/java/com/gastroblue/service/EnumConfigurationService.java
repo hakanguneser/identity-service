@@ -1,14 +1,14 @@
 package com.gastroblue.service;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.Language;
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
 import com.gastroblue.repository.EnumValueConfigurationRepository;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.Language;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -216,7 +216,7 @@ public class EnumConfigurationService {
         .findByIdAndCompanyGroupId(id, companyGroupId)
         .orElseThrow(
             () ->
-                new IllegalDefinitionException(
+                new NotFoundException(
                     ErrorCode.ENUM_CONFIGURATION_NOT_FOUND,
                     String.format(
                         "Enum Configuration not found (id=%s, companyGroupId=%s)",
@@ -251,7 +251,7 @@ public class EnumConfigurationService {
             .findByIdAndCompanyGroupId(id, companyGroupId)
             .orElseThrow(
                 () ->
-                    new IllegalDefinitionException(
+                    new NotFoundException(
                         ErrorCode.ENUM_CONFIGURATION_NOT_FOUND,
                         String.format(
                             "Enum Configuration not found (id=%s, companyGroupId=%s)",

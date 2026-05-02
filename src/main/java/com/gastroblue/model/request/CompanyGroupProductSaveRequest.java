@@ -1,6 +1,6 @@
 package com.gastroblue.model.request;
 
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.validation.constraints.NotNull;
 
 public record CompanyGroupProductSaveRequest(

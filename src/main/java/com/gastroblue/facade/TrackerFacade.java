@@ -1,8 +1,9 @@
 package com.gastroblue.facade;
 
 import com.gastroblue.client.TrackerPushNotificationDispatcher;
-import com.gastroblue.exception.AccessDeniedException;
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.TrackerMapper;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -21,7 +22,6 @@ import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.service.impl.UserProductService;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -107,11 +107,11 @@ public class TrackerFacade {
             .orElseThrow(
                 () -> {
                   log.debug("Company not found with code: {}", companyCode);
-                  return new IllegalDefinitionException(
+                  return new NotFoundException(
                       ErrorCode.COMPANY_NOT_FOUND, "Company not found: " + companyCode);
                 });
     if (!company.getCompanyGroupId().equals(group.getId())) {
-      throw new IllegalDefinitionException(
+      throw new NotFoundException(
           ErrorCode.COMPANY_NOT_FOUND,
           "Company not found in group: " + companyGroupCode + " / " + companyCode);
     }

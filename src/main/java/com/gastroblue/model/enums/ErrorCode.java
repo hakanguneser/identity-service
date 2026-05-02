@@ -1,6 +1,8 @@
 package com.gastroblue.model.enums;
 
-public enum ErrorCode {
+import com.gastroblue.commons.helper.exception.model.base.ErrorCodeBase;
+
+public enum ErrorCode implements ErrorCodeBase {
   USER_NOT_FOUND,
   USER_ALREADY_EXISTS,
   INVALID_REQUEST_BODY,
@@ -31,5 +33,10 @@ public enum ErrorCode {
   COMPANY_PRODUCT_LICENSE_EXPIRED,
   LICENSE_USER_LIMIT_EXCEEDED,
   COMPANY_PRODUCT_NOT_ACTIVE,
-  PRODUCT_NOT_ALLOWED_FOR_REGISTRATION
+  PRODUCT_NOT_ALLOWED_FOR_REGISTRATION;
+
+  @Override
+  public String code() {
+    return name();
+  }
 }

@@ -1,8 +1,8 @@
 package com.gastroblue.service.impl;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.base.SessionUser;
@@ -37,7 +37,7 @@ public class CompanyGroupService {
             .orElseThrow(
                 () -> {
                   log.debug("Company Group not found for update with id: {}", companyGroupId);
-                  return new IllegalDefinitionException(
+                  return new NotFoundException(
                       ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
                 });
     entityToBeUpdate.setName(request.name());
@@ -59,7 +59,7 @@ public class CompanyGroupService {
             .orElseThrow(
                 () -> {
                   log.debug("Company Group not found with id: {}", companyGroupId);
-                  return new IllegalDefinitionException(
+                  return new NotFoundException(
                       ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
                 });
   }
@@ -81,7 +81,7 @@ public class CompanyGroupService {
         .orElseThrow(
             () -> {
               log.debug("Company Group not found with id: {}", companyGroupId);
-              return new IllegalDefinitionException(
+              return new NotFoundException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
             });
   }
@@ -92,7 +92,7 @@ public class CompanyGroupService {
         .orElseThrow(
             () -> {
               log.debug("Company Group not found with code: {}", groupCode);
-              return new IllegalDefinitionException(
+              return new NotFoundException(
                   ErrorCode.COMPANY_GROUP_NOT_FOUND, "Group not found: " + groupCode);
             });
   }

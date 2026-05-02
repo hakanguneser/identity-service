@@ -142,7 +142,7 @@ ADMIN > GROUP_MANAGER > ZONE_MANAGER > COMPANY_MANAGER > SUPERVISOR > STAFF
 
 ### Hata Yönetimi
 
-- Özel exception'lar: `IllegalDefinitionException`, `AccessDeniedException`, `ValidationException`
+- Özel exception'lar: `NotFoundException`, `AccessDeniedException`, `ValidationException`
 - Tüm exception'lar `AbstractRuntimeException`'dan türer
 - `GlobalExceptionHelper` tüm hataları yakalar — yeni exception türleri eklemeden önce mevcut yapıya bak
 - Hata mesajları her zaman DB'den çekilir (`ErrorMessageEntity`) — hardcode mesaj yazma

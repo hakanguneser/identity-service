@@ -1,7 +1,9 @@
 package com.gastroblue.mapper;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
+import com.gastroblue.commons.shared.enums.Language;
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
@@ -9,8 +11,6 @@ import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import io.gastroblue.commons.shared.enums.Language;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;

@@ -1,7 +1,7 @@
 package com.gastroblue.mapper;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.split;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.base.Company;

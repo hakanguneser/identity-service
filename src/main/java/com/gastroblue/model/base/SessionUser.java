@@ -1,8 +1,8 @@
 package com.gastroblue.model.base;
 
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.ApplicationRole;
-import io.gastroblue.commons.shared.enums.Language;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationRole;
+import com.gastroblue.commons.shared.enums.Language;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;

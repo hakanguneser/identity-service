@@ -1,10 +1,10 @@
 package com.gastroblue.service.impl;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.CompanyGroupProductRepository;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class CompanyGroupProductService {
                   "CompanyGroupProduct not found for groupId={} product={}",
                   companyGroupId,
                   product);
-              return new IllegalDefinitionException(
+              return new NotFoundException(
                   ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND,
                   "Product not defined for company group");
             });
@@ -53,7 +53,7 @@ public class CompanyGroupProductService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new IllegalDefinitionException(
+                    new NotFoundException(
                         ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND,
                         "CompanyGroupProduct not found"));
     existing.setEnabled(updated.getEnabled());

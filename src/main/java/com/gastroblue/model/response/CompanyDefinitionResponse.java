@@ -1,6 +1,6 @@
 package com.gastroblue.model.response;
 
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

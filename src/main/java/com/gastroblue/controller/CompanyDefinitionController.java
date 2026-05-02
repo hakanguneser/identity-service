@@ -1,5 +1,6 @@
 package com.gastroblue.controller;
 
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.facade.CompanyDefinitionFacade;
 import com.gastroblue.model.request.CompanyProductSaveRequest;
 import com.gastroblue.model.request.CompanyProductUpdateRequest;
@@ -8,7 +9,6 @@ import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;

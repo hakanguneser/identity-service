@@ -1,10 +1,10 @@
 package com.gastroblue.service.impl;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.model.entity.CompanyProductEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.CompanyProductRepository;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class CompanyProductService {
         .orElseThrow(
             () -> {
               log.debug("CompanyProduct not found for companyId={} product={}", companyId, product);
-              return new IllegalDefinitionException(
+              return new NotFoundException(
                   ErrorCode.COMPANY_PRODUCT_NOT_FOUND, "Product not defined for company");
             });
   }
@@ -51,7 +51,7 @@ public class CompanyProductService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new IllegalDefinitionException(
+                    new NotFoundException(
                         ErrorCode.COMPANY_PRODUCT_NOT_FOUND, "CompanyProduct not found"));
     existing.setEnabled(updated.getEnabled());
     existing.setLicenseExpiresAt(updated.getLicenseExpiresAt());

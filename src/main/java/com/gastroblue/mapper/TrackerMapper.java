@@ -1,8 +1,9 @@
 package com.gastroblue.mapper;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.split;
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
@@ -13,7 +14,6 @@ import com.gastroblue.model.response.tracker.TrackerCompany;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyGroup;
 import com.gastroblue.model.response.tracker.TrackerUser;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.Collections;
 import java.util.List;
 import lombok.AccessLevel;

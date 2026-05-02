@@ -1,9 +1,9 @@
 package com.gastroblue.util;
 
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.join;
-import static io.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.model.enums.ErrorCode;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +23,7 @@ public class EmailDomainValidator {
       if (mailAddresses == null || mailAddresses.isEmpty()) {
         return;
       }
-      throw new IllegalDefinitionException(
+      throw new NotFoundException(
           ErrorCode.INVALID_MAIL_DOMAINS, "At least one domain must be specified");
     }
 
@@ -38,7 +38,7 @@ public class EmailDomainValidator {
             .toList();
 
     if (!invalidMails.isEmpty()) {
-      throw new IllegalDefinitionException(ErrorCode.INVALID_MAIL_DOMAINS, join(invalidMails));
+      throw new NotFoundException(ErrorCode.INVALID_MAIL_DOMAINS, join(invalidMails));
     }
   }
 

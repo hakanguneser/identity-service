@@ -1,7 +1,7 @@
 package com.gastroblue.config;
 
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.model.properties.JwtProperties;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.util.Map;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

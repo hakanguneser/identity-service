@@ -1,12 +1,16 @@
 package com.gastroblue.facade;
 
+import static com.gastroblue.commons.shared.enums.ApplicationRole.*;
 import static com.gastroblue.model.enums.MailParameters.*;
 import static com.gastroblue.model.enums.MailTemplate.INITIAL_PASSWORD;
 import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
-import static io.gastroblue.commons.shared.enums.ApplicationRole.*;
 
-import com.gastroblue.exception.AccessDeniedException;
-import com.gastroblue.exception.ValidationException;
+import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
+import com.gastroblue.commons.helper.exception.type.BusinessException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationRole;
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.shared.util.DelimitedStringUtil;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
 import com.gastroblue.model.base.CompanyGroup;
@@ -35,10 +39,6 @@ import com.gastroblue.service.impl.UserDefinitionService;
 import com.gastroblue.service.impl.UserProductService;
 import com.gastroblue.util.EmailDomainValidator;
 import com.gastroblue.util.PasswordGenerator;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.enums.ApplicationRole;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
-import io.gastroblue.commons.shared.util.DelimitedStringUtil;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -182,7 +182,7 @@ public class UserDefinitionFacade {
     ApplicationProduct product = sessionUser.getApplicationProduct();
     if (sessionUser.getApplicationRole().isAdministrator()) {
       if (requestedProduct == null) {
-        throw new ValidationException(
+        throw new BusinessException(
             ErrorCode.PRODUCT_NOT_ALLOWED_FOR_REGISTRATION,
             String.format(
                 "Requested user %s has Admin role, but no product is assigned. ApplicationRole: %s, companyGroupId is null",
@@ -271,7 +271,7 @@ public class UserDefinitionFacade {
     if (sessionUserEntity == null
         || sessionUserEntity.getEmail() == null
         || sessionUserEntity.getEmail().isBlank()) {
-      throw new ValidationException(
+      throw new BusinessException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION, "User email is required");
     }
     return sessionUserEntity;
@@ -306,14 +306,14 @@ public class UserDefinitionFacade {
       if (request.companyGroupId() != null) {
         return companyGroupService.findByIdOrThrow(request.companyGroupId());
       }
-      throw new ValidationException(
+      throw new BusinessException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
           String.format("Requested user %s has no companyGroupId", sessionUser.username()));
     }
 
     // 2. Session ADMIN değilse → direkt session'dan çek
     if (sessionUser.companyGroupId() == null || sessionUser.companyGroupId().isEmpty()) {
-      throw new ValidationException(
+      throw new BusinessException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
           String.format("Requested user %s has no companyGroupId", sessionUser.username()));
     }

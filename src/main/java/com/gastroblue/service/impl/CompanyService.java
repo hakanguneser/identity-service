@@ -1,6 +1,6 @@
 package com.gastroblue.service.impl;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.repository.CompanyRepository;
@@ -26,7 +26,7 @@ public class CompanyService {
     return findById(id)
         .orElseThrow(
             () ->
-                new IllegalDefinitionException(
+                new NotFoundException(
                     ErrorCode.COMPANY_NOT_FOUND,
                     String.format("Company not found (companyId=%s)", id)));
   }
@@ -48,7 +48,7 @@ public class CompanyService {
         .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
         .orElseThrow(
             () ->
-                new IllegalDefinitionException(
+                new NotFoundException(
                     ErrorCode.COMPANY_NOT_FOUND,
                     String.format(
                         "Company not found (companyId=%s, companyGroupId=%s)",
@@ -62,7 +62,7 @@ public class CompanyService {
             .filter(e -> e.getCompanyGroupId().equals(companyGroupId))
             .orElseThrow(
                 () ->
-                    new IllegalDefinitionException(
+                    new NotFoundException(
                         ErrorCode.COMPANY_NOT_FOUND,
                         String.format(
                             "Company not found (companyId=%s, companyGroupId=%s)",

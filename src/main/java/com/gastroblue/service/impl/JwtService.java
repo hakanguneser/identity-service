@@ -2,7 +2,7 @@ package com.gastroblue.service.impl;
 
 import static io.jsonwebtoken.Claims.*;
 
-import com.gastroblue.exception.AccessDeniedException;
+import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.service.IJwtService;

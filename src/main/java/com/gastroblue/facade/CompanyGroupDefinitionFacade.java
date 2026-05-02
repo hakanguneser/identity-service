@@ -1,6 +1,8 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
@@ -15,8 +17,6 @@ import com.gastroblue.model.response.CompanyGroupProductResponse;
 import com.gastroblue.service.impl.CompanyGroupProductService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.util.EmailDomainValidator;
-import io.gastroblue.commons.shared.enums.ApplicationProduct;
-import io.gastroblue.commons.shared.model.DisplayableLookupValue;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class CompanyGroupDefinitionFacade {
         .findByCompanyGroupIdAndProduct(companyGroupId, request.product())
         .ifPresent(
             existing -> {
-              throw new IllegalDefinitionException(
+              throw new NotFoundException(
                   ErrorCode.COMPANY_GROUP_PRODUCT_ALREADY_EXISTS,
                   "Product already assigned to company group: " + request.product());
             });
