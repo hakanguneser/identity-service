@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,8 +40,11 @@ import org.springframework.stereotype.Service;
 public class AuthenticationFacade {
 
   private final IJwtService jwtService;
-  private final ITokenGenerationService tokenGenerationService;
   private final JwtProperties jwtProperties;
+
+  @Autowired(required = false)
+  private ITokenGenerationService tokenGenerationService;
+
   private final AuthenticationManager authenticationManager;
   private final UserDefinitionService userService;
   private final CompanyService companyService;

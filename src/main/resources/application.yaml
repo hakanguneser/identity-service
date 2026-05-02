@@ -54,10 +54,13 @@ mail:
     password: ${MAIL_PASSWORD}
 
 gastroblue:
+  identity:
+    token:
+      private-key: ${EC_PRIVATE_KEY:MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCC6MSk5LiOmSnpOyrNo2ID/GtPU2eAqHsN3shEHWPQOaw==}
   commons:
     security:
-      enabled: false
-      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      enabled: true
+      public-key: ${EC_PUBLIC_KEY:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3AQzd7jGIvnvtHORNZ17vPPJEAlb1kfOmPfLr6HNOoJvutGvz4qhKgd8HPYLttVBWI50txLF/08sFsQRwqpw/Q==}
       token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
       sys-tokens:
