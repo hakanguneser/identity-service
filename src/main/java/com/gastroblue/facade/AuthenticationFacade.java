@@ -21,6 +21,7 @@ import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.impl.*;
+import com.gastroblue.service.token.ITokenGenerationService;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationFacade {
 
   private final IJwtService jwtService;
+  private final ITokenGenerationService tokenGenerationService;
   private final JwtProperties jwtProperties;
   private final AuthenticationManager authenticationManager;
   private final UserDefinitionService userService;
@@ -93,12 +95,12 @@ public class AuthenticationFacade {
         buildExtraClaims(
             userEntity, userProduct, product, getResponsibleCompanyIds(userEntity, userProduct));
     String token =
-        jwtService.generateToken(
+        tokenGenerationService.generateToken(
             userEntity.getUsername(),
             extraClaims,
             TimeUnit.MINUTES.toMillis(jwtProperties.getTokenValidityInMinutes()));
     String refreshToken =
-        jwtService.generateToken(
+        tokenGenerationService.generateToken(
             userEntity.getUsername(),
             extraClaims,
             TimeUnit.DAYS.toMillis(jwtProperties.getRefreshTokenValidityInDays()));
@@ -116,7 +118,7 @@ public class AuthenticationFacade {
     SessionUser sessionUser = jwtService.validateAndExtractToken(request.refreshToken());
     HashMap<String, Object> extraClaims = IJwtService.toExtraClaims(sessionUser);
     String newToken =
-        jwtService.generateToken(
+        tokenGenerationService.generateToken(
             sessionUser.username(),
             extraClaims,
             TimeUnit.DAYS.toMillis(jwtProperties.getRefreshTokenValidityInDays()));
