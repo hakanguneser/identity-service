@@ -1,6 +1,6 @@
 package com.gastroblue.controller;
 
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.facade.UserDefinitionFacade;
 import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
@@ -86,32 +86,32 @@ public class UserDefinitionController {
   }
 
   @GetMapping("dropdown/application-roles")
-  public ResponseEntity<List<DisplayableLookupValue>> findAllApplicationRoles() {
+  public ResponseEntity<List<BaseLookupModel>> findAllApplicationRoles() {
     return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")
-  public ResponseEntity<List<DisplayableLookupValue>> findAllDepartments() {
+  public ResponseEntity<List<BaseLookupModel>> findAllDepartments() {
     return ResponseEntity.ok(userFacade.findAllDepartments());
   }
 
   @GetMapping("dropdown/genders")
-  public ResponseEntity<List<DisplayableLookupValue>> findAllGenders() {
+  public ResponseEntity<List<BaseLookupModel>> findAllGenders() {
     return ResponseEntity.ok(userFacade.findAllGenders());
   }
 
   @GetMapping("dropdown/zones")
-  public ResponseEntity<List<DisplayableLookupValue>> findAllZones() {
+  public ResponseEntity<List<BaseLookupModel>> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
   }
 
   @GetMapping("dropdown/company-groups")
-  public ResponseEntity<List<DisplayableLookupValue>> findAvailableCompanyGroups() {
+  public ResponseEntity<List<BaseLookupModel>> findAvailableCompanyGroups() {
     return ResponseEntity.ok(userFacade.findAvailableCompanyGroups());
   }
 
   @GetMapping("dropdown/companies")
-  public ResponseEntity<List<DisplayableLookupValue>> findAvailableCompanies() {
+  public ResponseEntity<List<BaseLookupModel>> findAvailableCompanies() {
     return ResponseEntity.ok(userFacade.findAvailableCompanies());
   }
 }

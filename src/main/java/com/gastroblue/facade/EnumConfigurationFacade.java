@@ -1,8 +1,8 @@
 package com.gastroblue.facade;
 
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.model.entity.EnumValueConfigurationEntity;
 import com.gastroblue.model.request.EnumConfigurationSaveRequest;
 import com.gastroblue.model.request.EnumConfigurationUpdateRequest;
@@ -30,12 +30,12 @@ public class EnumConfigurationFacade {
     return toResponse(enumConfigurationService.update(id, request, companyGroupId));
   }
 
-  public List<DisplayableLookupValue> getDropdownValues(String enumType, String companyGroupId) {
+  public List<BaseLookupModel> getDropdownValues(String enumType, String companyGroupId) {
     return enumConfigurationService.getDropdownValues(
         enumType, companyGroupId, IJwtService.getSessionLanguage());
   }
 
-  public List<DisplayableLookupValue> getDropdownValues(String enumType) {
+  public List<BaseLookupModel> getDropdownValues(String enumType) {
     return getDropdownValues(enumType, IJwtService.findSessionUserOrThrow().companyGroupId());
   }
 
@@ -47,7 +47,7 @@ public class EnumConfigurationFacade {
     return enumConfigurationService.findAll(companyGroupId).stream().map(this::toResponse).toList();
   }
 
-  public DisplayableLookupValue resolve(String enumType, String enumKey, String companyGroupId) {
+  public BaseLookupModel resolve(String enumType, String enumKey, String companyGroupId) {
     if (enumKey == null) {
       return null;
     }
@@ -58,23 +58,22 @@ public class EnumConfigurationFacade {
   }
 
   /** Product-scoped dropdown — for enums whose values differ per product (e.g. Department). */
-  public List<DisplayableLookupValue> getDropdownValues(
-      String enumType, ApplicationProduct product) {
+  public List<BaseLookupModel> getDropdownValues(String enumType, ApplicationProduct product) {
     return getDropdownValues(
         enumType, IJwtService.findSessionUserOrThrow().companyGroupId(), product);
   }
 
-  public List<DisplayableLookupValue> getDropdownValues(
+  public List<BaseLookupModel> getDropdownValues(
       String enumType, String companyGroupId, ApplicationProduct product) {
     return enumConfigurationService.getDropdownValues(
         enumType, companyGroupId, IJwtService.getSessionLanguage(), product);
   }
 
   /**
-   * Product-scoped resolve — returns the {@link DisplayableLookupValue} for a single key within a
-   * specific product context.
+   * Product-scoped resolve — returns the {@link BaseLookupModel} for a single key within a specific
+   * product context.
    */
-  public DisplayableLookupValue resolve(
+  public BaseLookupModel resolve(
       String enumType, String enumKey, String companyGroupId, ApplicationProduct product) {
     if (enumKey == null) {
       return null;
@@ -85,7 +84,7 @@ public class EnumConfigurationFacade {
         .orElse(null);
   }
 
-  public List<DisplayableLookupValue> getChildDropdownValues(
+  public List<BaseLookupModel> getChildDropdownValues(
       String enumType, String parentEnumType, String parentKey, String companyGroupId) {
     return enumConfigurationService.getChildDropdownValues(
         enumType, companyGroupId, IJwtService.getSessionLanguage(), parentKey, parentEnumType);

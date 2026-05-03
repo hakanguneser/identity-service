@@ -7,13 +7,13 @@ import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
 
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.commons.helper.mail.model.dto.Receivers;
 import com.gastroblue.commons.helper.mail.service.IMailService;
 import com.gastroblue.commons.helper.security.model.dto.SessionUser;
 import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.commons.shared.util.DelimitedStringUtil;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.mapper.UserMapper;
@@ -238,7 +238,7 @@ public class UserDefinitionFacade {
         DEPARTMENT,
         createdUser.getDepartments().stream()
             .filter(Objects::nonNull)
-            .map(DisplayableLookupValue::getDisplay)
+            .map(BaseLookupModel::getDisplay)
             .toList());
     if (createdUser.getZone() != null) {
       mailParams.put(ZONE, createdUser.getZone().getDisplay());
@@ -389,10 +389,10 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  // TODO: burada ApplicationRole'un DisplayableLookupValue'e dönüştürülmesi gerekiyor
-  public List<DisplayableLookupValue> findAllApplicationRoles() {
-    List<DisplayableLookupValue> resolvedRoles = new ArrayList<>();
-    // TODO DisplayableLookupValue
+  // TODO: burada ApplicationRole'un BaseLookupModel'e dönüştürülmesi gerekiyor
+  public List<BaseLookupModel> findAllApplicationRoles() {
+    List<BaseLookupModel> resolvedRoles = new ArrayList<>();
+    // TODO BaseLookupModel
     resolvedRoles.add(ZONE_MANAGER.toDisplay());
     resolvedRoles.add(COMPANY_MANAGER.toDisplay());
     resolvedRoles.add(ApplicationRole.SUPERVISOR.toDisplay());
@@ -401,19 +401,19 @@ public class UserDefinitionFacade {
     return resolvedRoles;
   }
 
-  public List<DisplayableLookupValue> findAllDepartments() {
+  public List<BaseLookupModel> findAllDepartments() {
     return enumFacade.getDropdownValues(EnumTypes.DEPARTMENT);
   }
 
-  public List<DisplayableLookupValue> findAllZones() {
+  public List<BaseLookupModel> findAllZones() {
     return enumFacade.getDropdownValues(EnumTypes.ZONE);
   }
 
-  public List<DisplayableLookupValue> findAllGenders() {
+  public List<BaseLookupModel> findAllGenders() {
     return enumFacade.getDropdownValues(EnumTypes.GENDER);
   }
 
-  public List<DisplayableLookupValue> findAvailableCompanies() {
+  public List<BaseLookupModel> findAvailableCompanies() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
     return companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
@@ -428,14 +428,14 @@ public class UserDefinitionFacade {
                 c -> (c.getCompanyCode() + " - " + c.getCompanyName()).toLowerCase()))
         .map(
             company ->
-                new DisplayableLookupValue(
+                new BaseLookupModel(
                     company.getId(),
                     company.getCompanyCode() + " - " + company.getCompanyName(),
                     index.getAndIncrement()))
         .toList();
   }
 
-  public List<DisplayableLookupValue> findAvailableCompanyGroups() {
+  public List<BaseLookupModel> findAvailableCompanyGroups() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
     return companyGroupService.findAll().stream()
@@ -448,7 +448,7 @@ public class UserDefinitionFacade {
                 c -> c.getGroupCode().toLowerCase() + " - " + c.getName().toLowerCase()))
         .map(
             companyGroup ->
-                new DisplayableLookupValue(
+                new BaseLookupModel(
                     companyGroup.getId(),
                     companyGroup.getGroupCode() + " - " + companyGroup.getName(),
                     index.getAndIncrement()))

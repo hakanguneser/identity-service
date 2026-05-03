@@ -1,6 +1,6 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,13 +17,13 @@ public class CompanyDefinitionResponse {
   private String companyCode;
   private String companyName;
   private List<String> companyMail;
-  private DisplayableLookupValue country;
-  private DisplayableLookupValue city;
-  private DisplayableLookupValue zone;
-  private DisplayableLookupValue segment1;
-  private DisplayableLookupValue segment2;
-  private DisplayableLookupValue segment3;
-  private DisplayableLookupValue segment4;
-  private DisplayableLookupValue segment5;
+  private BaseLookupModel country;
+  private BaseLookupModel city;
+  private BaseLookupModel zone;
+  private BaseLookupModel segment1;
+  private BaseLookupModel segment2;
+  private BaseLookupModel segment3;
+  private BaseLookupModel segment4;
+  private BaseLookupModel segment5;
   private Boolean isActive;
 }

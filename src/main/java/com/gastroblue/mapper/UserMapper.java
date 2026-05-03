@@ -2,8 +2,8 @@ package com.gastroblue.mapper;
 
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.commons.shared.enums.Language;
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
@@ -54,7 +54,7 @@ public class UserMapper {
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
 
-    List<DisplayableLookupValue> resolvedDepartmentList =
+    List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
             .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
             .filter(Objects::nonNull)
@@ -67,8 +67,7 @@ public class UserMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        .applicationRole(
-            userProduct.getApplicationRole().toDisplay()) // TODO DisplayableLookupValue
+        .applicationRole(userProduct.getApplicationRole().toDisplay()) // TODO BaseLookupModel
         .language(
             facade.resolve(
                 EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))

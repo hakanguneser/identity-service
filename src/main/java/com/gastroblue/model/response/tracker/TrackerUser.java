@@ -1,6 +1,6 @@
 package com.gastroblue.model.response.tracker;
 
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +21,9 @@ public class TrackerUser {
   private String name;
   private String surname;
   private String phone;
-  private DisplayableLookupValue language;
-  private DisplayableLookupValue gender;
-  private DisplayableLookupValue zone;
-  private DisplayableLookupValue applicationRole;
-  private List<DisplayableLookupValue> departments;
+  private BaseLookupModel language;
+  private BaseLookupModel gender;
+  private BaseLookupModel zone;
+  private BaseLookupModel applicationRole;
+  private List<BaseLookupModel> departments;
 }

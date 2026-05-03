@@ -3,7 +3,7 @@ package com.gastroblue.mapper;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
-import com.gastroblue.commons.shared.model.DisplayableLookupValue;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
@@ -29,7 +29,7 @@ public class TrackerMapper {
     }
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
-    List<DisplayableLookupValue> resolvedDepartmentList =
+    List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
             .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
             .toList();
