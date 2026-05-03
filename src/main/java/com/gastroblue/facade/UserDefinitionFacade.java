@@ -7,6 +7,8 @@ import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
 
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
+import com.gastroblue.commons.helper.mail.model.dto.Receivers;
+import com.gastroblue.commons.helper.mail.service.IMailService;
 import com.gastroblue.commons.helper.security.model.dto.SessionUser;
 import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
@@ -32,7 +34,6 @@ import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.service.IMailService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.service.impl.UserDefinitionService;
@@ -209,20 +210,20 @@ public class UserDefinitionFacade {
       String generatedPassword,
       String companyGroupName,
       String companyName) {
-    List<String> toAddress = new ArrayList<>();
-    List<String> ccAddress = new ArrayList<>();
-    List<String> bccAddress = new ArrayList<>();
+
+    Receivers receivers = new Receivers();
+    Map<MailParameters, Object> mailParams = new EnumMap<>(MailParameters.class);
+
     boolean activateManagerNote = false;
     UserDefinitionResponse createdUser =
         UserMapper.toResponse(createdUserEntity, userProduct, enumFacade);
     if (createdUserEntity.getEmail() == null || createdUserEntity.getEmail().isBlank()) {
-      toAddress.add(managerUserEntity.getEmail());
+      receivers.setTo(Collections.singletonList(managerUserEntity.getEmail()));
       activateManagerNote = true;
     } else {
-      toAddress.add(createdUserEntity.getEmail());
-      ccAddress.add(managerUserEntity.getEmail());
+      receivers.setTo(List.of(createdUserEntity.getEmail()));
+      receivers.setCc(List.of(managerUserEntity.getEmail()));
     }
-    Map<MailParameters, Object> mailParams = new EnumMap<>(MailParameters.class);
 
     mailParams.put(FULL_NAME, createdUserEntity.getFullName());
     mailParams.put(USERNAME, createdUserEntity.getUsername());
@@ -244,7 +245,7 @@ public class UserDefinitionFacade {
     }
     mailParams.put(COMPANY_NAME, companyName);
     mailParams.put(COMPANY_GROUP_NAME, companyGroupName);
-    mailService.sendMail(toAddress, ccAddress, bccAddress, mailTemplate, mailParams);
+    mailService.sendMail(mailTemplate, receivers, mailParams);
   }
 
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {

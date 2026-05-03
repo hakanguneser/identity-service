@@ -43,21 +43,19 @@ app:
     base-url: ${EXPO_PUSH_BASE_URL:https://exp.host}
     access-token: ${EXPO_ACCESS_TOKEN:}
 
-mail:
-  enabled: ${MAIL_ENABLED:true}
-  from: ${MAIL_FROM}
-  admin-redirect-address: ${MAIL_ADMIN_REDIRECT_ADDRESS:hakan.guneser@gmail.com}
-  smtp:
-    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
-    port: ${MAIL_SMTP_PORT:587}
-    username: ${MAIL_FROM}
-    password: ${MAIL_PASSWORD}
+
 
 gastroblue:
-  identity:
-    token:
-      private-key: ${EC_PRIVATE_KEY:MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCC6MSk5LiOmSnpOyrNo2ID/GtPU2eAqHsN3shEHWPQOaw==}
   commons:
+    mail:
+      enabled: ${MAIL_ENABLED:true}
+      log-enabled: ${MAIL_LOG_ENABLED:true}
+      redirect-enabled: ${MAIL_REDIRECT_ENABLED:false}
+      from: ${MAIL_FROM:noreply@gastroblueapp.com}
+      admin-mail: ${MAIL_ADMIN_MAIL:}
+      smtp:
+        username: ${MAIL_SMTP_USERNAME:${MAIL_FROM:noreply@gastroblueapp.com}}
+        password: ${MAIL_PASSWORD:}
     security:
       enabled: true
       public-key: ${EC_PUBLIC_KEY:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3AQzd7jGIvnvtHORNZ17vPPJEAlb1kfOmPfLr6HNOoJvutGvz4qhKgd8HPYLttVBWI50txLF/08sFsQRwqpw/Q==}
@@ -86,3 +84,7 @@ gastroblue:
         name: Hakan Guneser
         email: hakanguneser@gastroblueapp.com
         url: https://www.gastrobluecheckapp.com/
+
+  identity:
+    token:
+      private-key: ${EC_PRIVATE_KEY:MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCC6MSk5LiOmSnpOyrNo2ID/GtPU2eAqHsN3shEHWPQOaw==}

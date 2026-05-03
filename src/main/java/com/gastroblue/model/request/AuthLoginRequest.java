@@ -1,7 +1,7 @@
 package com.gastroblue.model.request;
 
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ChannelType;
+import com.gastroblue.commons.shared.enums.ChannelType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

@@ -6,10 +6,9 @@
 	<parent>
 		<groupId>com.gastroblue</groupId>
 		<artifactId>gastroblue-parent</artifactId>
-		<version>1.0.2</version>
+		<version>1.0.4</version>
 	</parent>
 
-	<groupId>com.gastroblue</groupId>
 	<artifactId>identity-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>identity-service</name>
@@ -68,7 +67,7 @@
 		<dependency>
 			<groupId>com.gastroblue</groupId>
 			<artifactId>gastroblue-commons</artifactId>
-			<version>1.4.9</version>
+			<version>1.5.6</version>
 		</dependency>
 
 	</dependencies>

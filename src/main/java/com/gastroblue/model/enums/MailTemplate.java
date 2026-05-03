@@ -1,24 +1,15 @@
 package com.gastroblue.model.enums;
 
+import com.gastroblue.commons.helper.mail.model.base.BaseMailTemplate;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-/**
- * Enum representing all supported email templates.
- *
- * <p>To add a new template:
- *
- * <ol>
- *   <li>Add a new constant here with the template file name (without extension).
- *   <li>Create the corresponding {@code .html} file in {@code resources/templates/mail/}.
- * </ol>
- */
+@AllArgsConstructor
 @Getter
-@RequiredArgsConstructor
-public enum MailTemplate {
-  INITIAL_PASSWORD("initial-password"),
-  RESET_PASSWORD("reset-password");
+public enum MailTemplate implements BaseMailTemplate {
+  INITIAL_PASSWORD("initial-password", "GastroBlue – Hesabınız Oluşturuldu"),
+  RESET_PASSWORD("reset-password", "GastroBlue – Şifreniz Yenilendi");
 
-  /** File name (without extension) relative to {@code resources/templates/mail/}. */
   private final String templateName;
+  private final String subject;
 }
