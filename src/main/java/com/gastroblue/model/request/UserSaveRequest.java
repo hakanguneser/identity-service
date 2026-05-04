@@ -1,17 +1,11 @@
 package com.gastroblue.model.request;
 
 import com.gastroblue.annotations.validation.field.phone.ValidPhoneNumber;
-import com.gastroblue.annotations.validation.request.ValidDepartmentsForProduct;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
 import jakarta.validation.constraints.*;
 import java.util.List;
 
-/**
- * Departments are validated via the class-level {@link ValidDepartmentsForProduct} constraint,
- * which uses {@link #product} from this same request — not the caller's session product — so that
- * an ADMIN can create users for any product context.
- */
 // @ValidDepartmentsForProduct TODO validate departments
 public record UserSaveRequest(
     @Size(min = 5, max = 100, message = "{validation.username.size.5.100}")

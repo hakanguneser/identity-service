@@ -4,6 +4,7 @@ import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.helper.security.model.dto.SessionUser;
 import com.gastroblue.commons.helper.security.model.properties.JwtProperties;
 import com.gastroblue.commons.helper.security.service.IJwtService;
@@ -41,6 +42,7 @@ public class AuthenticationFacade {
 
   private final IJwtService jwtService;
   private final JwtProperties jwtProperties;
+  private final ILookupService lookupService;
 
   @Autowired(required = false)
   private ITokenGenerationService tokenGenerationService;
@@ -49,7 +51,6 @@ public class AuthenticationFacade {
   private final UserDefinitionService userService;
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
-  private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
   private final CompanyGroupProductService companyGroupProductService;
   private final CompanyProductService companyProductService;
@@ -142,8 +143,7 @@ public class AuthenticationFacade {
                 .orElse(null)
             : null;
 
-    response.setUser(
-        UserMapper.toResponse(userEntityByUserName, userProduct, enumConfigurationFacade));
+    response.setUser(UserMapper.toResponse(userEntityByUserName, userProduct, lookupService));
     if (sessionUser.companyGroupId() != null) {
       try {
         CompanyGroup companyGroup =
@@ -179,7 +179,7 @@ public class AuthenticationFacade {
     return companyService
         .findByCompanyGroupId(IJwtService.findSessionUserOrThrow().companyGroupId())
         .stream()
-        .map(entity -> CompanyGroupMapper.toAuthResponse(entity, enumConfigurationFacade))
+        .map(entity -> CompanyGroupMapper.toAuthResponse(entity, lookupService))
         .toList();
   }
 
@@ -265,7 +265,7 @@ public class AuthenticationFacade {
     extraClaims.put(
         IJwtService.JWT_ROLE, userProduct != null ? userProduct.getApplicationRole().name() : null);
     extraClaims.put(IJwtService.JWT_COMPANY_IDS, companyIds);
-    extraClaims.put(IJwtService.JWT_APPLICATION_PRODUCT, product);
+    extraClaims.put(IJwtService.JWT_APPLICATION_PRODUCT, product.name());
     extraClaims.put(IJwtService.JWT_LANGUAGE, userEntity.getLanguage().name());
     extraClaims.put(
         IJwtService.JWT_DEPARTMENTS,

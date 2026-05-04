@@ -3,11 +3,11 @@ package com.gastroblue.mapper;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.Language;
-import com.gastroblue.facade.EnumConfigurationFacade;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.EnumTypes;
+import com.gastroblue.model.enums.Lookups;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
@@ -46,7 +46,7 @@ public class UserMapper {
   public static UserDefinitionResponse toResponse(
       final UserEntity entity,
       final UserProductEntity userProduct,
-      final EnumConfigurationFacade facade) {
+      final ILookupService lookupService) {
     if (entity == null) {
       return null;
     }
@@ -56,7 +56,7 @@ public class UserMapper {
 
     List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
-            .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
+            .map(dept -> lookupService.findLookupByKey(Lookups.DEPARTMENT, dept))
             .filter(Objects::nonNull)
             .toList();
 
@@ -67,23 +67,17 @@ public class UserMapper {
         .companyGroupId(entity.getCompanyGroupId())
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
-        .applicationRole(userProduct.getApplicationRole().toDisplay()) // TODO BaseLookupModel
-        .language(
-            facade.resolve(
-                EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))
+        .applicationRole(
+            lookupService.findLookupByKey(
+                Lookups.APPLICATION_ROLE, userProduct.getApplicationRole().name()))
+        .language(lookupService.findLookupByKey(Lookups.LANGUAGE, entity.getLanguage().name()))
         .email(entity.getEmail())
-        .isActive(userProduct != null ? userProduct.isActive() : entity.isActive())
+        .isActive(userProduct.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())
-        .gender(
-            entity.getGender() != null
-                ? facade.resolve(EnumTypes.GENDER, entity.getGender(), entity.getCompanyGroupId())
-                : null)
-        .zone(
-            entity.getZone() != null
-                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), entity.getCompanyGroupId())
-                : null)
+        .gender(lookupService.findLookupByKey(Lookups.GENDER, entity.getGender()))
+        .zone(lookupService.findLookupByKey(Lookups.ZONE, entity.getZone()))
         .build();
   }
 

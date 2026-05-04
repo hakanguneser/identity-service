@@ -2,12 +2,13 @@ package com.gastroblue.facade;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
-import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.Lookups;
 import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
@@ -29,7 +30,7 @@ public class CompanyGroupDefinitionFacade {
 
   private final CompanyGroupService companyGroupService;
   private final CompanyGroupProductService companyGroupProductService;
-  private final EnumConfigurationFacade enumConfigurationFacade;
+  private final ILookupService lookupService;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
     EmailDomainValidator.validateAllowedDomains(
@@ -99,35 +100,34 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public List<BaseLookupModel> findZones(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.ZONE, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.ZONE, companyGroupId);
   }
 
   public List<BaseLookupModel> findCountries(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.COUNTRY, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.COUNTRY, companyGroupId);
   }
 
   public List<BaseLookupModel> findCities(final String companyGroupId, final String country) {
-    return enumConfigurationFacade.getChildDropdownValues(
-        EnumTypes.CITY, EnumTypes.COUNTRY, country, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.CITY, companyGroupId, country);
   }
 
   public List<BaseLookupModel> findSegment1(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_1, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.SEGMENT_1, companyGroupId);
   }
 
   public List<BaseLookupModel> findSegment2(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_2, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.SEGMENT_2, companyGroupId);
   }
 
   public List<BaseLookupModel> findSegment3(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_3, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.SEGMENT_3, companyGroupId);
   }
 
   public List<BaseLookupModel> findSegment4(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_4, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.SEGMENT_4, companyGroupId);
   }
 
   public List<BaseLookupModel> findSegment5(final String companyGroupId) {
-    return enumConfigurationFacade.getDropdownValues(EnumTypes.SEGMENT_5, companyGroupId);
+    return lookupService.findLookups4Group(Lookups.SEGMENT_5, companyGroupId);
   }
 }

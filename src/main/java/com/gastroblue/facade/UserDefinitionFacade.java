@@ -8,6 +8,7 @@ import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.helper.mail.model.dto.Receivers;
 import com.gastroblue.commons.helper.mail.service.IMailService;
 import com.gastroblue.commons.helper.security.model.dto.SessionUser;
@@ -22,8 +23,8 @@ import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.EnumTypes;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.Lookups;
 import com.gastroblue.model.enums.MailParameters;
 import com.gastroblue.model.enums.MailTemplate;
 import com.gastroblue.model.request.LanguageUpdateRequest;
@@ -63,14 +64,14 @@ public class UserDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final CompanyService companyService;
   private final PasswordEncoder passwordEncoder;
-  private final EnumConfigurationFacade enumFacade;
+  private final ILookupService lookupService;
   private final IMailService mailService;
   private final UserProductService userProductService;
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
     UserProductEntity userProduct = resolveUserProduct(userId);
-    return UserMapper.toResponse(userEntity, userProduct, enumFacade);
+    return UserMapper.toResponse(userEntity, userProduct, lookupService);
   }
 
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
@@ -85,7 +86,7 @@ public class UserDefinitionFacade {
 
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
-    return UserMapper.toResponse(updatedEntity, userProduct, enumFacade);
+    return UserMapper.toResponse(updatedEntity, userProduct, lookupService);
   }
 
   public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
@@ -126,7 +127,7 @@ public class UserDefinitionFacade {
 
     List<String> sessionDepartments = sessionUser.departments();
     return users.stream()
-        .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), enumFacade))
+        .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), lookupService))
         .filter(
             user -> {
               if (sessionDepartments == null || sessionDepartments.contains("ALL")) {
@@ -174,7 +175,7 @@ public class UserDefinitionFacade {
         generatedPassword,
         companyGroup.getName(),
         company.getCompanyName());
-    return UserMapper.toResponse(savedUserEntity, savedUserProduct, enumFacade);
+    return UserMapper.toResponse(savedUserEntity, savedUserProduct, lookupService);
   }
 
   private static ApplicationProduct getApplicationProduct(ApplicationProduct requestedProduct) {
@@ -216,7 +217,7 @@ public class UserDefinitionFacade {
 
     boolean activateManagerNote = false;
     UserDefinitionResponse createdUser =
-        UserMapper.toResponse(createdUserEntity, userProduct, enumFacade);
+        UserMapper.toResponse(createdUserEntity, userProduct, lookupService);
     if (createdUserEntity.getEmail() == null || createdUserEntity.getEmail().isBlank()) {
       receivers.setTo(Collections.singletonList(managerUserEntity.getEmail()));
       activateManagerNote = true;
@@ -333,7 +334,7 @@ public class UserDefinitionFacade {
     UserProductEntity updatedProduct = userProductService.save(userProduct);
 
     UserEntity userEntity = userService.findById(userId);
-    return UserMapper.toResponse(userEntity, updatedProduct, enumFacade);
+    return UserMapper.toResponse(userEntity, updatedProduct, lookupService);
   }
 
   public void sendOtp(final String userId) {
@@ -402,15 +403,15 @@ public class UserDefinitionFacade {
   }
 
   public List<BaseLookupModel> findAllDepartments() {
-    return enumFacade.getDropdownValues(EnumTypes.DEPARTMENT);
+    return lookupService.findLookups(Lookups.DEPARTMENT);
   }
 
   public List<BaseLookupModel> findAllZones() {
-    return enumFacade.getDropdownValues(EnumTypes.ZONE);
+    return lookupService.findLookups(Lookups.ZONE);
   }
 
   public List<BaseLookupModel> findAllGenders() {
-    return enumFacade.getDropdownValues(EnumTypes.GENDER);
+    return lookupService.findLookups(Lookups.GENDER);
   }
 
   public List<BaseLookupModel> findAvailableCompanies() {
@@ -469,7 +470,7 @@ public class UserDefinitionFacade {
     }
     if (user.getCompanyId() != null) {
       CompanyEntity companyEntity = companyService.findByIdOrThrow(user.getCompanyId());
-      company = CompanyGroupMapper.toResponse(companyEntity, enumFacade);
+      company = CompanyGroupMapper.toResponse(companyEntity, lookupService);
     }
 
     return CompanyContextResponse.builder().companyGroup(companyGroup).company(company).build();

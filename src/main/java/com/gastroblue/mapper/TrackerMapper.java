@@ -4,12 +4,12 @@ import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
-import com.gastroblue.facade.EnumConfigurationFacade;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.EnumTypes;
+import com.gastroblue.model.enums.Lookups;
 import com.gastroblue.model.response.tracker.TrackerCompany;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyGroup;
@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class TrackerMapper {
 
   public static TrackerUser toUser(
-      UserEntity entity, UserProductEntity userProduct, EnumConfigurationFacade facade) {
+      UserEntity entity, UserProductEntity userProduct, ILookupService lookupService) {
     if (entity == null) {
       return null;
     }
@@ -31,7 +31,7 @@ public class TrackerMapper {
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
     List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
-            .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
+            .map(dept -> lookupService.findLookupByKey(Lookups.DEPARTMENT, dept))
             .toList();
     return TrackerUser.builder()
         .userId(entity.getId())
@@ -40,9 +40,7 @@ public class TrackerMapper {
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
         .applicationRole(userProduct != null ? userProduct.getApplicationRole().toDisplay() : null)
-        .language(
-            facade.resolve(
-                EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))
+        .language(lookupService.findLookupByKey(Lookups.LANGUAGE, entity.getLanguage().name()))
         .email(entity.getEmail())
         .isActive(userProduct != null ? userProduct.isActive() : entity.isActive())
         .name(entity.getName())
@@ -50,11 +48,11 @@ public class TrackerMapper {
         .phone(entity.getPhone())
         .gender(
             entity.getGender() != null
-                ? facade.resolve(EnumTypes.GENDER, entity.getGender(), entity.getCompanyGroupId())
+                ? lookupService.findLookupByKey(Lookups.GENDER, entity.getGender())
                 : null)
         .zone(
             entity.getZone() != null
-                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), entity.getCompanyGroupId())
+                ? lookupService.findLookupByKey(Lookups.ZONE, entity.getZone())
                 : null)
         .build();
   }
@@ -70,7 +68,7 @@ public class TrackerMapper {
         .build();
   }
 
-  public static TrackerCompany toCompany(CompanyEntity entity, EnumConfigurationFacade facade) {
+  public static TrackerCompany toCompany(CompanyEntity entity, ILookupService lookupService) {
     String companyGroupId = entity.getCompanyGroupId();
     return TrackerCompany.builder()
         .companyId(entity.getId())
@@ -78,47 +76,23 @@ public class TrackerMapper {
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(
-            entity.getCity() != null
-                ? facade.resolve(EnumTypes.CITY, entity.getCity(), companyGroupId)
-                : null)
-        .country(
-            entity.getCountry() != null
-                ? facade.resolve(EnumTypes.COUNTRY, entity.getCountry(), companyGroupId)
-                : null)
-        .zone(
-            entity.getZone() != null
-                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), companyGroupId)
-                : null)
-        .segment1(
-            entity.getSegment1() != null
-                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), companyGroupId)
-                : null)
-        .segment2(
-            entity.getSegment2() != null
-                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), companyGroupId)
-                : null)
-        .segment3(
-            entity.getSegment3() != null
-                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), companyGroupId)
-                : null)
-        .segment4(
-            entity.getSegment4() != null
-                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), companyGroupId)
-                : null)
-        .segment5(
-            entity.getSegment5() != null
-                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), companyGroupId)
-                : null)
+        .city(lookupService.findLookupByKey(Lookups.CITY, entity.getCity()))
+        .country(lookupService.findLookupByKey(Lookups.COUNTRY, entity.getCountry()))
+        .zone(lookupService.findLookupByKey(Lookups.ZONE, entity.getZone()))
+        .segment1(lookupService.findLookupByKey(Lookups.SEGMENT_1, entity.getSegment1()))
+        .segment2(lookupService.findLookupByKey(Lookups.SEGMENT_2, entity.getSegment2()))
+        .segment3(lookupService.findLookupByKey(Lookups.SEGMENT_3, entity.getSegment3()))
+        .segment4(lookupService.findLookupByKey(Lookups.SEGMENT_4, entity.getSegment4()))
+        .segment5(lookupService.findLookupByKey(Lookups.SEGMENT_5, entity.getSegment5()))
         .isActive(entity.isActive())
         .build();
   }
 
   public static TrackerCompanyContextResponse toCompanyContextResponse(
-      CompanyGroupEntity group, CompanyEntity company, EnumConfigurationFacade facade) {
+      CompanyGroupEntity group, CompanyEntity company, ILookupService lookupService) {
     return TrackerCompanyContextResponse.builder()
         .companyGroup(toCompanyGroup(group))
-        .company(toCompany(company, facade))
+        .company(toCompany(company, lookupService))
         .build();
   }
 }

@@ -3,6 +3,7 @@ package com.gastroblue.facade;
 import com.gastroblue.client.TrackerPushNotificationDispatcher;
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.helper.security.model.dto.SessionUser;
 import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
@@ -42,7 +43,7 @@ public class TrackerFacade {
   private final UserProductService userProductService;
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
-  private final EnumConfigurationFacade enumConfigurationFacade;
+  private final ILookupService lookupService;
   private final TrackerPushNotificationDispatcher trackerPushNotificationDispatcher;
 
   public TrackerCompanyUsersResponse findCompanyUsers(String companyGroupId, String companyId) {
@@ -60,9 +61,7 @@ public class TrackerFacade {
                 .collect(Collectors.toMap(UserProductEntity::getUserId, up -> up));
     List<TrackerUser> items =
         users.stream()
-            .map(
-                u ->
-                    TrackerMapper.toUser(u, userProductMap.get(u.getId()), enumConfigurationFacade))
+            .map(u -> TrackerMapper.toUser(u, userProductMap.get(u.getId()), lookupService))
             .toList();
     return TrackerCompanyUsersResponse.builder().users(items).build();
   }
@@ -90,7 +89,7 @@ public class TrackerFacade {
                   if (user == null || userProduct == null) {
                     return null;
                   }
-                  return TrackerMapper.toUser(user, userProduct, enumConfigurationFacade);
+                  return TrackerMapper.toUser(user, userProduct, lookupService);
                 })
             .filter(Objects::nonNull)
             .toList();
@@ -115,7 +114,7 @@ public class TrackerFacade {
           ErrorCode.COMPANY_NOT_FOUND,
           "Company not found in group: " + companyGroupCode + " / " + companyCode);
     }
-    return TrackerMapper.toCompanyContextResponse(group, company, enumConfigurationFacade);
+    return TrackerMapper.toCompanyContextResponse(group, company, lookupService);
   }
 
   public PushNotificationAcceptedResponse enqueuePushNotifications(

@@ -4,6 +4,7 @@ import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -36,18 +37,18 @@ public class CompanyDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final CompanyGroupProductService companyGroupProductService;
   private final CompanyProductService companyProductService;
-  private final EnumConfigurationFacade enumConfigurationFacade;
+  private final ILookupService lookupService;
 
   public List<CompanyDefinitionResponse> findCompaniesByCompanyGroupId(String companyGroupId) {
     return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(entity -> CompanyGroupMapper.toResponse(entity, enumConfigurationFacade))
+        .map(entity -> CompanyGroupMapper.toResponse(entity, lookupService))
         .toList();
   }
 
   public CompanyDefinitionResponse findCompanyByCompanyIdAndCompanyGroupId(
       String companyGroupId, String companyId) {
     CompanyEntity entity = companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(entity, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(entity, lookupService);
   }
 
   public CompanyDefinitionResponse saveCompany(String companyGroupId, CompanySaveRequest request) {
@@ -58,7 +59,7 @@ public class CompanyDefinitionFacade {
     CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(request, companyGroupId);
 
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
-    return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(savedCompany, lookupService);
   }
 
   public CompanyDefinitionResponse updateCompany(
@@ -81,12 +82,12 @@ public class CompanyDefinitionFacade {
     entityToBeUpdated.setSegment4(request.segment4());
     entityToBeUpdated.setSegment5(request.segment5());
     CompanyEntity savedCompany = companyService.save(entityToBeUpdated);
-    return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(savedCompany, lookupService);
   }
 
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(companyEntity, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(companyEntity, lookupService);
   }
 
   public List<CompanyProductResponse> findCompanyProducts(String companyGroupId, String companyId) {
@@ -159,7 +160,7 @@ public class CompanyDefinitionFacade {
 
     return CompanyContextResponse.builder()
         .companyGroup(CompanyGroupMapper.toResponse(group))
-        .company(CompanyGroupMapper.toResponse(company, enumConfigurationFacade))
+        .company(CompanyGroupMapper.toResponse(company, lookupService))
         .build();
   }
 }

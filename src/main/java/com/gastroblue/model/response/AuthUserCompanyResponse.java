@@ -15,9 +15,9 @@ public class AuthUserCompanyResponse {
   private String companyCode;
   private String companyName;
   private List<String> companyMail;
-  private String country;
-  private String city;
-  private String zone;
+  private BaseLookupModel country;
+  private BaseLookupModel city;
+  private BaseLookupModel zone;
   private BaseLookupModel segment1;
   private BaseLookupModel segment2;
   private BaseLookupModel segment3;

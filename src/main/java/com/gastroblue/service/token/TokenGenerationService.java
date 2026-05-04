@@ -1,7 +1,6 @@
 package com.gastroblue.service.token;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -30,11 +29,11 @@ public class TokenGenerationService implements ITokenGenerationService {
   public String generateToken(String subject, Map<String, Object> claims, long expiration) {
     long now = System.currentTimeMillis();
     return Jwts.builder()
-        .setClaims(claims)
-        .setSubject(subject)
-        .setIssuedAt(new Date(now))
-        .setExpiration(new Date(now + expiration))
-        .signWith(privateKey, SignatureAlgorithm.ES256)
+        .claims(claims)
+        .subject(subject)
+        .issuedAt(new Date(now))
+        .expiration(new Date(now + expiration))
+        .signWith(privateKey)
         .compact();
   }
 
