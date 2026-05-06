@@ -1,6 +1,7 @@
 package com.gastroblue.model.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gastroblue.commons.helper.lookup.validation.ValidChildLookup;
 import com.gastroblue.commons.helper.lookup.validation.ValidLookup;
 import com.gastroblue.model.enums.Lookups;
 import jakarta.validation.Valid;
@@ -18,7 +19,7 @@ public record CompanySaveRequest(
         String companyCode,
     @ValidLookup(lookup = Lookups.class, constant = "ZONE") String zone,
     @ValidLookup(lookup = Lookups.class, constant = "COUNTRY") String country,
-    @ValidLookup(lookup = Lookups.class, constant = "CITY") String city,
+    @ValidChildLookup(lookup = Lookups.class, constant = "CITY", parent = "country") String city,
     @ValidLookup(lookup = Lookups.class, constant = "SEGMENT_1") String segment1,
     @ValidLookup(lookup = Lookups.class, constant = "SEGMENT_2") String segment2,
     @ValidLookup(lookup = Lookups.class, constant = "SEGMENT_3") String segment3,

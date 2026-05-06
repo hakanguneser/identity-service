@@ -84,14 +84,28 @@ public class CompanyGroupMapper {
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(lookupService.findLookupByKey(Lookups.CITY, entity.getCity()))
-        .country(lookupService.findLookupByKey(Lookups.COUNTRY, entity.getCountry()))
-        .zone(lookupService.findLookupByKey(Lookups.ZONE, entity.getZone()))
-        .segment1(lookupService.findLookupByKey(Lookups.SEGMENT_1, entity.getSegment1()))
-        .segment2(lookupService.findLookupByKey(Lookups.SEGMENT_2, entity.getSegment2()))
-        .segment3(lookupService.findLookupByKey(Lookups.SEGMENT_3, entity.getSegment3()))
-        .segment4(lookupService.findLookupByKey(Lookups.SEGMENT_4, entity.getSegment4()))
-        .segment5(lookupService.findLookupByKey(Lookups.SEGMENT_5, entity.getSegment5()))
+        .country(
+            lookupService.findLookupByCGIdAndKey(
+                Lookups.COUNTRY, companyGroupId, entity.getCountry()))
+        .city(
+            lookupService.findChildLookupByCGIdAndKey(
+                Lookups.CITY, companyGroupId, entity.getCountry(), entity.getCity()))
+        .zone(lookupService.findLookupByCGIdAndKey(Lookups.ZONE, companyGroupId, entity.getZone()))
+        .segment1(
+            lookupService.findLookupByCGIdAndKey(
+                Lookups.SEGMENT_1, companyGroupId, entity.getSegment1()))
+        .segment2(
+            lookupService.findLookupByCGIdAndKey(
+                Lookups.SEGMENT_2, companyGroupId, entity.getSegment2()))
+        .segment3(
+            lookupService.findLookupByCGIdAndKey(
+                Lookups.SEGMENT_3, companyGroupId, entity.getSegment3()))
+        .segment4(
+            lookupService.findLookupByCGIdAndKey(
+                Lookups.SEGMENT_4, companyGroupId, entity.getSegment4()))
+        .segment5(
+            lookupService.findLookupByCGIdAndKey(
+                Lookups.SEGMENT_5, companyGroupId, entity.getSegment5()))
         .isActive(entity.isActive())
         .build();
   }
