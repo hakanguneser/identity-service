@@ -5,8 +5,8 @@ import com.gastroblue.model.entity.CompanyGroupEulaContentEntity;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupEulaContentResponse;
+import com.gastroblue.model.response.CompanyGroupEulaContentsResponse;
 import com.gastroblue.service.impl.CompanyGroupEulaContentService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +34,13 @@ public class CompanyGroupEulaContentFacade {
     return CompanyGroupEulaContentMapper.toResponse(entity);
   }
 
-  public List<CompanyGroupEulaContentResponse> findAllByCompanyGroupId(String companyGroupId) {
-    return eulaContentService.findAllByCompanyGroupId(companyGroupId).stream()
-        .map(CompanyGroupEulaContentMapper::toResponse)
-        .toList();
+  public CompanyGroupEulaContentsResponse findAllByCompanyGroupId(String companyGroupId) {
+    return CompanyGroupEulaContentsResponse.builder()
+        .eulaContents(
+            eulaContentService.findAllByCompanyGroupId(companyGroupId).stream()
+                .map(CompanyGroupEulaContentMapper::toSummary)
+                .toList())
+        .build();
   }
 
   public void delete(String companyGroupId, String id) {

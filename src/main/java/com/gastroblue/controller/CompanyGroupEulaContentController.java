@@ -4,9 +4,9 @@ import com.gastroblue.facade.CompanyGroupEulaContentFacade;
 import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupEulaContentResponse;
+import com.gastroblue.model.response.CompanyGroupEulaContentsResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +17,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequiredArgsConstructor
 public class CompanyGroupEulaContentController {
 
-  // TODO : burada once summary verip detayinda companyGroupId ile contente gidilmeli
-
   private final CompanyGroupEulaContentFacade eulaContentFacade;
 
   @GetMapping
-  public ResponseEntity<List<CompanyGroupEulaContentResponse>> findAll(
+  public ResponseEntity<CompanyGroupEulaContentsResponse> findAll(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(eulaContentFacade.findAllByCompanyGroupId(companyGroupId));
   }

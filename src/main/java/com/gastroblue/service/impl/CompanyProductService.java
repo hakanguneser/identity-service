@@ -53,7 +53,7 @@ public class CompanyProductService {
                 () ->
                     new NotFoundException(
                         ErrorCode.COMPANY_PRODUCT_NOT_FOUND, "CompanyProduct not found"));
-    existing.setEnabled(updated.getEnabled());
+    existing.setEnabled(updated.isEnabled());
     existing.setLicenseExpiresAt(updated.getLicenseExpiresAt());
     existing.setAgreedUserCount(updated.getAgreedUserCount());
     return companyProductRepository.save(existing);

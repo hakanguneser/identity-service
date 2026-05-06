@@ -1,38 +1,43 @@
 package com.gastroblue.facade;
 
+import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.security.model.dto.SessionUser;
 import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
 import com.gastroblue.model.entity.UserEntity;
+import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.response.UserEligibilityResponse;
-import com.gastroblue.service.impl.*;
+import com.gastroblue.service.impl.UserDefinitionService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class EligibilityFacade {
 
   private final UserDefinitionService userDefinitionService;
 
+  /** Checks session user can add Tracker users (supervisor+ and non-blank profile email). */
   public UserEligibilityResponse trackerAddUser() {
-    try {
-      SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-      UserEntity userEntity = userDefinitionService.findUserByUserName(sessionUser.username());
-      ApplicationRole applicationRole = sessionUser.getApplicationRole();
-      if (applicationRole == null || !applicationRole.isSupervisorAndAbove()) {
-        return new UserEligibilityResponse(
-            false, "User Must Be Supervisor or Above"); // TODO: Language support
-      }
-      if (userEntity.getEmail() == null || userEntity.getEmail().isBlank()) {
-        return new UserEligibilityResponse(false, "User Must have Email"); // TODO: Language support
-      }
+    SessionUser session = IJwtService.findSessionUserOrThrow();
+    requireSupervisorOrAbove(session.getApplicationRole());
 
-    } catch (Exception e) {
-      return new UserEligibilityResponse(false, "Unexpected Error"); // TODO: Language support
+    UserEntity user = userDefinitionService.findUserByUserName(session.username());
+    requireNonBlankEmail(user);
+
+    return new UserEligibilityResponse(true, null);
+  }
+
+  private static void requireSupervisorOrAbove(ApplicationRole role) {
+    if (role == null || !role.isSupervisorAndAbove()) {
+      throw new BusinessException(ErrorCode.USER_NOT_ELIGIBLE_SUPERVISOR_OR_ABOVE);
     }
-    return new UserEligibilityResponse(true, "User is eligible to add tracker user");
+  }
+
+  private static void requireNonBlankEmail(UserEntity user) {
+    String email = user.getEmail();
+    if (email == null || email.isBlank()) {
+      throw new BusinessException(ErrorCode.USER_NOT_ELIGIBLE_EMAIL);
+    }
   }
 }

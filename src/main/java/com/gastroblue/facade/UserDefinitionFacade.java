@@ -390,16 +390,8 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  // TODO: burada ApplicationRole'un BaseLookupModel'e dönüştürülmesi gerekiyor
   public List<BaseLookupModel> findAllApplicationRoles() {
-    List<BaseLookupModel> resolvedRoles = new ArrayList<>();
-    // TODO BaseLookupModel
-    resolvedRoles.add(ZONE_MANAGER.toDisplay());
-    resolvedRoles.add(COMPANY_MANAGER.toDisplay());
-    resolvedRoles.add(ApplicationRole.SUPERVISOR.toDisplay());
-    resolvedRoles.add(ApplicationRole.STAFF.toDisplay());
-
-    return resolvedRoles;
+    return lookupService.findAssignableRoles();
   }
 
   public List<BaseLookupModel> findAllDepartments() {

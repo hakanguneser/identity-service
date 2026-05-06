@@ -46,6 +46,10 @@ app:
 
 
 gastroblue:
+  product: IDENTITY
+  identity:
+    token:
+      private-key: ${EC_PRIVATE_KEY:MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCC6MSk5LiOmSnpOyrNo2ID/GtPU2eAqHsN3shEHWPQOaw==}
   commons:
     mail:
       enabled: ${MAIL_ENABLED:true}
@@ -75,6 +79,7 @@ gastroblue:
       enabled: true
     exception:
       enabled: true
+      cache: true
     swagger:
       enabled: true
       title: Identity Service API
@@ -84,7 +89,5 @@ gastroblue:
         name: Hakan Guneser
         email: hakanguneser@gastroblueapp.com
         url: https://www.gastrobluecheckapp.com/
-
-  identity:
-    token:
-      private-key: ${EC_PRIVATE_KEY:MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCC6MSk5LiOmSnpOyrNo2ID/GtPU2eAqHsN3shEHWPQOaw==}
+    lookup:
+      cache: true

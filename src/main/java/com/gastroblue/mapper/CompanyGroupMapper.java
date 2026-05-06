@@ -152,7 +152,7 @@ public class CompanyGroupMapper {
         .id(entity.getId())
         .companyId(entity.getCompanyId())
         .product(entity.getProduct())
-        .enabled(entity.getEnabled())
+        .enabled(entity.isEnabled())
         .licenseExpiresAt(entity.getLicenseExpiresAt())
         .agreedUserCount(entity.getAgreedUserCount())
         .build();

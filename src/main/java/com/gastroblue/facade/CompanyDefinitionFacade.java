@@ -26,6 +26,7 @@ import com.gastroblue.util.EmailDomainValidator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -162,5 +163,13 @@ public class CompanyDefinitionFacade {
         .companyGroup(CompanyGroupMapper.toResponse(group))
         .company(CompanyGroupMapper.toResponse(company, lookupService))
         .build();
+  }
+
+  public @Nullable CompanyProductResponse toggleCompanyProduct(
+      String companyGroupId, String companyId, ApplicationProduct product) {
+    CompanyProductEntity companyProductEntity =
+        companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
+    companyProductEntity.setEnabled(!companyProductEntity.isEnabled());
+    return CompanyGroupMapper.toResponse(companyProductService.save(companyProductEntity));
   }
 }

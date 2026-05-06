@@ -11,13 +11,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class CompanyGroupEulaContentResponse {
+public class CompanyGroupEulaContentSummary {
   private String id;
   private String companyGroupId;
   private ApplicationProduct product;
   private String eulaVersion;
   private Language language;
-  private String content;
   private LocalDate startDate;
   private LocalDate endDate;
   private LocalDateTime createdAt;

@@ -203,7 +203,7 @@ public class AuthenticationFacade {
         .findByCompanyIdAndProduct(companyId, product)
         .ifPresent(
             cp -> {
-              if (Boolean.FALSE.equals(cp.getEnabled())) {
+              if (Boolean.FALSE.equals(cp.isEnabled())) {
                 throw new AccessDeniedException(
                     ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE,
                     "Product disabled at company level for companyId="

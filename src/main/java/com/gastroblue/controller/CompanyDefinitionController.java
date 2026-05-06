@@ -70,14 +70,12 @@ public class CompanyDefinitionController {
   }
 
   @PatchMapping("/{companyGroupId}/companies/{companyId}/products/{product}/toggle")
-  public ResponseEntity<CompanyDefinitionResponse> toggleCompanyProduct(
+  public ResponseEntity<CompanyProductResponse> toggleCompanyProduct(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "companyId") final String companyId,
       @PathVariable(name = "product") final ApplicationProduct product) {
-    // return ResponseEntity.ok(companyDefinitionFacade.toggleCompanyProduct(companyGroupId,
-    // companyId, product));
-    // TODO: implement
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(
+        companyDefinitionFacade.toggleCompanyProduct(companyGroupId, companyId, product));
   }
 
   @GetMapping("/{companyGroupId}/companies/{companyId}/products")

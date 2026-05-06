@@ -31,7 +31,7 @@ public class CompanyProductEntity extends Auditable {
   private ApplicationProduct product;
 
   @Column(name = "ENABLED", nullable = false)
-  private Boolean enabled;
+  private boolean enabled;
 
   @Column(name = "LICENSE_EXPIRES_AT")
   private LocalDate licenseExpiresAt;
