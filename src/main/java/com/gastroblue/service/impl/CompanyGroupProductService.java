@@ -62,8 +62,4 @@ public class CompanyGroupProductService {
     existing.setNotes(updated.getNotes());
     return companyGroupProductRepository.save(existing);
   }
-
-  public void delete(String id) {
-    companyGroupProductRepository.deleteById(id);
-  }
 }

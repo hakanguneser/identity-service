@@ -35,10 +35,6 @@ public class CompanyService {
     return companyRepository.findByCompanyGroupId(companyGroupId);
   }
 
-  public List<CompanyEntity> findAll() {
-    return companyRepository.findAll();
-  }
-
   public CompanyEntity save(CompanyEntity companyEntity) {
     return companyRepository.save(companyEntity);
   }
