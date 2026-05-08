@@ -8,6 +8,7 @@ import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.helper.mail.model.dto.Receivers;
 import com.gastroblue.commons.helper.mail.service.IMailService;
@@ -395,15 +396,15 @@ public class UserDefinitionFacade {
   }
 
   public List<BaseLookupModel> findAllDepartments() {
-    return lookupService.findLookups(Lookups.DEPARTMENT);
+    return lookupService.findAll(LookupQuery.of().lookup(Lookups.DEPARTMENT));
   }
 
   public List<BaseLookupModel> findAllZones() {
-    return lookupService.findLookups(Lookups.ZONE);
+    return lookupService.findAll(LookupQuery.of().lookup(Lookups.ZONE));
   }
 
   public List<BaseLookupModel> findAllGenders() {
-    return lookupService.findLookups(Lookups.GENDER);
+    return lookupService.findAll(LookupQuery.of().lookup(Lookups.GENDER));
   }
 
   public List<BaseLookupModel> findAvailableCompanies() {

@@ -2,6 +2,7 @@ package com.gastroblue.facade;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
@@ -100,34 +101,42 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public List<BaseLookupModel> findZones(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.ZONE, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.ZONE).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findCountries(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.COUNTRY, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.COUNTRY).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findCities(final String companyGroupId, final String country) {
-    return lookupService.findLookups4Group(Lookups.CITY, companyGroupId, country);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.CITY).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findSegment1(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.SEGMENT_1, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.SEGMENT_1).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findSegment2(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.SEGMENT_2, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.SEGMENT_2).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findSegment3(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.SEGMENT_3, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.SEGMENT_3).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findSegment4(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.SEGMENT_4, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.SEGMENT_4).companyGroupId(companyGroupId));
   }
 
   public List<BaseLookupModel> findSegment5(final String companyGroupId) {
-    return lookupService.findLookups4Group(Lookups.SEGMENT_5, companyGroupId);
+    return lookupService.findAll(
+        LookupQuery.of().lookup(Lookups.SEGMENT_5).companyGroupId(companyGroupId));
   }
 }

@@ -4,6 +4,7 @@ import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
@@ -27,11 +28,15 @@ public class TrackerMapper {
     if (entity == null) {
       return null;
     }
+    LookupQuery base =
+        LookupQuery.of()
+            .companyGroupId(entity.getCompanyGroupId())
+            .product(userProduct.getProduct().name());
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
     List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
-            .map(dept -> lookupService.findLookupByKey(Lookups.DEPARTMENT, dept))
+            .map(dept -> lookupService.find(base.lookup(Lookups.DEPARTMENT).key(dept)))
             .toList();
     return TrackerUser.builder()
         .userId(entity.getId())
@@ -40,7 +45,8 @@ public class TrackerMapper {
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
         .applicationRole(userProduct != null ? userProduct.getApplicationRole().toDisplay() : null)
-        .language(lookupService.findLookupByKey(Lookups.LANGUAGE, entity.getLanguage().name()))
+        .language(
+            lookupService.find(base.lookup(Lookups.LANGUAGE).key(entity.getLanguage().name())))
         .email(entity.getEmail())
         .isActive(userProduct != null ? userProduct.isActive() : entity.isActive())
         .name(entity.getName())
@@ -48,11 +54,11 @@ public class TrackerMapper {
         .phone(entity.getPhone())
         .gender(
             entity.getGender() != null
-                ? lookupService.findLookupByKey(Lookups.GENDER, entity.getGender())
+                ? lookupService.find(base.lookup(Lookups.GENDER).key(entity.getGender()))
                 : null)
         .zone(
             entity.getZone() != null
-                ? lookupService.findLookupByKey(Lookups.ZONE, entity.getZone())
+                ? lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone()))
                 : null)
         .build();
   }
@@ -69,21 +75,21 @@ public class TrackerMapper {
   }
 
   public static TrackerCompany toCompany(CompanyEntity entity, ILookupService lookupService) {
-    String companyGroupId = entity.getCompanyGroupId();
+    LookupQuery base = LookupQuery.of().companyGroupId(entity.getCompanyGroupId());
     return TrackerCompany.builder()
         .companyId(entity.getId())
-        .companyGroupId(companyGroupId)
+        .companyGroupId(entity.getCompanyGroupId())
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(lookupService.findLookupByKey(Lookups.CITY, entity.getCity()))
-        .country(lookupService.findLookupByKey(Lookups.COUNTRY, entity.getCountry()))
-        .zone(lookupService.findLookupByKey(Lookups.ZONE, entity.getZone()))
-        .segment1(lookupService.findLookupByKey(Lookups.SEGMENT_1, entity.getSegment1()))
-        .segment2(lookupService.findLookupByKey(Lookups.SEGMENT_2, entity.getSegment2()))
-        .segment3(lookupService.findLookupByKey(Lookups.SEGMENT_3, entity.getSegment3()))
-        .segment4(lookupService.findLookupByKey(Lookups.SEGMENT_4, entity.getSegment4()))
-        .segment5(lookupService.findLookupByKey(Lookups.SEGMENT_5, entity.getSegment5()))
+        .city(lookupService.find(base.lookup(Lookups.CITY).key(entity.getCity())))
+        .country(lookupService.find(base.lookup(Lookups.COUNTRY).key(entity.getCountry())))
+        .zone(lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone())))
+        .segment1(lookupService.find(base.lookup(Lookups.SEGMENT_1).key(entity.getSegment1())))
+        .segment2(lookupService.find(base.lookup(Lookups.SEGMENT_2).key(entity.getSegment2())))
+        .segment3(lookupService.find(base.lookup(Lookups.SEGMENT_3).key(entity.getSegment3())))
+        .segment4(lookupService.find(base.lookup(Lookups.SEGMENT_4).key(entity.getSegment4())))
+        .segment5(lookupService.find(base.lookup(Lookups.SEGMENT_5).key(entity.getSegment5())))
         .isActive(entity.isActive())
         .build();
   }

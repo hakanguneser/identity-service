@@ -3,6 +3,7 @@ package com.gastroblue.mapper;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
 import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.Language;
 import com.gastroblue.model.entity.UserEntity;
@@ -50,13 +51,16 @@ public class UserMapper {
     if (entity == null) {
       return null;
     }
-
+    LookupQuery base =
+        LookupQuery.of()
+            .companyGroupId(entity.getCompanyGroupId())
+            .product(userProduct.getProduct().name());
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
 
     List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
-            .map(dept -> lookupService.findLookupByKey(Lookups.DEPARTMENT, dept))
+            .map(dept -> lookupService.find(base.lookup(Lookups.DEPARTMENT).key(dept)))
             .filter(Objects::nonNull)
             .toList();
 
@@ -68,16 +72,17 @@ public class UserMapper {
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
         .applicationRole(
-            lookupService.findLookupByKey(
-                Lookups.APPLICATION_ROLE, userProduct.getApplicationRole().name()))
-        .language(lookupService.findLookupByKey(Lookups.LANGUAGE, entity.getLanguage().name()))
+            lookupService.find(
+                base.lookup(Lookups.APPLICATION_ROLE).key(userProduct.getApplicationRole().name())))
+        .language(
+            lookupService.find(base.lookup(Lookups.LANGUAGE).key(entity.getLanguage().name())))
         .email(entity.getEmail())
         .isActive(userProduct.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())
-        .gender(lookupService.findLookupByKey(Lookups.GENDER, entity.getGender()))
-        .zone(lookupService.findLookupByKey(Lookups.ZONE, entity.getZone()))
+        .gender(lookupService.find(base.lookup(Lookups.GENDER).key(entity.getGender())))
+        .zone(lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone())))
         .build();
   }
 
