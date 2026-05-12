@@ -53,7 +53,7 @@ public class AuthenticationFacade {
   private final UserProductService userProductService;
 
   public AuthLoginResponse login(AuthLoginRequest request) {
-    log.info("Login request: {}", request.toString());
+    log.info("Login request: username={}, product={}, channel={}", request.username(), request.product(), request.channel());
     UserEntity userEntity;
     try {
       Authentication authentication =
@@ -117,6 +117,23 @@ public class AuthenticationFacade {
 
   public AuthRefreshTokenResponse refreshToken(RefreshTokenRequest request) {
     SessionUser sessionUser = jwtService.validateAndExtractToken(request.refreshToken());
+
+    UserEntity userEntity = userService.findUserByUserName(sessionUser.username());
+    if (userEntity == null || !userEntity.isActive()) {
+      throw new AccessDeniedException(ErrorCode.UNAUTHORIZED_USER, "User is not active");
+    }
+
+    if (sessionUser.getApplicationProduct() != null) {
+      UserProductEntity userProduct =
+          userProductService
+              .findByUserIdAndProduct(userEntity.getId(), sessionUser.getApplicationProduct())
+              .orElseThrow(() -> new AccessDeniedException(ErrorCode.COMPANY_PRODUCT_NOT_FOUND));
+      if (!userProduct.isActive()) {
+        throw new AccessDeniedException(
+            ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE, "UserProduct is not active");
+      }
+    }
+
     HashMap<String, Object> extraClaims = IJwtService.toExtraClaims(sessionUser);
     String newToken =
         tokenGenerationService.generateToken(
