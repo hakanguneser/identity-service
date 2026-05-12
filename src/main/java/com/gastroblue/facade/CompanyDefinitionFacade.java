@@ -16,14 +16,15 @@ import com.gastroblue.model.request.CompanyProductUpdateRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
+import com.gastroblue.model.response.CompanyDefinitionListResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
+import com.gastroblue.model.response.CompanyProductListResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
 import com.gastroblue.service.impl.CompanyGroupProductService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyProductService;
 import com.gastroblue.service.impl.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
@@ -40,10 +41,13 @@ public class CompanyDefinitionFacade {
   private final CompanyProductService companyProductService;
   private final ILookupService lookupService;
 
-  public List<CompanyDefinitionResponse> findCompaniesByCompanyGroupId(String companyGroupId) {
-    return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(entity -> CompanyGroupMapper.toResponse(entity, lookupService))
-        .toList();
+  public CompanyDefinitionListResponse findCompaniesByCompanyGroupId(String companyGroupId) {
+    return CompanyDefinitionListResponse.builder()
+        .companies(
+            companyService.findByCompanyGroupId(companyGroupId).stream()
+                .map(entity -> CompanyGroupMapper.toResponse(entity, lookupService))
+                .toList())
+        .build();
   }
 
   public CompanyDefinitionResponse findCompanyByCompanyIdAndCompanyGroupId(
@@ -91,11 +95,14 @@ public class CompanyDefinitionFacade {
     return CompanyGroupMapper.toResponse(companyEntity, lookupService);
   }
 
-  public List<CompanyProductResponse> findCompanyProducts(String companyGroupId, String companyId) {
+  public CompanyProductListResponse findCompanyProducts(String companyGroupId, String companyId) {
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    return companyProductService.findAllByCompanyId(companyId).stream()
-        .map(CompanyGroupMapper::toResponse)
-        .toList();
+    return CompanyProductListResponse.builder()
+        .products(
+            companyProductService.findAllByCompanyId(companyId).stream()
+                .map(CompanyGroupMapper::toResponse)
+                .toList())
+        .build();
   }
 
   public CompanyProductResponse saveCompanyProduct(

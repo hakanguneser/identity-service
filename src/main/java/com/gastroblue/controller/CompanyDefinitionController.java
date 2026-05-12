@@ -7,11 +7,12 @@ import com.gastroblue.model.request.CompanyProductUpdateRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
+import com.gastroblue.model.response.CompanyDefinitionListResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
+import com.gastroblue.model.response.CompanyProductListResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class CompanyDefinitionController {
   private final CompanyDefinitionFacade companyDefinitionFacade;
 
   @GetMapping("/{companyGroupId}/companies")
-  public ResponseEntity<List<CompanyDefinitionResponse>> findCompaniesByCompanyGroupId(
+  public ResponseEntity<CompanyDefinitionListResponse> findCompaniesByCompanyGroupId(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyDefinitionFacade.findCompaniesByCompanyGroupId(companyGroupId));
   }
@@ -79,7 +80,7 @@ public class CompanyDefinitionController {
   }
 
   @GetMapping("/{companyGroupId}/companies/{companyId}/products")
-  public ResponseEntity<List<CompanyProductResponse>> findCompanyProducts(
+  public ResponseEntity<CompanyProductListResponse> findCompanyProducts(
       @PathVariable final String companyGroupId, @PathVariable final String companyId) {
     return ResponseEntity.ok(
         companyDefinitionFacade.findCompanyProducts(companyGroupId, companyId));

@@ -1,17 +1,18 @@
 package com.gastroblue.controller;
 
-import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.facade.CompanyGroupDefinitionFacade;
 import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
+import com.gastroblue.model.response.CompanyGroupDefinitionListResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.response.CompanyGroupProductListResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
+import com.gastroblue.model.response.DropdownResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class CompanyGroupDefinitionController {
   private final CompanyGroupDefinitionFacade companyGroupDefinitionFacade;
 
   @GetMapping
-  public ResponseEntity<List<CompanyGroupDefinitionResponse>> findAllCompanyGroups() {
+  public ResponseEntity<CompanyGroupDefinitionListResponse> findAllCompanyGroups() {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findAllCompanyGroups());
   }
 
@@ -56,7 +57,7 @@ public class CompanyGroupDefinitionController {
   }
 
   @GetMapping("/{companyGroupId}/products")
-  public ResponseEntity<List<CompanyGroupProductResponse>> findCompanyGroupProducts(
+  public ResponseEntity<CompanyGroupProductListResponse> findCompanyGroupProducts(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCompanyGroupProducts(companyGroupId));
   }
@@ -84,50 +85,50 @@ public class CompanyGroupDefinitionController {
   }
 
   @GetMapping("/{companyGroupId}/dropdown/zones")
-  public ResponseEntity<List<BaseLookupModel>> findZones(
+  public ResponseEntity<DropdownResponse> findZones(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findZones(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/country")
-  public ResponseEntity<List<BaseLookupModel>> findCountries(
+  public ResponseEntity<DropdownResponse> findCountries(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCountries(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/country/{country}/cities")
-  public ResponseEntity<List<BaseLookupModel>> findCities(
+  public ResponseEntity<DropdownResponse> findCities(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "country") final String country) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findCities(companyGroupId, country));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment1")
-  public ResponseEntity<List<BaseLookupModel>> findSegment1(
+  public ResponseEntity<DropdownResponse> findSegment1(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment1(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment2")
-  public ResponseEntity<List<BaseLookupModel>> findSegment2(
+  public ResponseEntity<DropdownResponse> findSegment2(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment2(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment3")
-  public ResponseEntity<List<BaseLookupModel>> findSegment3(
+  public ResponseEntity<DropdownResponse> findSegment3(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment3(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment4")
-  public ResponseEntity<List<BaseLookupModel>> findSegment4(
+  public ResponseEntity<DropdownResponse> findSegment4(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment4(companyGroupId));
   }
 
   @GetMapping("/{companyGroupId}/dropdown/segment5")
-  public ResponseEntity<List<BaseLookupModel>> findSegment5(
+  public ResponseEntity<DropdownResponse> findSegment5(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyGroupDefinitionFacade.findSegment5(companyGroupId));
   }

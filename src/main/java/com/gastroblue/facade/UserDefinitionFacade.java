@@ -32,9 +32,11 @@ import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
+import com.gastroblue.model.response.AccessibleUsersResponse;
 import com.gastroblue.model.response.CompanyContextResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.response.DropdownResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.service.impl.CompanyService;
@@ -90,7 +92,7 @@ public class UserDefinitionFacade {
     return UserMapper.toResponse(updatedEntity, userProduct, lookupService);
   }
 
-  public List<UserDefinitionResponse> findAccessibleUsers(boolean includeAll) {
+  public AccessibleUsersResponse findAccessibleUsers(boolean includeAll) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     ApplicationProduct product = sessionUser.getApplicationProduct();
     ApplicationRole sessionRole = sessionUser.getApplicationRole();
@@ -127,16 +129,20 @@ public class UserDefinitionFacade {
             : Map.of();
 
     List<String> sessionDepartments = sessionUser.departments();
-    return users.stream()
-        .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), lookupService))
-        .filter(
-            user -> {
-              if (sessionDepartments == null || sessionDepartments.contains("ALL")) {
-                return true;
-              }
-              return user.getDepartmentsList().stream().anyMatch(sessionDepartments::contains);
-            })
-        .toList();
+    return AccessibleUsersResponse.builder()
+        .users(
+            users.stream()
+                .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), lookupService))
+                .filter(
+                    user -> {
+                      if (sessionDepartments == null || sessionDepartments.contains("ALL")) {
+                        return true;
+                      }
+                      return user.getDepartmentsList().stream()
+                          .anyMatch(sessionDepartments::contains);
+                    })
+                .toList())
+        .build();
   }
 
   public UserDefinitionResponse saveUser(UserSaveRequest request) {
@@ -391,62 +397,74 @@ public class UserDefinitionFacade {
     userService.updateUser(userEntity);
   }
 
-  public List<BaseLookupModel> findAllApplicationRoles() {
-    return lookupService.findAssignableRoles();
+  public DropdownResponse findAllApplicationRoles() {
+    return DropdownResponse.builder().items(lookupService.findAssignableRoles()).build();
   }
 
-  public List<BaseLookupModel> findAllDepartments() {
-    return lookupService.findAll(LookupQuery.of().lookup(Lookups.DEPARTMENT));
+  public DropdownResponse findAllDepartments() {
+    return DropdownResponse.builder()
+        .items(lookupService.findAll(LookupQuery.of().lookup(Lookups.DEPARTMENT)))
+        .build();
   }
 
-  public List<BaseLookupModel> findAllZones() {
-    return lookupService.findAll(LookupQuery.of().lookup(Lookups.ZONE));
+  public DropdownResponse findAllZones() {
+    return DropdownResponse.builder()
+        .items(lookupService.findAll(LookupQuery.of().lookup(Lookups.ZONE)))
+        .build();
   }
 
-  public List<BaseLookupModel> findAllGenders() {
-    return lookupService.findAll(LookupQuery.of().lookup(Lookups.GENDER));
+  public DropdownResponse findAllGenders() {
+    return DropdownResponse.builder()
+        .items(lookupService.findAll(LookupQuery.of().lookup(Lookups.GENDER)))
+        .build();
   }
 
-  public List<BaseLookupModel> findAvailableCompanies() {
+  public DropdownResponse findAvailableCompanies() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
-    return companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
-        .filter(CompanyEntity::isActive)
-        .filter(
-            company ->
-                sessionUser.companyIds() == null
-                    || sessionUser.companyIds().isEmpty()
-                    || sessionUser.companyIds().contains(company.getId()))
-        .sorted(
-            Comparator.comparing(
-                c -> (c.getCompanyCode() + " - " + c.getCompanyName()).toLowerCase()))
-        .map(
-            company ->
-                new BaseLookupModel(
-                    company.getId(),
-                    company.getCompanyCode() + " - " + company.getCompanyName(),
-                    index.getAndIncrement()))
-        .toList();
+    return DropdownResponse.builder()
+        .items(
+            companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
+                .filter(CompanyEntity::isActive)
+                .filter(
+                    company ->
+                        sessionUser.companyIds() == null
+                            || sessionUser.companyIds().isEmpty()
+                            || sessionUser.companyIds().contains(company.getId()))
+                .sorted(
+                    Comparator.comparing(
+                        c -> (c.getCompanyCode() + " - " + c.getCompanyName()).toLowerCase()))
+                .map(
+                    company ->
+                        new BaseLookupModel(
+                            company.getId(),
+                            company.getCompanyCode() + " - " + company.getCompanyName(),
+                            index.getAndIncrement()))
+                .toList())
+        .build();
   }
 
-  public List<BaseLookupModel> findAvailableCompanyGroups() {
+  public DropdownResponse findAvailableCompanyGroups() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     AtomicInteger index = new AtomicInteger(0);
-    return companyGroupService.findAll().stream()
-        .filter(
-            companyGroup ->
-                sessionUser.companyGroupId() == null
-                    || Objects.equals(sessionUser.companyGroupId(), companyGroup.getId()))
-        .sorted(
-            Comparator.comparing(
-                c -> c.getGroupCode().toLowerCase() + " - " + c.getName().toLowerCase()))
-        .map(
-            companyGroup ->
-                new BaseLookupModel(
-                    companyGroup.getId(),
-                    companyGroup.getGroupCode() + " - " + companyGroup.getName(),
-                    index.getAndIncrement()))
-        .toList();
+    return DropdownResponse.builder()
+        .items(
+            companyGroupService.findAll().stream()
+                .filter(
+                    companyGroup ->
+                        sessionUser.companyGroupId() == null
+                            || Objects.equals(sessionUser.companyGroupId(), companyGroup.getId()))
+                .sorted(
+                    Comparator.comparing(
+                        c -> c.getGroupCode().toLowerCase() + " - " + c.getName().toLowerCase()))
+                .map(
+                    companyGroup ->
+                        new BaseLookupModel(
+                            companyGroup.getId(),
+                            companyGroup.getGroupCode() + " - " + companyGroup.getName(),
+                            index.getAndIncrement()))
+                .toList())
+        .build();
   }
 
   public CompanyContextResponse findUserCompanyContext(String userId) {

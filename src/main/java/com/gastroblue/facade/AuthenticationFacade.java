@@ -169,18 +169,24 @@ public class AuthenticationFacade {
     return response;
   }
 
-  public List<AuthUserCompanyGroupResponse> findMyCompanyGroups() {
-    return companyGroupService.findMyCompanyGroups().stream()
-        .map(CompanyGroupMapper::toAuthResponse)
-        .toList();
+  public AuthUserCompanyGroupsResponse findMyCompanyGroups() {
+    return AuthUserCompanyGroupsResponse.builder()
+        .companyGroups(
+            companyGroupService.findMyCompanyGroups().stream()
+                .map(CompanyGroupMapper::toAuthResponse)
+                .toList())
+        .build();
   }
 
-  public List<AuthUserCompanyResponse> findMyCompanies() {
-    return companyService
-        .findByCompanyGroupId(IJwtService.findSessionUserOrThrow().companyGroupId())
-        .stream()
-        .map(entity -> CompanyGroupMapper.toAuthResponse(entity, lookupService))
-        .toList();
+  public AuthUserCompaniesResponse findMyCompanies() {
+    return AuthUserCompaniesResponse.builder()
+        .companies(
+            companyService
+                .findByCompanyGroupId(IJwtService.findSessionUserOrThrow().companyGroupId())
+                .stream()
+                .map(entity -> CompanyGroupMapper.toAuthResponse(entity, lookupService))
+                .toList())
+        .build();
   }
 
   public void signEula() {

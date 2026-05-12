@@ -1,7 +1,6 @@
 package com.gastroblue.facade;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
-import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
@@ -14,12 +13,14 @@ import com.gastroblue.model.request.CompanyGroupProductSaveRequest;
 import com.gastroblue.model.request.CompanyGroupProductUpdateRequest;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanyGroupUpdateRequest;
+import com.gastroblue.model.response.CompanyGroupDefinitionListResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
+import com.gastroblue.model.response.CompanyGroupProductListResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
+import com.gastroblue.model.response.DropdownResponse;
 import com.gastroblue.service.impl.CompanyGroupProductService;
 import com.gastroblue.service.impl.CompanyGroupService;
 import com.gastroblue.util.EmailDomainValidator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,19 +47,25 @@ public class CompanyGroupDefinitionFacade {
     return CompanyGroupMapper.toResponse(companyGroupService.update(companyGroupId, request));
   }
 
-  public List<CompanyGroupDefinitionResponse> findAllCompanyGroups() {
-    return companyGroupService.findAll().stream().map(CompanyGroupMapper::toResponse).toList();
+  public CompanyGroupDefinitionListResponse findAllCompanyGroups() {
+    return CompanyGroupDefinitionListResponse.builder()
+        .companyGroups(
+            companyGroupService.findAll().stream().map(CompanyGroupMapper::toResponse).toList())
+        .build();
   }
 
   public CompanyGroupDefinitionResponse findCompanyGroupById(String companyGroupId) {
     return CompanyGroupMapper.toResponse(companyGroupService.findByIdOrThrow(companyGroupId));
   }
 
-  public List<CompanyGroupProductResponse> findCompanyGroupProducts(String companyGroupId) {
+  public CompanyGroupProductListResponse findCompanyGroupProducts(String companyGroupId) {
     companyGroupService.findByIdOrThrow(companyGroupId);
-    return companyGroupProductService.findAllByCompanyGroupId(companyGroupId).stream()
-        .map(CompanyGroupMapper::toResponse)
-        .toList();
+    return CompanyGroupProductListResponse.builder()
+        .products(
+            companyGroupProductService.findAllByCompanyGroupId(companyGroupId).stream()
+                .map(CompanyGroupMapper::toResponse)
+                .toList())
+        .build();
   }
 
   public CompanyGroupProductResponse saveCompanyGroupProduct(
@@ -100,43 +107,67 @@ public class CompanyGroupDefinitionFacade {
         companyGroupProductService.update(existing.getId(), updated));
   }
 
-  public List<BaseLookupModel> findZones(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.ZONE).companyGroupId(companyGroupId));
+  public DropdownResponse findZones(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.ZONE).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findCountries(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.COUNTRY).companyGroupId(companyGroupId));
+  public DropdownResponse findCountries(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.COUNTRY).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findCities(final String companyGroupId, final String country) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.CITY).companyGroupId(companyGroupId));
+  public DropdownResponse findCities(final String companyGroupId, final String country) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.CITY).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findSegment1(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.SEGMENT_1).companyGroupId(companyGroupId));
+  public DropdownResponse findSegment1(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.SEGMENT_1).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findSegment2(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.SEGMENT_2).companyGroupId(companyGroupId));
+  public DropdownResponse findSegment2(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.SEGMENT_2).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findSegment3(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.SEGMENT_3).companyGroupId(companyGroupId));
+  public DropdownResponse findSegment3(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.SEGMENT_3).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findSegment4(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.SEGMENT_4).companyGroupId(companyGroupId));
+  public DropdownResponse findSegment4(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.SEGMENT_4).companyGroupId(companyGroupId)))
+        .build();
   }
 
-  public List<BaseLookupModel> findSegment5(final String companyGroupId) {
-    return lookupService.findAll(
-        LookupQuery.of().lookup(Lookups.SEGMENT_5).companyGroupId(companyGroupId));
+  public DropdownResponse findSegment5(final String companyGroupId) {
+    return DropdownResponse.builder()
+        .items(
+            lookupService.findAll(
+                LookupQuery.of().lookup(Lookups.SEGMENT_5).companyGroupId(companyGroupId)))
+        .build();
   }
 }
