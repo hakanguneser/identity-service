@@ -27,8 +27,6 @@ public class SecurityConfig extends AbstractSecurityConfig {
             ApplicationRole.APP_CLIENT.name(),
             ApplicationRole.GROUP_MANAGER.name(),
             ApplicationRole.ZONE_MANAGER.name());
-    auth.requestMatchers("/api/v1/definition/company-groups/context")
-        .hasAnyRole(ApplicationRole.APP_CLIENT.name());
     auth.requestMatchers("/api/v1/tracker/**").hasRole(ApplicationRole.APP_CLIENT.name());
     auth.anyRequest().authenticated();
   }

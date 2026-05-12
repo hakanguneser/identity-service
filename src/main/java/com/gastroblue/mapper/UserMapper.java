@@ -53,7 +53,7 @@ public class UserMapper {
     LookupQuery base =
         LookupQuery.of()
             .companyGroupId(entity.getCompanyGroupId())
-            .product(userProduct.getProduct().name());
+            .product(userProduct != null ? userProduct.getProduct().name() : null);
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
 
@@ -71,12 +71,15 @@ public class UserMapper {
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
         .applicationRole(
-            lookupService.find(
-                base.lookup(Lookups.APPLICATION_ROLE).key(userProduct.getApplicationRole().name())))
+            userProduct != null
+                ? lookupService.find(
+                    base.lookup(Lookups.APPLICATION_ROLE)
+                        .key(userProduct.getApplicationRole().name()))
+                : null)
         .language(
             lookupService.find(base.lookup(Lookups.LANGUAGE).key(entity.getLanguage().name())))
         .email(entity.getEmail())
-        .isActive(userProduct.isActive())
+        .isActive(userProduct != null && userProduct.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())

@@ -46,20 +46,4 @@ public class CompanyGroupProductService {
                   "Product not defined for company group");
             });
   }
-
-  public CompanyGroupProductEntity update(String id, CompanyGroupProductEntity updated) {
-    CompanyGroupProductEntity existing =
-        companyGroupProductRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        ErrorCode.COMPANY_GROUP_PRODUCT_NOT_FOUND,
-                        "CompanyGroupProduct not found"));
-    existing.setEnabled(updated.getEnabled());
-    existing.setApiUrl(updated.getApiUrl());
-    existing.setApiVersion(updated.getApiVersion());
-    existing.setNotes(updated.getNotes());
-    return companyGroupProductRepository.save(existing);
-  }
 }

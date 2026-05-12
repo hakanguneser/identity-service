@@ -10,7 +10,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,21 +41,6 @@ public class CompanyProductService {
 
   public List<CompanyProductEntity> findAllByCompanyId(String companyId) {
     return companyProductRepository.findAllByCompanyId(companyId);
-  }
-
-  @Transactional
-  public CompanyProductEntity update(String id, CompanyProductEntity updated) {
-    CompanyProductEntity existing =
-        companyProductRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        ErrorCode.COMPANY_PRODUCT_NOT_FOUND, "CompanyProduct not found"));
-    existing.setEnabled(updated.isEnabled());
-    existing.setLicenseExpiresAt(updated.getLicenseExpiresAt());
-    existing.setAgreedUserCount(updated.getAgreedUserCount());
-    return companyProductRepository.save(existing);
   }
 
   public void delete(String id) {

@@ -4,6 +4,8 @@ import com.gastroblue.commons.helper.exception.model.base.ErrorCodeBase;
 
 public enum ErrorCode implements ErrorCodeBase {
   USER_NOT_FOUND,
+  INVALID_JWT_TOKEN,
+  INACTIVE_USER,
   USER_ALREADY_EXISTS,
   COMPANY_NOT_FOUND,
   COMPANY_GROUP_NOT_FOUND,
@@ -25,7 +27,9 @@ public enum ErrorCode implements ErrorCodeBase {
   COMPANY_PRODUCT_NOT_ACTIVE,
   PRODUCT_NOT_ALLOWED_FOR_REGISTRATION,
   USER_NOT_ELIGIBLE_EMAIL,
-  USER_NOT_ELIGIBLE_SUPERVISOR_OR_ABOVE;
+  USER_NOT_ELIGIBLE_SUPERVISOR_OR_ABOVE,
+  USER_PRODUCT_NOT_FOUND,
+  ACCOUNT_LOCKED;
 
   @Override
   public String code() {

@@ -96,15 +96,11 @@ public class CompanyGroupDefinitionFacade {
     companyGroupService.findByIdOrThrow(companyGroupId);
     CompanyGroupProductEntity existing =
         companyGroupProductService.findByCompanyGroupIdAndProductOrThrow(companyGroupId, product);
-    CompanyGroupProductEntity updated =
-        CompanyGroupProductEntity.builder()
-            .enabled(request.enabled())
-            .apiUrl(request.apiUrl())
-            .apiVersion(request.apiVersion())
-            .notes(request.notes())
-            .build();
-    return CompanyGroupMapper.toResponse(
-        companyGroupProductService.update(existing.getId(), updated));
+    existing.setEnabled(request.enabled());
+    existing.setApiUrl(request.apiUrl());
+    existing.setApiVersion(request.apiVersion());
+    existing.setNotes(request.notes());
+    return CompanyGroupMapper.toResponse(companyGroupProductService.save(existing));
   }
 
   public DropdownResponse findZones(final String companyGroupId) {
@@ -127,7 +123,10 @@ public class CompanyGroupDefinitionFacade {
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
-                LookupQuery.of().lookup(Lookups.CITY).companyGroupId(companyGroupId)))
+                LookupQuery.of()
+                    .lookup(Lookups.CITY)
+                    .companyGroupId(companyGroupId)
+                    .parentKey(country)))
         .build();
   }
 

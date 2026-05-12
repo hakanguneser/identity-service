@@ -52,16 +52,18 @@ public class CompanyGroupService {
   }
 
   public CompanyGroupEntity findByIdOrThrow(final String companyGroupId) {
-    return companyGroupId == null
-        ? null
-        : companyGroupRepository
-            .findById(companyGroupId)
-            .orElseThrow(
-                () -> {
-                  log.debug("Company Group not found with id: {}", companyGroupId);
-                  return new NotFoundException(
-                      ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
-                });
+    if (companyGroupId == null) {
+      throw new NotFoundException(
+          ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company group ID must not be null");
+    }
+    return companyGroupRepository
+        .findById(companyGroupId)
+        .orElseThrow(
+            () -> {
+              log.debug("Company Group not found with id: {}", companyGroupId);
+              return new NotFoundException(
+                  ErrorCode.COMPANY_GROUP_NOT_FOUND, "Company Group not found");
+            });
   }
 
   public List<CompanyGroupEntity> findMyCompanyGroups() {
@@ -70,7 +72,7 @@ public class CompanyGroupService {
       case ADMIN -> findAll();
       case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR ->
           List.of(findByIdOrThrow(user.companyGroupId()));
-      default -> null;
+      default -> List.of();
     };
   }
 

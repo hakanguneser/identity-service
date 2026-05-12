@@ -29,9 +29,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,14 +55,21 @@ public class AuthenticationFacade {
   private final UserProductService userProductService;
 
   public AuthLoginResponse login(AuthLoginRequest request) {
-    log.info("Login request: username={}, product={}, channel={}", request.username(), request.product(), request.channel());
+    log.info(
+        "Login request: username={}, product={}, channel={}",
+        request.username(),
+        request.product(),
+        request.channel());
     UserEntity userEntity;
     try {
       Authentication authentication =
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(request.username(), request.password()));
       userEntity = (UserEntity) authentication.getPrincipal();
+    } catch (LockedException e) {
+      throw new AccessDeniedException(ErrorCode.ACCOUNT_LOCKED, "Account is temporarily locked");
     } catch (BadCredentialsException e) {
+      userService.incrementLoginAttempts(request.username());
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     } catch (RuntimeException e) {
       log.error("Authentication failed unexpectedly: {}", e.getMessage(), e);
@@ -119,8 +128,14 @@ public class AuthenticationFacade {
     SessionUser sessionUser = jwtService.validateAndExtractToken(request.refreshToken());
 
     UserEntity userEntity = userService.findUserByUserName(sessionUser.username());
-    if (userEntity == null || !userEntity.isActive()) {
-      throw new AccessDeniedException(ErrorCode.UNAUTHORIZED_USER, "User is not active");
+    if (!userEntity.isActive()) {
+      throw new AccessDeniedException(ErrorCode.INACTIVE_USER, "User is not active");
+    }
+
+    if (sessionUser.passwordVersion() != null
+        && sessionUser.passwordVersion() != userEntity.getPasswordVersion()) {
+      throw new AccessDeniedException(
+          ErrorCode.INVALID_JWT_TOKEN, "Password version mismatch — please log in again");
     }
 
     if (sessionUser.getApplicationProduct() != null) {
@@ -208,7 +223,7 @@ public class AuthenticationFacade {
     eulaContentService.getActiveEulaContentForSessionUser();
     userProductService
         .findByUserIdAndProduct(user.getId(), sessionUser.getApplicationProduct())
-        .orElseThrow();
+        .orElseThrow(() -> new AccessDeniedException(ErrorCode.USER_PRODUCT_NOT_FOUND));
     userProductService.updateEulaAcceptedAt(user.getId(), sessionUser.getApplicationProduct());
   }
 
@@ -291,6 +306,7 @@ public class AuthenticationFacade {
         userProduct != null
             ? DelimitedStringUtil.splitClean(userProduct.getDepartments())
             : List.of());
+    extraClaims.put(IJwtService.JWT_PASSWORD_VERSION, userEntity.getPasswordVersion());
     return extraClaims;
   }
 
@@ -300,18 +316,32 @@ public class AuthenticationFacade {
       case ADMIN, GROUP_MANAGER -> List.of();
       case ZONE_MANAGER ->
           companyService.findByCompanyGroupId(userEntity.getCompanyGroupId()).stream()
+              .filter(c -> userEntity.getZone() != null && userEntity.getZone().equals(c.getZone()))
+              .filter(
+                  c ->
+                      companyProductService
+                          .findByCompanyIdAndProduct(c.getId(), userProduct.getProduct())
+                          .isPresent())
               .map(CompanyEntity::getId)
               .toList();
       default -> List.of(userEntity.getCompanyId());
     };
   }
 
+  @Transactional
+  public void logout() {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    UserEntity userEntity = userService.findUserByUserName(sessionUser.username());
+    userEntity.setPasswordVersion(userEntity.getPasswordVersion() + 1);
+    userService.updateUser(userEntity);
+  }
+
   public void pushToken(PushTokenRequest request) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserProductEntity userProduct =
         userProductService
-            .findByUserIdAndProduct(sessionUser.username(), sessionUser.getApplicationProduct())
-            .orElseThrow();
+            .findByUserIdAndProduct(sessionUser.userId(), sessionUser.getApplicationProduct())
+            .orElseThrow(() -> new AccessDeniedException(ErrorCode.USER_PRODUCT_NOT_FOUND));
     userProduct.setPushToken(request.token());
     userProductService.save(userProduct);
   }

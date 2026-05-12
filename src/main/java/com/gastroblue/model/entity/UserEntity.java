@@ -72,6 +72,17 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "PASSWORD_EXPIRES_AT")
   private LocalDateTime passwordExpiresAt;
 
+  @Column(name = "PASSWORD_VERSION", nullable = false)
+  @Builder.Default
+  private int passwordVersion = 1;
+
+  @Column(name = "LOGIN_ATTEMPT_COUNT", nullable = false)
+  @Builder.Default
+  private int loginAttemptCount = 0;
+
+  @Column(name = "LOCKED_UNTIL")
+  private LocalDateTime lockedUntil;
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority("ROLE_AUTHENTICATED"));
@@ -84,7 +95,7 @@ public class UserEntity extends Auditable implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    return true;
+    return lockedUntil == null || lockedUntil.isBefore(LocalDateTime.now());
   }
 
   @Override

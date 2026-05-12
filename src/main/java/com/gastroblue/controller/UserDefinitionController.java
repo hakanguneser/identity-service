@@ -60,7 +60,7 @@ public class UserDefinitionController {
   @PatchMapping("/{userId}/language")
   ResponseEntity<Void> updateLanguage(
       @PathVariable("userId") final String userId,
-      @RequestBody final LanguageUpdateRequest request) {
+      @RequestBody @Valid final LanguageUpdateRequest request) {
     userFacade.updateLanguage(userId, request);
     return ResponseEntity.noContent().build();
   }

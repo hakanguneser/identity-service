@@ -108,7 +108,9 @@ public class CompanyGroupMapper {
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(lookupService.find(base.lookup(Lookups.CITY).key(entity.getCity())))
+        .city(
+            lookupService.find(
+                base.lookup(Lookups.CITY).parentKey(entity.getCountry()).key(entity.getCity())))
         .country(lookupService.find(base.lookup(Lookups.COUNTRY).key(entity.getCountry())))
         .zone(lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone())))
         .segment1(lookupService.find(base.lookup(Lookups.SEGMENT_1).key(entity.getSegment1())))

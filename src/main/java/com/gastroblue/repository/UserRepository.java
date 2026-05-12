@@ -37,7 +37,9 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
   @Query(
       """
       update UserEntity u
-      set u.passwordChangeRequired = case when (u.passwordExpiresAt is null or u.passwordExpiresAt < :now) then true else u.passwordChangeRequired end
+      set u.passwordChangeRequired = case when (u.passwordExpiresAt is null or u.passwordExpiresAt < :now) then true else u.passwordChangeRequired end,
+          u.loginAttemptCount = 0,
+          u.lockedUntil = null
       where u.username = :username
       """)
   void updatePasswordCheckAfterLogin(

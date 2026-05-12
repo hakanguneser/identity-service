@@ -21,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserDefinitionService {
 
+  private static final int MAX_LOGIN_ATTEMPT_COUNT = 5;
+  private static final int LOGIN_LOCK_DURATION_MINUTES = 15;
+
   private final UserRepository userRepository;
 
   public UserEntity updateUser(UserEntity userEntity) {
@@ -90,14 +93,24 @@ public class UserDefinitionService {
   }
 
   @Transactional
-  public UserEntity toggleUser(String userId) {
-    UserEntity entityToBeUpdated = findById(userId);
-    entityToBeUpdated.setActive(!entityToBeUpdated.isActive());
-    return userRepository.save(entityToBeUpdated);
+  public void updatePasswordCheckAfterLogin(String username) {
+    userRepository.updatePasswordCheckAfterLogin(username, LocalDateTime.now());
   }
 
   @Transactional
-  public void updatePasswordCheckAfterLogin(String username) {
-    userRepository.updatePasswordCheckAfterLogin(username, LocalDateTime.now());
+  public void incrementLoginAttempts(String username) {
+    userRepository
+        .findByUsername(username.toLowerCase(Locale.ENGLISH))
+        .ifPresent(
+            user -> {
+              int newCount = user.getLoginAttemptCount() + 1;
+              if (newCount >= MAX_LOGIN_ATTEMPT_COUNT) {
+                user.setLockedUntil(LocalDateTime.now().plusMinutes(LOGIN_LOCK_DURATION_MINUTES));
+                user.setLoginAttemptCount(0);
+              } else {
+                user.setLoginAttemptCount(newCount);
+              }
+              userRepository.save(user);
+            });
   }
 }

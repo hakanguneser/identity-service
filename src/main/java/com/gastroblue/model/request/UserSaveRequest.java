@@ -20,7 +20,9 @@ public record UserSaveRequest(
     @NotNull(message = "{validation.applicationRole.check.null}") ApplicationRole applicationRole,
     @NotNull(message = "{validation.department.check.null}")
         List<@ValidLookup(lookup = Lookups.class, constant = "DEPARTMENT") String> departments,
-    @Size(min = 3, max = 100, message = "{validation.name.size.3.100}") String name,
+    @NotBlank(message = "{validation.name.check.null}")
+        @Size(min = 3, max = 100, message = "{validation.name.size.3.100}")
+        String name,
     @Size(min = 3, max = 100, message = "{validation.surname.size.3.100}")
         @NotBlank(message = "{validation.surname.check.null}")
         String surname,

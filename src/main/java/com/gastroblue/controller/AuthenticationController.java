@@ -57,8 +57,14 @@ public class AuthenticationController {
     return ResponseEntity.noContent().build();
   }
 
+  @PostMapping("/logout")
+  public ResponseEntity<Void> logout() {
+    authenticationFacade.logout();
+    return ResponseEntity.noContent().build();
+  }
+
   @PatchMapping("/push-token")
-  public ResponseEntity<Void> pushToken(@RequestBody PushTokenRequest request) {
+  public ResponseEntity<Void> pushToken(@RequestBody @Valid PushTokenRequest request) {
     authenticationFacade.pushToken(request);
     return ResponseEntity.noContent().build();
   }

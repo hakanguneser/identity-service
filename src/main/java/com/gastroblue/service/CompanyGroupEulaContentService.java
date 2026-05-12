@@ -93,7 +93,6 @@ public class CompanyGroupEulaContentService {
 
   public String getActiveEulaContentForSessionUser() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-    log.info("SessionUser when get Active Eula: {}", sessionUser.toString());
     return eulaContentRepository
         .findActiveContent(
             sessionUser.companyGroupId(),

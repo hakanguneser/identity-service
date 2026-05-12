@@ -61,6 +61,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserDefinitionFacade {
 
+  private static final String DEPARTMENT_ALL = "ALL";
+
   @Value("${app.admin.registration.enabled}")
   private boolean adminRegistrationEnabled;
 
@@ -78,18 +80,34 @@ public class UserDefinitionFacade {
     return UserMapper.toResponse(userEntity, userProduct, lookupService);
   }
 
+  @Transactional
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
     UserProductEntity userProduct = resolveUserProduct(userId);
 
-    if (!userProduct.getApplicationRole().isAdministrator()) {
-      CompanyGroup companyGroup =
-          companyGroupService.findCompanyByIdOrThrow(existingEntity.getCompanyGroupId());
-      EmailDomainValidator.isDomainAllowed(request.mail(), companyGroup.getMailDomains());
+    if (userProduct == null || !userProduct.getApplicationRole().isAdministrator()) {
+      if (request.mail() != null && !request.mail().isBlank()) {
+        if (existingEntity.getCompanyGroupId() != null) {
+          CompanyGroup companyGroup =
+              companyGroupService.findCompanyByIdOrThrow(existingEntity.getCompanyGroupId());
+          EmailDomainValidator.validateAllowedDomains(
+              DelimitedStringUtil.split(companyGroup.getMailDomains()), List.of(request.mail()));
+        }
+      }
     }
 
     UserEntity entityTobeUpdated = UserMapper.updateEntity(existingEntity, request);
     UserEntity updatedEntity = userService.updateUser(entityTobeUpdated);
+
+    if (userProduct != null && request.departments() != null) {
+      List<String> depts =
+          request.departments().contains(DEPARTMENT_ALL)
+              ? List.of(DEPARTMENT_ALL)
+              : request.departments().stream().distinct().toList();
+      userProduct.setDepartments(DelimitedStringUtil.join(depts));
+      userProduct = userProductService.save(userProduct);
+    }
+
     return UserMapper.toResponse(updatedEntity, userProduct, lookupService);
   }
 
@@ -136,7 +154,8 @@ public class UserDefinitionFacade {
                 .map(u -> UserMapper.toResponse(u, userProductMap.get(u.getId()), lookupService))
                 .filter(
                     user -> {
-                      if (sessionDepartments == null || sessionDepartments.contains("ALL")) {
+                      if (sessionDepartments == null
+                          || sessionDepartments.contains(DEPARTMENT_ALL)) {
                         return true;
                       }
                       return user.getDepartmentsList().stream()
@@ -206,8 +225,8 @@ public class UserDefinitionFacade {
 
   private List<String> getDepartments(UserSaveRequest request) {
     List<String> departments = Optional.ofNullable(request.departments()).orElse(List.of());
-    if (departments.contains("ALL")) {
-      return List.of("ALL");
+    if (departments.contains(DEPARTMENT_ALL)) {
+      return List.of(DEPARTMENT_ALL);
     }
     return departments.stream().distinct().toList();
   }
@@ -268,7 +287,7 @@ public class UserDefinitionFacade {
         throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
       }
       isAuthorized =
-          request.departments().contains("ALL")
+          request.departments().contains(DEPARTMENT_ALL)
               && request.applicationRole() != null
               && request.applicationRole().isAdministrator();
     } else {
@@ -346,6 +365,7 @@ public class UserDefinitionFacade {
     return UserMapper.toResponse(userEntity, updatedProduct, lookupService);
   }
 
+  @Transactional
   public void sendOtp(final String userId) {
     UserEntity managerUser =
         userService.findUserByUserName(IJwtService.findSessionUserOrThrow().username());
@@ -354,6 +374,7 @@ public class UserDefinitionFacade {
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);
     userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMinutes(15));
+    userEntity.setPasswordVersion(userEntity.getPasswordVersion() + 1);
     userService.updateUser(userEntity);
     String companyGroupName = "";
     if (userEntity.getCompanyGroupId() != null) {
@@ -381,12 +402,12 @@ public class UserDefinitionFacade {
         companyName);
   }
 
+  @Transactional
   public void changePassword(final PasswordChangeRequest request) {
     UserEntity userEntity =
         userService.findUserByUserName(IJwtService.findSessionUserOrThrow().username());
 
-    if (userEntity == null
-        || !passwordEncoder.matches(request.oldPassword(), userEntity.getPassword())) {
+    if (!passwordEncoder.matches(request.oldPassword(), userEntity.getPassword())) {
       throw new BadCredentialsException("Bad credentials");
     }
 
@@ -395,6 +416,7 @@ public class UserDefinitionFacade {
       userEntity.setPasswordChangeRequired(false);
     }
     userEntity.setPasswordExpiresAt(LocalDateTime.now().plusMonths(12));
+    userEntity.setPasswordVersion(userEntity.getPasswordVersion() + 1);
 
     userService.updateUser(userEntity);
   }

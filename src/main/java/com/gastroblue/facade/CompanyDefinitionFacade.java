@@ -27,7 +27,6 @@ import com.gastroblue.service.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -137,13 +136,10 @@ public class CompanyDefinitionFacade {
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     CompanyProductEntity existing =
         companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
-    CompanyProductEntity updated =
-        CompanyProductEntity.builder()
-            .enabled(request.enabled())
-            .licenseExpiresAt(request.licenseExpiresAt())
-            .agreedUserCount(request.agreedUserCount())
-            .build();
-    return CompanyGroupMapper.toResponse(companyProductService.update(existing.getId(), updated));
+    existing.setEnabled(request.enabled());
+    existing.setLicenseExpiresAt(request.licenseExpiresAt());
+    existing.setAgreedUserCount(request.agreedUserCount());
+    return CompanyGroupMapper.toResponse(companyProductService.save(existing));
   }
 
   public void deleteCompanyProduct(
@@ -172,7 +168,7 @@ public class CompanyDefinitionFacade {
         .build();
   }
 
-  public @Nullable CompanyProductResponse toggleCompanyProduct(
+  public CompanyProductResponse toggleCompanyProduct(
       String companyGroupId, String companyId, ApplicationProduct product) {
     CompanyProductEntity companyProductEntity =
         companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
