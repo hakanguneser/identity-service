@@ -1,6 +1,7 @@
 package com.gastroblue.facade;
 
 import static com.gastroblue.commons.shared.enums.ApplicationRole.*;
+import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 import static com.gastroblue.model.enums.MailParameters.*;
 import static com.gastroblue.model.enums.MailTemplate.INITIAL_PASSWORD;
 import static com.gastroblue.model.enums.MailTemplate.RESET_PASSWORD;
@@ -50,8 +51,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDefinitionFacade {
 
   private static final String DEPARTMENT_ALL = "ALL";
-
-  @Value("${app.admin.registration.enabled}")
-  private boolean adminRegistrationEnabled;
 
   private final UserDefinitionService userService;
   private final CompanyGroupService companyGroupService;
@@ -170,7 +166,12 @@ public class UserDefinitionFacade {
     UserEntity managerUser = checkRegisteredUserRole(request);
     CompanyGroupEntity companyGroup = getRegistrationCompanyGroup(request);
     CompanyEntity company = getRegistrationCompany(request);
-    EmailDomainValidator.isDomainAllowed(request.email(), companyGroup.getMailDomains());
+    if (request.email() != null && !request.email().isBlank()) {
+      List<String> mailDomains = DelimitedStringUtil.split(companyGroup.getMailDomains());
+      if (!mailDomains.isEmpty()) {
+        EmailDomainValidator.validateAllowedDomains(mailDomains, List.of(request.email()));
+      }
+    }
     String generatedPassword = PasswordGenerator.generate();
     UserEntity entityToBeSaved =
         UserMapper.toEntity(
@@ -278,29 +279,16 @@ public class UserDefinitionFacade {
   }
 
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
-    boolean isAuthorized;
-    String username = IJwtService.findSessionUserOrThrow().username();
-    UserEntity sessionUserEntity = userService.findUserByUserName(username);
-    SessionUser sessionUser = IJwtService.findSessionUser();
-    if (sessionUserEntity == null) {
-      if (!adminRegistrationEnabled) {
-        throw new AccessDeniedException(ErrorCode.ADMINISTRATOR_REGISTRATION_DISABLED);
-      }
-      isAuthorized =
-          request.departments().contains(DEPARTMENT_ALL)
-              && request.applicationRole() != null
-              && request.applicationRole().isAdministrator();
-    } else {
-      ApplicationRole sessionRole = sessionUser != null ? sessionUser.getApplicationRole() : null;
-      isAuthorized = sessionRole != null && sessionRole.isSupervisorAndAbove();
-    }
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    UserEntity sessionUserEntity = userService.findUserByUserName(sessionUser.username());
+
+    ApplicationRole sessionRole = sessionUser.getApplicationRole();
+    boolean isAuthorized = sessionRole != null && sessionRole.isSupervisorAndAbove();
 
     if (!isAuthorized) {
       throw new AccessDeniedException(ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION);
     }
-    if (sessionUserEntity == null
-        || sessionUserEntity.getEmail() == null
-        || sessionUserEntity.getEmail().isBlank()) {
+    if (sessionUserEntity.getEmail() == null || sessionUserEntity.getEmail().isBlank()) {
       throw new BusinessException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION, "User email is required");
     }
@@ -338,7 +326,7 @@ public class UserDefinitionFacade {
       }
       throw new BusinessException(
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION,
-          String.format("Requested user %s has no companyGroupId", sessionUser.username()));
+          "No companyGroupId provided for administrator registration");
     }
 
     // 2. Session ADMIN değilse → direkt session'dan çek
@@ -408,7 +396,7 @@ public class UserDefinitionFacade {
         userService.findUserByUserName(IJwtService.findSessionUserOrThrow().username());
 
     if (!passwordEncoder.matches(request.oldPassword(), userEntity.getPassword())) {
-      throw new BadCredentialsException("Bad credentials");
+      throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     }
 
     userEntity.setPassword(passwordEncoder.encode(request.newPassword()));
@@ -493,9 +481,6 @@ public class UserDefinitionFacade {
 
   public CompanyContextResponse findUserCompanyContext(String userId) {
     UserEntity user = userService.findById(userId);
-    if (user == null) {
-      return CompanyContextResponse.builder().build();
-    }
     CompanyGroupDefinitionResponse companyGroup = null;
     CompanyDefinitionResponse company = null;
     if (user.getCompanyGroupId() != null) {

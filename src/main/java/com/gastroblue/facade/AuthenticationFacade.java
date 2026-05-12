@@ -132,6 +132,10 @@ public class AuthenticationFacade {
       throw new AccessDeniedException(ErrorCode.INACTIVE_USER, "User is not active");
     }
 
+    if (!userEntity.isAccountNonLocked()) {
+      throw new AccessDeniedException(ErrorCode.ACCOUNT_LOCKED, "Account is temporarily locked");
+    }
+
     if (sessionUser.passwordVersion() != null
         && sessionUser.passwordVersion() != userEntity.getPasswordVersion()) {
       throw new AccessDeniedException(

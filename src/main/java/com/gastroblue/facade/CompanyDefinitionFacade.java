@@ -3,6 +3,7 @@ package com.gastroblue.facade;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
+import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
@@ -113,7 +114,7 @@ public class CompanyDefinitionFacade {
         .findByCompanyIdAndProduct(companyId, request.product())
         .ifPresent(
             existing -> {
-              throw new NotFoundException(
+              throw new BusinessException(
                   ErrorCode.COMPANY_PRODUCT_ALREADY_EXISTS,
                   "Product already assigned to company: " + request.product());
             });

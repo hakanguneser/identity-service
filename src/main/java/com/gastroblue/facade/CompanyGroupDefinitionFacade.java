@@ -1,6 +1,6 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
@@ -75,7 +75,7 @@ public class CompanyGroupDefinitionFacade {
         .findByCompanyGroupIdAndProduct(companyGroupId, request.product())
         .ifPresent(
             existing -> {
-              throw new NotFoundException(
+              throw new BusinessException(
                   ErrorCode.COMPANY_GROUP_PRODUCT_ALREADY_EXISTS,
                   "Product already assigned to company group: " + request.product());
             });

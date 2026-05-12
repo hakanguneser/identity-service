@@ -38,6 +38,7 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "USERNAME", length = 100)
   private String username;
 
+  @ToString.Exclude
   @Column(name = "PASSWORD", length = 500)
   private String password;
 
