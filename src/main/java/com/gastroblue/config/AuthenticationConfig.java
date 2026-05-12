@@ -1,7 +1,7 @@
 package com.gastroblue.config;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
-import com.gastroblue.service.impl.UserDefinitionService;
+import com.gastroblue.service.UserDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

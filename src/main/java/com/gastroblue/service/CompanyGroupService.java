@@ -1,4 +1,4 @@
-package com.gastroblue.service.impl;
+package com.gastroblue.service;
 
 import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
 

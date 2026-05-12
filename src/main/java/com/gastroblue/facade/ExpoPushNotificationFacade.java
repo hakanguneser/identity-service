@@ -1,5 +1,6 @@
-package com.gastroblue.client;
+package com.gastroblue.facade;
 
+import com.gastroblue.client.ExpoPushClient;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class TrackerPushNotificationDispatcher {
+public class ExpoPushNotificationFacade {
 
   private final ExpoPushClient expoPushClient;
 

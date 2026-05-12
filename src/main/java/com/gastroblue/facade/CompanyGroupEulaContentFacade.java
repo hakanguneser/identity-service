@@ -6,7 +6,7 @@ import com.gastroblue.model.request.CompanyGroupEulaContentSaveRequest;
 import com.gastroblue.model.request.CompanyGroupEulaContentUpdateRequest;
 import com.gastroblue.model.response.CompanyGroupEulaContentResponse;
 import com.gastroblue.model.response.CompanyGroupEulaContentsResponse;
-import com.gastroblue.service.impl.CompanyGroupEulaContentService;
+import com.gastroblue.service.CompanyGroupEulaContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

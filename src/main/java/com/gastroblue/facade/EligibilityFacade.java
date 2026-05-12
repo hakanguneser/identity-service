@@ -7,7 +7,7 @@ import com.gastroblue.commons.shared.enums.ApplicationRole;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.response.UserEligibilityResponse;
-import com.gastroblue.service.impl.UserDefinitionService;
+import com.gastroblue.service.UserDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

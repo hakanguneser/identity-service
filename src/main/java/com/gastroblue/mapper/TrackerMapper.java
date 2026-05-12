@@ -17,10 +17,9 @@ import com.gastroblue.model.response.tracker.TrackerCompanyGroup;
 import com.gastroblue.model.response.tracker.TrackerUser;
 import java.util.Collections;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public class TrackerMapper {
 
   public static TrackerUser toUser(

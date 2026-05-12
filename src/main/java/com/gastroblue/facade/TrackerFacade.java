@@ -1,6 +1,5 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.client.TrackerPushNotificationDispatcher;
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
@@ -19,10 +18,10 @@ import com.gastroblue.model.response.tracker.PushNotificationAcceptedResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyUsersResponse;
 import com.gastroblue.model.response.tracker.TrackerUser;
-import com.gastroblue.service.impl.CompanyGroupService;
-import com.gastroblue.service.impl.CompanyService;
-import com.gastroblue.service.impl.UserDefinitionService;
-import com.gastroblue.service.impl.UserProductService;
+import com.gastroblue.service.CompanyGroupService;
+import com.gastroblue.service.CompanyService;
+import com.gastroblue.service.UserDefinitionService;
+import com.gastroblue.service.UserProductService;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -44,7 +43,7 @@ public class TrackerFacade {
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
   private final ILookupService lookupService;
-  private final TrackerPushNotificationDispatcher trackerPushNotificationDispatcher;
+  private final ExpoPushNotificationFacade trackerPushNotificationDispatcher;
 
   public TrackerCompanyUsersResponse findCompanyUsers(String companyGroupId, String companyId) {
     requireTrackerProduct();

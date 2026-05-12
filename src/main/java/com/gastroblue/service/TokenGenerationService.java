@@ -1,4 +1,4 @@
-package com.gastroblue.service.token;
+package com.gastroblue.service;
 
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
@@ -7,25 +7,19 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(
-    name = "gastroblue.commons.security.enabled",
-    havingValue = "true",
-    matchIfMissing = false)
-@EnableConfigurationProperties(TokenProperties.class)
-public class TokenGenerationService implements ITokenGenerationService {
+public class TokenGenerationService {
 
   private final PrivateKey privateKey;
 
-  public TokenGenerationService(TokenProperties tokenProperties) {
-    this.privateKey = loadPrivateKey(tokenProperties.getPrivateKey());
+  public TokenGenerationService(
+      @Value("${gastroblue.identity.token.private-key}") String privateKeyBase64) {
+    this.privateKey = loadPrivateKey(privateKeyBase64);
   }
 
-  @Override
   public String generateToken(String subject, Map<String, Object> claims, long expiration) {
     long now = System.currentTimeMillis();
     return Jwts.builder()

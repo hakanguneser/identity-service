@@ -1,4 +1,4 @@
-package com.gastroblue.service.impl;
+package com.gastroblue.service;
 
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.model.entity.CompanyEntity;

@@ -21,14 +21,12 @@ import com.gastroblue.model.request.AuthLoginRequest;
 import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
-import com.gastroblue.service.impl.*;
-import com.gastroblue.service.token.ITokenGenerationService;
+import com.gastroblue.service.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,9 +41,7 @@ public class AuthenticationFacade {
   private final IJwtService jwtService;
   private final JwtProperties jwtProperties;
   private final ILookupService lookupService;
-
-  @Autowired(required = false)
-  private ITokenGenerationService tokenGenerationService;
+  private final TokenGenerationService tokenGenerationService;
 
   private final AuthenticationManager authenticationManager;
   private final UserDefinitionService userService;

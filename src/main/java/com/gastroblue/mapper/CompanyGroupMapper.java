@@ -20,10 +20,9 @@ import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public class CompanyGroupMapper {
 
   public static CompanyGroupEntity toEntity(CompanyGroupSaveRequest request) {
