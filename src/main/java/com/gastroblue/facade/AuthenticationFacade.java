@@ -158,7 +158,7 @@ public class AuthenticationFacade {
         tokenGenerationService.generateToken(
             sessionUser.username(),
             extraClaims,
-            TimeUnit.DAYS.toMillis(jwtProperties.getRefreshTokenValidityInDays()));
+            TimeUnit.DAYS.toMillis(jwtProperties.getTokenValidityInMinutes()));
     return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 
@@ -221,6 +221,7 @@ public class AuthenticationFacade {
         .build();
   }
 
+  @Transactional
   public void signEula() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity user = userService.findUserByUserName(sessionUser.username());
@@ -277,17 +278,17 @@ public class AuthenticationFacade {
   private ApiInfoDto buildApiInfo(
       ApplicationProduct product, boolean enabled, String url, String version) {
     if (!enabled || url == null) {
-      switch (product) {
-        case FORMFLOW:
-          throw new AccessDeniedException(ErrorCode.FORMFLOW_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
-        case TRACKER:
-          throw new AccessDeniedException(
-              ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
-        default:
-          throw new AccessDeniedException(
-              ErrorCode.PRODUCT_NOT_SELECTED,
-              "Product not enabled or apiUrl missing for product=" + product);
-      }
+      throw switch (product) {
+        case FORMFLOW ->
+            new AccessDeniedException(ErrorCode.FORMFLOW_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
+        case TRACKER ->
+            new AccessDeniedException(
+                ErrorCode.THERMOMETER_TRACKER_APP_NOT_ENABLED_FOR_COMPANY_GROUP);
+        default ->
+            new AccessDeniedException(
+                ErrorCode.PRODUCT_NOT_SELECTED,
+                "Product not enabled or apiUrl missing for product=" + product);
+      };
     }
     return ApiInfoDto.builder().url(url).version(version).build();
   }

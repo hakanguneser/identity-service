@@ -19,7 +19,9 @@ import lombok.*;
           name = "UK_COMPANY_GROUP_PRODUCTS",
           columnNames = {"COMPANY_GROUP_ID", "PRODUCT"})
     },
-    indexes = {})
+    indexes = {
+      @Index(name = "IDX_COMPANY_GROUP_PRODUCTS_CG_ID", columnList = "COMPANY_GROUP_ID")
+    })
 public class CompanyGroupProductEntity extends Auditable {
 
   @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)

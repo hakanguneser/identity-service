@@ -72,6 +72,11 @@ public class UserDefinitionFacade {
 
   public UserDefinitionResponse findUserById(String userId) {
     UserEntity userEntity = userService.findById(userId);
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    if (!sessionUser.getApplicationRole().isAdministrator()
+        && !Objects.equals(userEntity.getCompanyGroupId(), sessionUser.companyGroupId())) {
+      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "User not accessible");
+    }
     UserProductEntity userProduct = resolveUserProduct(userId);
     return UserMapper.toResponse(userEntity, userProduct, lookupService);
   }
@@ -79,7 +84,24 @@ public class UserDefinitionFacade {
   @Transactional
   public UserDefinitionResponse updateUser(final String userId, final UserUpdateRequest request) {
     UserEntity existingEntity = userService.findById(userId);
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+
+    if (!sessionUser.getApplicationRole().isAdministrator()
+        && !Objects.equals(existingEntity.getCompanyGroupId(), sessionUser.companyGroupId())) {
+      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "User not accessible");
+    }
+
     UserProductEntity userProduct = resolveUserProduct(userId);
+
+    // Self-update is exempt from role hierarchy check
+    if (!sessionUser.getApplicationRole().isAdministrator()
+        && !Objects.equals(userId, sessionUser.userId())
+        && userProduct != null
+        && !getManageableRoles(sessionUser.getApplicationRole())
+            .contains(userProduct.getApplicationRole())) {
+      throw new AccessDeniedException(
+          ErrorCode.ACCESS_DENIED, "Insufficient role to update this user");
+    }
 
     if (userProduct == null || !userProduct.getApplicationRole().isAdministrator()) {
       if (request.mail() != null && !request.mail().isBlank()) {
@@ -305,6 +327,10 @@ public class UserDefinitionFacade {
     if (sessionUser == null
         || (sessionUser.getApplicationRole() != null
             && sessionUser.getApplicationRole().isCompanyManagerAndAbove())) {
+      if (request.companyId() == null || request.companyId().isBlank()) {
+        throw new BusinessException(
+            ErrorCode.COMPANY_NOT_FOUND, "companyId is required for this registration role");
+      }
       return companyService.findByIdOrThrow(request.companyId());
     }
 
@@ -346,6 +372,11 @@ public class UserDefinitionFacade {
         userProductService
             .findByUserIdAndProduct(userId, product)
             .orElseThrow(() -> new AccessDeniedException(ErrorCode.ACCESS_DENIED));
+    if (!getManageableRoles(sessionUser.getApplicationRole())
+        .contains(userProduct.getApplicationRole())) {
+      throw new AccessDeniedException(
+          ErrorCode.ACCESS_DENIED, "Insufficient role to toggle this user");
+    }
     userProduct.setActive(!userProduct.isActive());
     UserProductEntity updatedProduct = userProductService.save(userProduct);
 
@@ -355,9 +386,19 @@ public class UserDefinitionFacade {
 
   @Transactional
   public void sendOtp(final String userId) {
-    UserEntity managerUser =
-        userService.findUserByUserName(IJwtService.findSessionUserOrThrow().username());
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    UserEntity managerUser = userService.findUserByUserName(sessionUser.username());
     UserEntity userEntity = userService.findById(userId);
+    userProductService
+        .findByUserIdAndProduct(userId, sessionUser.getApplicationProduct())
+        .ifPresent(
+            targetProduct -> {
+              if (!getManageableRoles(sessionUser.getApplicationRole())
+                  .contains(targetProduct.getApplicationRole())) {
+                throw new AccessDeniedException(
+                    ErrorCode.ACCESS_DENIED, "Insufficient role to reset this user's password");
+              }
+            });
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);
@@ -500,6 +541,18 @@ public class UserDefinitionFacade {
     UserEntity userEntity = userService.findById(userId);
     userEntity.setLanguage(request.language());
     userService.updateUser(userEntity);
+  }
+
+  private static Set<ApplicationRole> getManageableRoles(ApplicationRole callerRole) {
+    if (callerRole == null) return Set.of();
+    return switch (callerRole) {
+      case ADMIN -> Set.of(GROUP_MANAGER, ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
+      case GROUP_MANAGER -> Set.of(ZONE_MANAGER, COMPANY_MANAGER, SUPERVISOR, STAFF);
+      case ZONE_MANAGER -> Set.of(COMPANY_MANAGER, SUPERVISOR, STAFF);
+      case COMPANY_MANAGER -> Set.of(SUPERVISOR, STAFF);
+      case SUPERVISOR -> Set.of(STAFF);
+      default -> Set.of();
+    };
   }
 
   private UserProductEntity resolveUserProduct(String userId) {
