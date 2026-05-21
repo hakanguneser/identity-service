@@ -33,12 +33,7 @@ import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
-import com.gastroblue.model.response.AccessibleUsersResponse;
-import com.gastroblue.model.response.CompanyContextResponse;
-import com.gastroblue.model.response.CompanyDefinitionResponse;
-import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
-import com.gastroblue.model.response.DropdownResponse;
-import com.gastroblue.model.response.UserDefinitionResponse;
+import com.gastroblue.model.response.*;
 import com.gastroblue.service.CompanyGroupService;
 import com.gastroblue.service.CompanyService;
 import com.gastroblue.service.UserDefinitionService;
@@ -317,6 +312,7 @@ public class UserDefinitionFacade {
     return sessionUserEntity;
   }
 
+  // TODO burasi toparlanmali
   private CompanyEntity getRegistrationCompany(UserSaveRequest request) {
     SessionUser sessionUser = IJwtService.findSessionUser();
 
@@ -334,7 +330,14 @@ public class UserDefinitionFacade {
       return companyService.findByIdOrThrow(request.companyId());
     }
 
-    return companyService.findByIdOrThrow(sessionUser.getCompanyId());
+    return companyService.findByIdOrThrow(
+        sessionUser.getCompanyIdsOrEmptyList().stream()
+            .findAny()
+            .orElseThrow(
+                () ->
+                    new BusinessException(
+                        ErrorCode.COMPANY_NOT_FOUND,
+                        "companyId is required for this registration role")));
   }
 
   private CompanyGroupEntity getRegistrationCompanyGroup(UserSaveRequest request) {
