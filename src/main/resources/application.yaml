@@ -22,7 +22,7 @@ spring:
     open-in-view: false
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 
 server:
   port: ${SERVER_PORT:7102}
@@ -35,14 +35,14 @@ application:
       token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
       sys-tokens:
-        tt:
-          token: ${TRACKER_TOKEN:tracker-token}
+        tracker:
+          token: ${TRACKER_TOKEN:TRACKER_TOKEN_NOT_CONFIGURED}
           product: TRACKER
-        ff:
-          token: ${FORMFLOW_TOKEN:formflow-token}
+        formflow:
+          token: ${FORMFLOW_TOKEN:FORMFLOW_TOKEN_NOT_CONFIGURED}
           product: FORMFLOW
         admin:
-          token: ${ADMIN_TOKEN:admin-token}
+          token: ${ADMIN_TOKEN:ADMIN_TOKEN_NOT_CONFIGURED}
           product: CHECK
 
 management:

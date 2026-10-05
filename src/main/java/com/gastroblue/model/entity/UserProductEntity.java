@@ -21,7 +21,7 @@ import lombok.*;
           name = "UK_USER_PRODUCTS",
           columnNames = {"USER_ID", "PRODUCT"})
     },
-    indexes = {@Index(name = "IDX_USER_PRODUCTS_USER_ID", columnList = "USER_ID")})
+    indexes = {})
 public class UserProductEntity extends Auditable {
 
   @Column(name = "USER_ID", nullable = false, length = 36)

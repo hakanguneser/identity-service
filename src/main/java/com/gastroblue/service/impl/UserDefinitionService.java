@@ -89,6 +89,7 @@ public class UserDefinitionService {
         .toList();
   }
 
+  @Transactional
   public UserEntity toggleUser(String userId) {
     UserEntity entityToBeUpdated = findById(userId);
     entityToBeUpdated.setActive(!entityToBeUpdated.isActive());

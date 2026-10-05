@@ -40,7 +40,6 @@ public class AuthenticationFacade {
   private final UserDefinitionService userService;
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
-  private final UserDefinitionService userDefinitionService;
   private final EnumConfigurationFacade enumConfigurationFacade;
   private final CompanyGroupEulaContentService eulaContentService;
   private final CompanyGroupProductService companyGroupProductService;
@@ -183,7 +182,7 @@ public class AuthenticationFacade {
 
   public void signEula() {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
-    UserEntity user = userDefinitionService.findUserByUserName(sessionUser.username());
+    UserEntity user = userService.findUserByUserName(sessionUser.username());
     eulaContentService.getActiveEulaContentForSessionUser();
     userProductService
         .findByUserIdAndProduct(user.getId(), sessionUser.getApplicationProduct())

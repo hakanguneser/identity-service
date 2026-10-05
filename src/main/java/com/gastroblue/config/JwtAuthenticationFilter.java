@@ -4,6 +4,7 @@ import static com.gastroblue.model.enums.ErrorCode.EXPIRED_JWT_TOKEN;
 import static com.gastroblue.model.enums.ErrorCode.INVALID_JWT_TOKEN;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gastroblue.config.tracing.TraceIdConstants;
 import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.enums.ApplicationProduct;
@@ -43,9 +44,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private static final String BEARER = "Bearer ";
 
+  private static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper().registerModule(new JavaTimeModule());
+
   private final IJwtService jwtService;
   private final Map<String, ApplicationProduct> sysTokenProductMap;
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   protected void doFilterInternal(
@@ -65,7 +68,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String jwtToken = authHeader.substring(BEARER.length());
 
       if (SecurityContextHolder.getContext().getAuthentication() == null) {
-
         SessionUser sessionUser =
             sysTokenProductMap.containsKey(jwtToken)
                 ? buildSysTokenSession(sysTokenProductMap.get(jwtToken))
@@ -130,6 +132,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             .timeStamp(LocalDateTime.now())
             .traceId(MDC.get(TraceIdConstants.MDC_TRACE_ID_KEY))
             .build();
-    objectMapper.writeValue(response.getWriter(), error);
+    OBJECT_MAPPER.writeValue(response.getWriter(), error);
   }
 }

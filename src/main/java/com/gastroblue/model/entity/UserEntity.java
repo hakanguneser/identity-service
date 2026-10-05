@@ -22,8 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails;
     name = "USERS",
     uniqueConstraints = {@UniqueConstraint(name = "UK_USERS", columnNames = "USERNAME")},
     indexes = {
-      @Index(name = "IDX_USERS", columnList = "USERNAME"),
-      @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID")
+      @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID"),
+      @Index(name = "IDX_USERS_COMPANY_ID_ACTIVE", columnList = "COMPANY_ID, IS_ACTIVE"),
+      @Index(name = "IDX_USERS_PASSWORD_EXPIRES_AT", columnList = "PASSWORD_EXPIRES_AT")
     })
 public class UserEntity extends Auditable implements UserDetails {
 
@@ -70,9 +71,14 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "PASSWORD_EXPIRES_AT")
   private LocalDateTime passwordExpiresAt;
 
+  /**
+   * Returns a placeholder authority used only during the initial username/password authentication
+   * step. For JWT-authenticated requests, the real role is carried in the token and resolved via
+   * {@link com.gastroblue.model.base.SessionUser#authorities()}.
+   */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    return List.of(new SimpleGrantedAuthority("ROLE_AUTHENTICATED"));
   }
 
   @Override

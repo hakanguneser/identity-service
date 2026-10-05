@@ -30,20 +30,15 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             authorize -> {
-
-              // 🔓 Public endpoints
               authorize
                   .requestMatchers(
                       "/api/v1/auth/login", "/api/v1/auth/refresh", "/actuator/health/**")
                   .permitAll();
-
-              // 📘 Swagger (env controlled)
               if (swaggerEnabled) {
                 authorize
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
                     .permitAll();
               }
-              // 🔐 ADMIN only
               authorize
                   .requestMatchers("/api/v1/definition/company-groups/**")
                   .hasAnyRole(
@@ -51,18 +46,12 @@ public class SecurityConfig {
                       ApplicationRole.APP_CLIENT.name(),
                       ApplicationRole.GROUP_MANAGER.name(),
                       ApplicationRole.ZONE_MANAGER.name());
-
-              // 🔐 APP_CLIENT only
               authorize
                   .requestMatchers("/api/v1/definition/company-groups/context")
                   .hasAnyRole(ApplicationRole.APP_CLIENT.name());
-
-              // Tracker backend ↔ identity (TT_TOKEN → APP_CLIENT + TRACKER aud)
               authorize
                   .requestMatchers("/api/v1/tracker/**")
                   .hasRole(ApplicationRole.APP_CLIENT.name());
-
-              // 🔒 Everything else
               authorize.anyRequest().authenticated();
             })
         .sessionManagement(

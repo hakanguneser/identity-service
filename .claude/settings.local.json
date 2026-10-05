@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "Bash(./mvnw compile:*)",
-      "Bash(mvn compile:*)"
+      "Bash(mvn compile:*)",
+      "Bash(mvn clean:*)",
+      "Bash(cmd /c \"mvn clean install -q 2>&1\")",
+      "Bash(cmd /c \"cd D:\\\\\\\\git-clones\\\\\\\\gastroblue-commons && mvn clean install 2>&1\")",
+      "Bash(powershell -Command \"cd D:\\\\\\\\git-clones\\\\\\\\gastroblue-commons; mvn clean install 2>&1\")",
+      "Bash(powershell -Command \"where.exe mvn; where.exe mvnw; ls C:\\\\\\\\ProgramData\\\\\\\\chocolatey\\\\\\\\bin\\\\\\\\mvn* 2>&1; ls 'C:\\\\\\\\Program Files\\\\\\\\Apache\\\\\\\\*' 2>&1 | head -10\")",
+      "Bash(powershell -Command 'Get-Command mvn -ErrorAction SilentlyContinue; $env:PATH -split '\\\\'';'\\\\'' | Where-Object { $_ -like '\\\\''*maven*'\\\\'' -or $_ -like '\\\\''*java*'\\\\'' -or $_ -like '\\\\''*jdk*'\\\\'' } | Select-Object -First 10')",
+      "Bash(powershell -Command \"ls D:\\\\\\\\git-clones\\\\\\\\identity-service\\\\\\\\mvnw* 2>&1\")",
+      "Bash(powershell -Command \"Copy-Item D:\\\\\\\\git-clones\\\\\\\\identity-service\\\\\\\\mvnw.cmd D:\\\\\\\\git-clones\\\\\\\\gastroblue-commons\\\\\\\\mvnw.cmd; Copy-Item D:\\\\\\\\git-clones\\\\\\\\identity-service\\\\\\\\mvnw D:\\\\\\\\git-clones\\\\\\\\gastroblue-commons\\\\\\\\mvnw; Copy-Item D:\\\\\\\\git-clones\\\\\\\\identity-service\\\\\\\\.mvn -Destination D:\\\\\\\\git-clones\\\\\\\\gastroblue-commons\\\\\\\\.mvn -Recurse; Write-Host 'Done'\")",
+      "Bash(powershell -Command \"cd D:\\\\\\\\git-clones\\\\\\\\gastroblue-commons; .\\\\\\\\mvnw.cmd clean install 2>&1\")",
+      "Bash(del \"D:\\\\git-clones\\\\gastroblue-commons\\\\src\\\\main\\\\java\\\\com\\\\gastroblue\\\\service\\\\impl\\\\DefaultErrorMessageService.java\")",
+      "Bash(./mvnw.cmd clean:*)",
+      "Bash(xargs -I{} unzip -l {})",
+      "Bash(unzip -l /c/Users/hakanguneser/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/4.0.1/spring-boot-autoconfigure-4.0.1.jar)",
+      "Bash(unzip -l /c/Users/hakanguneser/.m2/repository/org/springframework/boot/spring-boot-data-jpa/4.0.1/spring-boot-data-jpa-4.0.1.jar)",
+      "Bash(unzip -l /c/Users/hakanguneser/.m2/repository/org/springframework/boot/spring-boot-jpa/4.0.1/spring-boot-jpa-4.0.1.jar)",
+      "Bash(unzip -l /c/Users/hakanguneser/.m2/repository/org/springframework/boot/spring-boot-persistence/4.0.1/spring-boot-persistence-4.0.1.jar)",
+      "Bash(unzip -l /c/Users/hakanguneser/.m2/repository/org/springframework/boot/spring-boot-hibernate/4.0.1/spring-boot-hibernate-4.0.1.jar)"
     ]
   }
 }
