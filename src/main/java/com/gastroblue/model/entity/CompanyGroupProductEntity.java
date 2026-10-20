@@ -1,7 +1,7 @@
 package com.gastroblue.model.entity;
 
-import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.commons.helper.persistence.model.base.Auditable;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +19,7 @@ import lombok.*;
           name = "UK_COMPANY_GROUP_PRODUCTS",
           columnNames = {"COMPANY_GROUP_ID", "PRODUCT"})
     },
-    indexes = {})
+    indexes = {@Index(name = "IDX_COMPANY_GROUP_PRODUCTS_CG_ID", columnList = "COMPANY_GROUP_ID")})
 public class CompanyGroupProductEntity extends Auditable {
 
   @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)

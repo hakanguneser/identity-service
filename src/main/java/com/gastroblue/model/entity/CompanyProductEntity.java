@@ -1,7 +1,7 @@
 package com.gastroblue.model.entity;
 
-import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.commons.helper.persistence.model.base.Auditable;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.*;
@@ -20,7 +20,7 @@ import lombok.*;
           name = "UK_COMPANY_PRODUCTS",
           columnNames = {"COMPANY_ID", "PRODUCT"})
     },
-    indexes = {})
+    indexes = {@Index(name = "IDX_COMPANY_PRODUCTS_COMPANY_ID", columnList = "COMPANY_ID")})
 public class CompanyProductEntity extends Auditable {
 
   @Column(name = "COMPANY_ID", nullable = false, length = 36)
@@ -31,7 +31,7 @@ public class CompanyProductEntity extends Auditable {
   private ApplicationProduct product;
 
   @Column(name = "ENABLED", nullable = false)
-  private Boolean enabled;
+  private boolean enabled;
 
   @Column(name = "LICENSE_EXPIRES_AT")
   private LocalDate licenseExpiresAt;

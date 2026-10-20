@@ -1,28 +1,31 @@
 package com.gastroblue.facade;
 
-import static com.gastroblue.util.DelimitedStringUtil.join;
-import static com.gastroblue.util.DelimitedStringUtil.split;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.BusinessException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyProductEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.CompanyProductSaveRequest;
 import com.gastroblue.model.request.CompanyProductUpdateRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
+import com.gastroblue.model.response.CompanyDefinitionListResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
+import com.gastroblue.model.response.CompanyProductListResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
-import com.gastroblue.service.impl.CompanyGroupProductService;
-import com.gastroblue.service.impl.CompanyGroupService;
-import com.gastroblue.service.impl.CompanyProductService;
-import com.gastroblue.service.impl.CompanyService;
+import com.gastroblue.service.CompanyGroupProductService;
+import com.gastroblue.service.CompanyGroupService;
+import com.gastroblue.service.CompanyProductService;
+import com.gastroblue.service.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,18 +39,21 @@ public class CompanyDefinitionFacade {
   private final CompanyGroupService companyGroupService;
   private final CompanyGroupProductService companyGroupProductService;
   private final CompanyProductService companyProductService;
-  private final EnumConfigurationFacade enumConfigurationFacade;
+  private final ILookupService lookupService;
 
-  public List<CompanyDefinitionResponse> findCompaniesByCompanyGroupId(String companyGroupId) {
-    return companyService.findByCompanyGroupId(companyGroupId).stream()
-        .map(entity -> CompanyGroupMapper.toResponse(entity, enumConfigurationFacade))
-        .toList();
+  public CompanyDefinitionListResponse findCompaniesByCompanyGroupId(String companyGroupId) {
+    return CompanyDefinitionListResponse.builder()
+        .companies(
+            companyService.findByCompanyGroupId(companyGroupId).stream()
+                .map(entity -> CompanyGroupMapper.toResponse(entity, lookupService))
+                .toList())
+        .build();
   }
 
   public CompanyDefinitionResponse findCompanyByCompanyIdAndCompanyGroupId(
       String companyGroupId, String companyId) {
     CompanyEntity entity = companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(entity, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(entity, lookupService);
   }
 
   public CompanyDefinitionResponse saveCompany(String companyGroupId, CompanySaveRequest request) {
@@ -58,7 +64,7 @@ public class CompanyDefinitionFacade {
     CompanyEntity entityToBeSave = CompanyGroupMapper.toEntity(request, companyGroupId);
 
     CompanyEntity savedCompany = companyService.save(entityToBeSave);
-    return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(savedCompany, lookupService);
   }
 
   public CompanyDefinitionResponse updateCompany(
@@ -81,19 +87,22 @@ public class CompanyDefinitionFacade {
     entityToBeUpdated.setSegment4(request.segment4());
     entityToBeUpdated.setSegment5(request.segment5());
     CompanyEntity savedCompany = companyService.save(entityToBeUpdated);
-    return CompanyGroupMapper.toResponse(savedCompany, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(savedCompany, lookupService);
   }
 
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
-    return CompanyGroupMapper.toResponse(companyEntity, enumConfigurationFacade);
+    return CompanyGroupMapper.toResponse(companyEntity, lookupService);
   }
 
-  public List<CompanyProductResponse> findCompanyProducts(String companyGroupId, String companyId) {
+  public CompanyProductListResponse findCompanyProducts(String companyGroupId, String companyId) {
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
-    return companyProductService.findAllByCompanyId(companyId).stream()
-        .map(CompanyGroupMapper::toResponse)
-        .toList();
+    return CompanyProductListResponse.builder()
+        .products(
+            companyProductService.findAllByCompanyId(companyId).stream()
+                .map(CompanyGroupMapper::toResponse)
+                .toList())
+        .build();
   }
 
   public CompanyProductResponse saveCompanyProduct(
@@ -105,7 +114,7 @@ public class CompanyDefinitionFacade {
         .findByCompanyIdAndProduct(companyId, request.product())
         .ifPresent(
             existing -> {
-              throw new IllegalDefinitionException(
+              throw new BusinessException(
                   ErrorCode.COMPANY_PRODUCT_ALREADY_EXISTS,
                   "Product already assigned to company: " + request.product());
             });
@@ -128,13 +137,10 @@ public class CompanyDefinitionFacade {
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     CompanyProductEntity existing =
         companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
-    CompanyProductEntity updated =
-        CompanyProductEntity.builder()
-            .enabled(request.enabled())
-            .licenseExpiresAt(request.licenseExpiresAt())
-            .agreedUserCount(request.agreedUserCount())
-            .build();
-    return CompanyGroupMapper.toResponse(companyProductService.update(existing.getId(), updated));
+    existing.setEnabled(request.enabled());
+    existing.setLicenseExpiresAt(request.licenseExpiresAt());
+    existing.setAgreedUserCount(request.agreedUserCount());
+    return CompanyGroupMapper.toResponse(companyProductService.save(existing));
   }
 
   public void deleteCompanyProduct(
@@ -153,13 +159,21 @@ public class CompanyDefinitionFacade {
             .orElseThrow(
                 () -> {
                   log.debug("Company not found with code: {}", companyCode);
-                  return new IllegalDefinitionException(
+                  return new NotFoundException(
                       ErrorCode.COMPANY_NOT_FOUND, "Company not found: " + companyCode);
                 });
 
     return CompanyContextResponse.builder()
         .companyGroup(CompanyGroupMapper.toResponse(group))
-        .company(CompanyGroupMapper.toResponse(company, enumConfigurationFacade))
+        .company(CompanyGroupMapper.toResponse(company, lookupService))
         .build();
+  }
+
+  public CompanyProductResponse toggleCompanyProduct(
+      String companyGroupId, String companyId, ApplicationProduct product) {
+    CompanyProductEntity companyProductEntity =
+        companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
+    companyProductEntity.setEnabled(!companyProductEntity.isEnabled());
+    return CompanyGroupMapper.toResponse(companyProductService.save(companyProductEntity));
   }
 }

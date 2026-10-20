@@ -5,12 +5,12 @@ import com.gastroblue.model.request.LanguageUpdateRequest;
 import com.gastroblue.model.request.PasswordChangeRequest;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
+import com.gastroblue.model.response.AccessibleUsersResponse;
 import com.gastroblue.model.response.CompanyContextResponse;
+import com.gastroblue.model.response.DropdownResponse;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +60,7 @@ public class UserDefinitionController {
   @PatchMapping("/{userId}/language")
   ResponseEntity<Void> updateLanguage(
       @PathVariable("userId") final String userId,
-      @RequestBody final LanguageUpdateRequest request) {
+      @RequestBody @Valid final LanguageUpdateRequest request) {
     userFacade.updateLanguage(userId, request);
     return ResponseEntity.noContent().build();
   }
@@ -79,39 +79,39 @@ public class UserDefinitionController {
   }
 
   @GetMapping("/accessible") // pageable ????
-  public ResponseEntity<List<UserDefinitionResponse>> findAccessibleUsers(
+  public ResponseEntity<AccessibleUsersResponse> findAccessibleUsers(
       @RequestParam(name = "includeAll", defaultValue = "false", required = false)
           boolean includeAll) {
     return ResponseEntity.ok(userFacade.findAccessibleUsers(includeAll));
   }
 
   @GetMapping("dropdown/application-roles")
-  public ResponseEntity<List<ResolvedEnum>> findAllApplicationRoles() {
+  public ResponseEntity<DropdownResponse> findAllApplicationRoles() {
     return ResponseEntity.ok(userFacade.findAllApplicationRoles());
   }
 
   @GetMapping("dropdown/departments")
-  public ResponseEntity<List<ResolvedEnum>> findAllDepartments() {
+  public ResponseEntity<DropdownResponse> findAllDepartments() {
     return ResponseEntity.ok(userFacade.findAllDepartments());
   }
 
   @GetMapping("dropdown/genders")
-  public ResponseEntity<List<ResolvedEnum>> findAllGenders() {
+  public ResponseEntity<DropdownResponse> findAllGenders() {
     return ResponseEntity.ok(userFacade.findAllGenders());
   }
 
   @GetMapping("dropdown/zones")
-  public ResponseEntity<List<ResolvedEnum>> findAllZones() {
+  public ResponseEntity<DropdownResponse> findAllZones() {
     return ResponseEntity.ok(userFacade.findAllZones());
   }
 
   @GetMapping("dropdown/company-groups")
-  public ResponseEntity<List<ResolvedEnum>> findAvailableCompanyGroups() {
+  public ResponseEntity<DropdownResponse> findAvailableCompanyGroups() {
     return ResponseEntity.ok(userFacade.findAvailableCompanyGroups());
   }
 
   @GetMapping("dropdown/companies")
-  public ResponseEntity<List<ResolvedEnum>> findAvailableCompanies() {
+  public ResponseEntity<DropdownResponse> findAvailableCompanies() {
     return ResponseEntity.ok(userFacade.findAvailableCompanies());
   }
 }

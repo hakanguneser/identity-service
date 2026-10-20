@@ -1,6 +1,6 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.model.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import java.time.LocalDate;
 import lombok.*;
 

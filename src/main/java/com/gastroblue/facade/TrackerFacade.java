@@ -1,15 +1,16 @@
 package com.gastroblue.facade;
 
-import com.gastroblue.client.TrackerPushNotificationDispatcher;
-import com.gastroblue.exception.AccessDeniedException;
-import com.gastroblue.exception.IllegalDefinitionException;
+import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
+import com.gastroblue.commons.helper.exception.type.NotFoundException;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
+import com.gastroblue.commons.helper.security.service.IJwtService;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.TrackerMapper;
-import com.gastroblue.model.base.SessionUser;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import com.gastroblue.model.request.PushNotificationRequest;
 import com.gastroblue.model.request.TrackerUsersByIdsRequest;
@@ -17,11 +18,10 @@ import com.gastroblue.model.response.tracker.PushNotificationAcceptedResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyUsersResponse;
 import com.gastroblue.model.response.tracker.TrackerUser;
-import com.gastroblue.service.IJwtService;
-import com.gastroblue.service.impl.CompanyGroupService;
-import com.gastroblue.service.impl.CompanyService;
-import com.gastroblue.service.impl.UserDefinitionService;
-import com.gastroblue.service.impl.UserProductService;
+import com.gastroblue.service.CompanyGroupService;
+import com.gastroblue.service.CompanyService;
+import com.gastroblue.service.UserDefinitionService;
+import com.gastroblue.service.UserProductService;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,8 +42,8 @@ public class TrackerFacade {
   private final UserProductService userProductService;
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
-  private final EnumConfigurationFacade enumConfigurationFacade;
-  private final TrackerPushNotificationDispatcher trackerPushNotificationDispatcher;
+  private final ILookupService lookupService;
+  private final ExpoPushNotificationFacade trackerPushNotificationDispatcher;
 
   public TrackerCompanyUsersResponse findCompanyUsers(String companyGroupId, String companyId) {
     requireTrackerProduct();
@@ -60,9 +60,7 @@ public class TrackerFacade {
                 .collect(Collectors.toMap(UserProductEntity::getUserId, up -> up));
     List<TrackerUser> items =
         users.stream()
-            .map(
-                u ->
-                    TrackerMapper.toUser(u, userProductMap.get(u.getId()), enumConfigurationFacade))
+            .map(u -> TrackerMapper.toUser(u, userProductMap.get(u.getId()), lookupService))
             .toList();
     return TrackerCompanyUsersResponse.builder().users(items).build();
   }
@@ -90,7 +88,7 @@ public class TrackerFacade {
                   if (user == null || userProduct == null) {
                     return null;
                   }
-                  return TrackerMapper.toUser(user, userProduct, enumConfigurationFacade);
+                  return TrackerMapper.toUser(user, userProduct, lookupService);
                 })
             .filter(Objects::nonNull)
             .toList();
@@ -107,15 +105,15 @@ public class TrackerFacade {
             .orElseThrow(
                 () -> {
                   log.debug("Company not found with code: {}", companyCode);
-                  return new IllegalDefinitionException(
+                  return new NotFoundException(
                       ErrorCode.COMPANY_NOT_FOUND, "Company not found: " + companyCode);
                 });
     if (!company.getCompanyGroupId().equals(group.getId())) {
-      throw new IllegalDefinitionException(
+      throw new NotFoundException(
           ErrorCode.COMPANY_NOT_FOUND,
           "Company not found in group: " + companyGroupCode + " / " + companyCode);
     }
-    return TrackerMapper.toCompanyContextResponse(group, company, enumConfigurationFacade);
+    return TrackerMapper.toCompanyContextResponse(group, company, lookupService);
   }
 
   public PushNotificationAcceptedResponse enqueuePushNotifications(

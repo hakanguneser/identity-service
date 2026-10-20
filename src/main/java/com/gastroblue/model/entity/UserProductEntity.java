@@ -1,15 +1,14 @@
 package com.gastroblue.model.entity;
 
-import com.gastroblue.model.entity.base.Auditable;
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ApplicationRole;
+import com.gastroblue.commons.helper.persistence.model.base.Auditable;
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationRole;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
 
 @Setter
 @Getter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,7 +20,7 @@ import lombok.*;
           name = "UK_USER_PRODUCTS",
           columnNames = {"USER_ID", "PRODUCT"})
     },
-    indexes = {})
+    indexes = {@Index(name = "IDX_USER_PRODUCTS_USER_ID", columnList = "USER_ID")})
 public class UserProductEntity extends Auditable {
 
   @Column(name = "USER_ID", nullable = false, length = 36)
@@ -35,8 +34,9 @@ public class UserProductEntity extends Auditable {
   @Column(name = "APPLICATION_ROLE", nullable = false, length = 50)
   private ApplicationRole applicationRole;
 
+  @Builder.Default
   @Column(name = "DEPARTMENTS", length = 1000, nullable = false)
-  private String departments;
+  private String departments = "";
 
   @Column(name = "IS_ACTIVE", nullable = false)
   private boolean active;

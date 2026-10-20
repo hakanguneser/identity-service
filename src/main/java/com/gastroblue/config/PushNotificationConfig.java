@@ -1,7 +1,6 @@
 package com.gastroblue.config;
 
-import com.gastroblue.model.properties.ExpoPushProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -10,13 +9,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableConfigurationProperties(ExpoPushProperties.class)
 public class PushNotificationConfig {
 
   @Bean
-  public RestClient expoPushRestClient(ExpoPushProperties props) {
+  public RestClient expoPushRestClient(
+      @Value("${app.expo.base-url:https://exp.host}") String baseUrl) {
     return RestClient.builder()
-        .baseUrl(props.getBaseUrl())
+        .baseUrl(baseUrl)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .build();

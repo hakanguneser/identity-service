@@ -1,0 +1,24 @@
+package com.gastroblue.model.response;
+
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.Language;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
+public class CompanyGroupEulaContentSummary {
+  private String id;
+  private String companyGroupId;
+  private ApplicationProduct product;
+  private String eulaVersion;
+  private Language language;
+  private LocalDate startDate;
+  private LocalDate endDate;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+}

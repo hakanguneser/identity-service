@@ -1,10 +1,9 @@
 package com.gastroblue.client;
 
-import com.gastroblue.model.properties.ExpoPushProperties;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,6 @@ import org.springframework.web.client.RestClient;
  * Push API</a> ({@code POST /--/api/v2/push/send}).
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class ExpoPushClient {
 
@@ -24,7 +22,14 @@ public class ExpoPushClient {
   private static final int MAX_MESSAGES_PER_REQUEST = 100;
 
   private final RestClient expoPushRestClient;
-  private final ExpoPushProperties expoPushProperties;
+  private final String accessToken;
+
+  public ExpoPushClient(
+      RestClient expoPushRestClient,
+      @Value("${app.expo.access-token:#{null}}") String accessToken) {
+    this.expoPushRestClient = expoPushRestClient;
+    this.accessToken = accessToken;
+  }
 
   public void sendNotifications(List<String> expoPushTokens, String title, String body) {
     if (expoPushTokens == null || expoPushTokens.isEmpty()) {
@@ -54,8 +59,8 @@ public class ExpoPushClient {
               .uri(SEND_PATH)
               .headers(
                   h -> {
-                    if (StringUtils.hasText(expoPushProperties.getAccessToken())) {
-                      h.setBearerAuth(expoPushProperties.getAccessToken().trim());
+                    if (StringUtils.hasText(accessToken)) {
+                      h.setBearerAuth(accessToken.trim());
                     }
                   })
               .body(messages)

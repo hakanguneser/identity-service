@@ -6,7 +6,6 @@ import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,12 +37,12 @@ public class AuthenticationController {
   }
 
   @GetMapping("/my/company-groups")
-  public ResponseEntity<List<AuthUserCompanyGroupResponse>> findMyCompanyGroups() {
+  public ResponseEntity<AuthUserCompanyGroupsResponse> findMyCompanyGroups() {
     return ResponseEntity.ok(authenticationFacade.findMyCompanyGroups());
   }
 
   @GetMapping("/my/companies")
-  public ResponseEntity<List<AuthUserCompanyResponse>> findMyCompanies() {
+  public ResponseEntity<AuthUserCompaniesResponse> findMyCompanies() {
     return ResponseEntity.ok(authenticationFacade.findMyCompanies());
   }
 
@@ -58,8 +57,14 @@ public class AuthenticationController {
     return ResponseEntity.noContent().build();
   }
 
+  @PostMapping("/logout")
+  public ResponseEntity<Void> logout() {
+    authenticationFacade.logout();
+    return ResponseEntity.noContent().build();
+  }
+
   @PatchMapping("/push-token")
-  public ResponseEntity<Void> pushToken(@RequestBody PushTokenRequest request) {
+  public ResponseEntity<Void> pushToken(@RequestBody @Valid PushTokenRequest request) {
     authenticationFacade.pushToken(request);
     return ResponseEntity.noContent().build();
   }

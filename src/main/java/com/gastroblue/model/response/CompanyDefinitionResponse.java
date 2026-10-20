@@ -1,6 +1,6 @@
 package com.gastroblue.model.response;
 
-import com.gastroblue.model.shared.ResolvedEnum;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,13 +17,13 @@ public class CompanyDefinitionResponse {
   private String companyCode;
   private String companyName;
   private List<String> companyMail;
-  private ResolvedEnum country;
-  private ResolvedEnum city;
-  private ResolvedEnum zone;
-  private ResolvedEnum segment1;
-  private ResolvedEnum segment2;
-  private ResolvedEnum segment3;
-  private ResolvedEnum segment4;
-  private ResolvedEnum segment5;
+  private BaseLookupModel country;
+  private BaseLookupModel city;
+  private BaseLookupModel zone;
+  private BaseLookupModel segment1;
+  private BaseLookupModel segment2;
+  private BaseLookupModel segment3;
+  private BaseLookupModel segment4;
+  private BaseLookupModel segment5;
   private Boolean isActive;
 }

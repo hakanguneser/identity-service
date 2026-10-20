@@ -1,6 +1,7 @@
 package com.gastroblue.model.entity;
 
-import com.gastroblue.model.entity.base.Auditable;
+import com.gastroblue.commons.helper.persistence.model.base.Auditable;
+import com.gastroblue.commons.shared.enums.Language;
 import com.gastroblue.model.enums.*;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -37,6 +38,7 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "USERNAME", length = 100)
   private String username;
 
+  @ToString.Exclude
   @Column(name = "PASSWORD", length = 500)
   private String password;
 
@@ -71,11 +73,17 @@ public class UserEntity extends Auditable implements UserDetails {
   @Column(name = "PASSWORD_EXPIRES_AT")
   private LocalDateTime passwordExpiresAt;
 
-  /**
-   * Returns a placeholder authority used only during the initial username/password authentication
-   * step. For JWT-authenticated requests, the real role is carried in the token and resolved via
-   * {@link com.gastroblue.model.base.SessionUser#authorities()}.
-   */
+  @Column(name = "PASSWORD_VERSION", nullable = false)
+  @Builder.Default
+  private int passwordVersion = 1;
+
+  @Column(name = "LOGIN_ATTEMPT_COUNT", nullable = false)
+  @Builder.Default
+  private int loginAttemptCount = 0;
+
+  @Column(name = "LOCKED_UNTIL")
+  private LocalDateTime lockedUntil;
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority("ROLE_AUTHENTICATED"));
@@ -88,7 +96,7 @@ public class UserEntity extends Auditable implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    return true;
+    return lockedUntil == null || lockedUntil.isBefore(LocalDateTime.now());
   }
 
   @Override
@@ -96,7 +104,6 @@ public class UserEntity extends Auditable implements UserDetails {
     return true;
   }
 
-  /** Global account status. Per-product active status is managed in UserProductEntity. */
   @Override
   public boolean isEnabled() {
     return active;

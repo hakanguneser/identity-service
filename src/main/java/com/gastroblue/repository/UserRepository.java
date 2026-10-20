@@ -1,8 +1,8 @@
 package com.gastroblue.repository;
 
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
+import com.gastroblue.commons.shared.enums.ApplicationRole;
 import com.gastroblue.model.entity.UserEntity;
-import com.gastroblue.model.enums.ApplicationProduct;
-import com.gastroblue.model.enums.ApplicationRole;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,9 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
   @Query(
       """
       update UserEntity u
-      set u.passwordChangeRequired = case when (u.passwordExpiresAt is null or u.passwordExpiresAt < :now) then true else u.passwordChangeRequired end
+      set u.passwordChangeRequired = case when (u.passwordExpiresAt is null or u.passwordExpiresAt < :now) then true else u.passwordChangeRequired end,
+          u.loginAttemptCount = 0,
+          u.lockedUntil = null
       where u.username = :username
       """)
   void updatePasswordCheckAfterLogin(

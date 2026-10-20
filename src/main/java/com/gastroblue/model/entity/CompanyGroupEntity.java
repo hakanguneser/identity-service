@@ -1,6 +1,6 @@
 package com.gastroblue.model.entity;
 
-import com.gastroblue.model.entity.base.Auditable;
+import com.gastroblue.commons.helper.persistence.model.base.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,8 +15,7 @@ import lombok.*;
     name = "COMPANY_GROUPS",
     uniqueConstraints = {
       @UniqueConstraint(name = "UK_COMPANY_GROUPS_COMPANY_CODE", columnNames = "GROUP_CODE")
-    },
-    indexes = {})
+    })
 public class CompanyGroupEntity extends Auditable {
 
   @Column(name = "NAME", length = 100)
