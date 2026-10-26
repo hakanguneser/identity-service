@@ -2,6 +2,7 @@ package com.gastroblue.facade;
 
 import static com.gastroblue.model.enums.ErrorCode.INVALID_USERNAME_OR_PASSWORD;
 
+import com.gastroblue.client.ExpoPushTokens;
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
@@ -347,7 +348,8 @@ public class AuthenticationFacade {
         userProductService
             .findByUserIdAndProduct(sessionUser.userId(), sessionUser.getApplicationProduct())
             .orElseThrow(() -> new AccessDeniedException(ErrorCode.USER_PRODUCT_NOT_FOUND));
-    userProduct.setPushToken(request.token());
+    // Stored without the ExponentPushToken[...] wrapper; ExpoPushClient adds it when sending.
+    userProduct.setPushToken(ExpoPushTokens.normalize(request.token()));
     userProductService.save(userProduct);
   }
 }

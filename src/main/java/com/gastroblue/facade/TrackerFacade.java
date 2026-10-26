@@ -1,5 +1,8 @@
 package com.gastroblue.facade;
 
+import com.gastroblue.client.ExpoPushClient;
+import com.gastroblue.client.ExpoPushResult;
+import com.gastroblue.client.ExpoPushTokens;
 import com.gastroblue.commons.helper.exception.type.AccessDeniedException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
@@ -12,9 +15,13 @@ import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.model.enums.ErrorCode;
+import com.gastroblue.model.enums.PushNotificationError;
+import com.gastroblue.model.enums.PushNotificationResultType;
 import com.gastroblue.model.request.PushNotificationRequest;
 import com.gastroblue.model.request.TrackerUsersByIdsRequest;
-import com.gastroblue.model.response.tracker.PushNotificationAcceptedResponse;
+import com.gastroblue.model.response.tracker.PushNotificationErrorDetail;
+import com.gastroblue.model.response.tracker.PushNotificationResponse;
+import com.gastroblue.model.response.tracker.PushNotificationResult;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyUsersResponse;
 import com.gastroblue.model.response.tracker.TrackerUser;
@@ -43,7 +50,7 @@ public class TrackerFacade {
   private final CompanyService companyService;
   private final CompanyGroupService companyGroupService;
   private final ILookupService lookupService;
-  private final ExpoPushNotificationFacade trackerPushNotificationDispatcher;
+  private final ExpoPushClient expoPushClient;
 
   public TrackerCompanyUsersResponse findCompanyUsers(String companyGroupId, String companyId) {
     requireTrackerProduct();
@@ -116,23 +123,83 @@ public class TrackerFacade {
     return TrackerMapper.toCompanyContextResponse(group, company, lookupService);
   }
 
-  public PushNotificationAcceptedResponse enqueuePushNotifications(
-      PushNotificationRequest request) {
-    requireTrackerProduct();
-    List<UserProductEntity> userProducts =
-        userProductService.findByUserIdInAndProduct(
-            request.userIdList(), ApplicationProduct.TRACKER);
-    List<String> tokens =
-        userProducts.stream()
-            .map(UserProductEntity::getPushToken)
-            .filter(StringUtils::hasText)
-            .map(String::trim)
-            .distinct()
+  /**
+   * Sends the notification synchronously and returns one result per requested user. Users without a
+   * TRACKER push token get {@code NoTokenFound}; token level Expo errors are mapped back to the
+   * users that own the token.
+   */
+  public PushNotificationResponse sendPushNotifications(PushNotificationRequest request) {
+    // requireTrackerProduct();
+    List<String> userIds = new ArrayList<>(new LinkedHashSet<>(request.userIdList()));
+
+    Map<String, String> tokenByUserId =
+        userProductService.findByUserIdInAndProduct(userIds, ApplicationProduct.TRACKER).stream()
+            .filter(up -> StringUtils.hasText(up.getPushToken()))
+            .collect(
+                Collectors.toMap(
+                    UserProductEntity::getUserId,
+                    up -> ExpoPushTokens.normalize(up.getPushToken()),
+                    (first, second) -> first));
+
+    Map<String, ExpoPushResult> resultByToken =
+        expoPushClient
+            .sendNotifications(
+                tokenByUserId.values().stream().distinct().toList(),
+                request.title(),
+                request.body())
+            .stream()
+            .collect(Collectors.toMap(ExpoPushResult::token, r -> r, (first, second) -> first));
+
+    List<PushNotificationResult> results =
+        userIds.stream()
+            .map(userId -> toPushResult(userId, tokenByUserId.get(userId), resultByToken))
             .toList();
-    if (!tokens.isEmpty()) {
-      trackerPushNotificationDispatcher.dispatch(tokens, request.title(), request.body());
+    int successCount =
+        (int) results.stream().filter(r -> r.result() == PushNotificationResultType.OK).count();
+
+    log.info(
+        "Tracker push sent: recipients={}, success={}, failure={}",
+        results.size(),
+        successCount,
+        results.size() - successCount);
+
+    return PushNotificationResponse.builder()
+        .recipientCount(results.size())
+        .successCount(successCount)
+        .failureCount(results.size() - successCount)
+        .results(results)
+        .build();
+  }
+
+  private static PushNotificationResult toPushResult(
+      String userId, String token, Map<String, ExpoPushResult> resultByToken) {
+    if (token == null) {
+      return failedResult(userId, PushNotificationError.NO_TOKEN_FOUND.getCode());
     }
-    return PushNotificationAcceptedResponse.builder().recipientCount(tokens.size()).build();
+    ExpoPushResult expoResult = resultByToken.get(token);
+    if (expoResult == null) {
+      return failedResult(userId, PushNotificationError.UNKNOWN.getCode());
+    }
+    if (expoResult.ok()) {
+      return PushNotificationResult.builder()
+          .userId(userId)
+          .result(PushNotificationResultType.OK)
+          .build();
+    }
+    return failedResult(userId, expoResult.errorCode());
+  }
+
+  /** Keeps Expo's own error code even when it is not one of the known codes. */
+  private static PushNotificationResult failedResult(String userId, String errorCode) {
+    return PushNotificationResult.builder()
+        .userId(userId)
+        .result(PushNotificationResultType.NOK)
+        .error(
+            PushNotificationErrorDetail.builder()
+                .expoError(errorCode)
+                .errorDescription(PushNotificationError.fromExpoCode(errorCode).getDescription())
+                .build())
+        .build();
   }
 
   private static void requireTrackerProduct() {
