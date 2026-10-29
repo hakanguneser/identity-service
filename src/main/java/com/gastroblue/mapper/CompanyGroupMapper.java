@@ -1,16 +1,17 @@
 package com.gastroblue.mapper;
 
-import static com.gastroblue.util.DelimitedStringUtil.join;
-import static com.gastroblue.util.DelimitedStringUtil.split;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.join;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 
-import com.gastroblue.facade.EnumConfigurationFacade;
+import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
 import com.gastroblue.model.base.Company;
 import com.gastroblue.model.base.CompanyGroup;
 import com.gastroblue.model.entity.CompanyEntity;
 import com.gastroblue.model.entity.CompanyGroupEntity;
 import com.gastroblue.model.entity.CompanyGroupProductEntity;
 import com.gastroblue.model.entity.CompanyProductEntity;
-import com.gastroblue.model.enums.EnumTypes;
+import com.gastroblue.model.enums.Lookups;
 import com.gastroblue.model.request.CompanyGroupSaveRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.response.AuthUserCompanyGroupResponse;
@@ -19,11 +20,9 @@ import com.gastroblue.model.response.CompanyDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupDefinitionResponse;
 import com.gastroblue.model.response.CompanyGroupProductResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
-import com.gastroblue.util.DelimitedStringUtil;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public class CompanyGroupMapper {
 
   public static CompanyGroupEntity toEntity(CompanyGroupSaveRequest request) {
@@ -32,7 +31,7 @@ public class CompanyGroupMapper {
         .groupCode(request.groupCode())
         .groupMail(join(request.groupMails()))
         .logoUrl(request.logoUrl())
-        .mailDomains(DelimitedStringUtil.join(request.mailDomains()))
+        .mailDomains(join(request.mailDomains()))
         .build();
   }
 
@@ -77,81 +76,48 @@ public class CompanyGroupMapper {
   }
 
   public static CompanyDefinitionResponse toResponse(
-      final CompanyEntity entity, final EnumConfigurationFacade facade) {
-    String companyGroupId = entity.getCompanyGroupId();
+      final CompanyEntity entity, final ILookupService lookupService) {
+    LookupQuery base = LookupQuery.of().companyGroupId(entity.getCompanyGroupId());
     return CompanyDefinitionResponse.builder()
         .companyId(entity.getId())
-        .companyGroupId(companyGroupId)
+        .companyGroupId(entity.getCompanyGroupId())
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
+        .country(lookupService.find(base.lookup(Lookups.COUNTRY).key(entity.getCountry())))
         .city(
-            entity.getCity() != null
-                ? facade.resolve(EnumTypes.CITY, entity.getCity(), companyGroupId)
-                : null)
-        .country(
-            entity.getCountry() != null
-                ? facade.resolve(EnumTypes.COUNTRY, entity.getCountry(), companyGroupId)
-                : null)
-        .zone(
-            entity.getZone() != null
-                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), companyGroupId)
-                : null)
-        .segment1(
-            entity.getSegment1() != null
-                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), companyGroupId)
-                : null)
-        .segment2(
-            entity.getSegment2() != null
-                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), companyGroupId)
-                : null)
-        .segment3(
-            entity.getSegment3() != null
-                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), companyGroupId)
-                : null)
-        .segment4(
-            entity.getSegment4() != null
-                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), companyGroupId)
-                : null)
-        .segment5(
-            entity.getSegment5() != null
-                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), companyGroupId)
-                : null)
+            lookupService.find(
+                base.lookup(Lookups.CITY).parentKey(entity.getCountry()).key(entity.getCity())))
+        .zone(lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone())))
+        .segment1(lookupService.find(base.lookup(Lookups.SEGMENT_1).key(entity.getSegment1())))
+        .segment2(lookupService.find(base.lookup(Lookups.SEGMENT_2).key(entity.getSegment2())))
+        .segment3(lookupService.find(base.lookup(Lookups.SEGMENT_3).key(entity.getSegment3())))
+        .segment4(lookupService.find(base.lookup(Lookups.SEGMENT_4).key(entity.getSegment4())))
+        .segment5(lookupService.find(base.lookup(Lookups.SEGMENT_5).key(entity.getSegment5())))
         .isActive(entity.isActive())
         .build();
   }
 
   public static AuthUserCompanyResponse toAuthResponse(
-      final CompanyEntity entity, final EnumConfigurationFacade facade) {
+      final CompanyEntity entity, final ILookupService lookupService) {
+
+    LookupQuery base = LookupQuery.of().companyGroupId(entity.getCompanyGroupId());
     return AuthUserCompanyResponse.builder()
         .companyId(entity.getId())
         .companyGroupId(entity.getCompanyGroupId())
         .companyCode(entity.getCompanyCode())
         .companyName(entity.getCompanyName())
         .companyMail(split(entity.getCompanyMail()))
-        .city(entity.getCity())
-        .country(entity.getCountry())
-        .zone(entity.getZone())
-        .segment1(
-            entity.getSegment1() != null
-                ? facade.resolve(EnumTypes.SEGMENT_1, entity.getSegment1(), entity.getId())
-                : null)
-        .segment2(
-            entity.getSegment2() != null
-                ? facade.resolve(EnumTypes.SEGMENT_2, entity.getSegment2(), entity.getId())
-                : null)
-        .segment3(
-            entity.getSegment3() != null
-                ? facade.resolve(EnumTypes.SEGMENT_3, entity.getSegment3(), entity.getId())
-                : null)
-        .segment4(
-            entity.getSegment4() != null
-                ? facade.resolve(EnumTypes.SEGMENT_4, entity.getSegment4(), entity.getId())
-                : null)
-        .segment5(
-            entity.getSegment5() != null
-                ? facade.resolve(EnumTypes.SEGMENT_5, entity.getSegment5(), entity.getId())
-                : null)
+        .city(
+            lookupService.find(
+                base.lookup(Lookups.CITY).parentKey(entity.getCountry()).key(entity.getCity())))
+        .country(lookupService.find(base.lookup(Lookups.COUNTRY).key(entity.getCountry())))
+        .zone(lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone())))
+        .segment1(lookupService.find(base.lookup(Lookups.SEGMENT_1).key(entity.getSegment1())))
+        .segment2(lookupService.find(base.lookup(Lookups.SEGMENT_2).key(entity.getSegment2())))
+        .segment3(lookupService.find(base.lookup(Lookups.SEGMENT_3).key(entity.getSegment3())))
+        .segment4(lookupService.find(base.lookup(Lookups.SEGMENT_4).key(entity.getSegment4())))
+        .segment5(lookupService.find(base.lookup(Lookups.SEGMENT_5).key(entity.getSegment5())))
         .isActive(entity.isActive())
         .build();
   }
@@ -192,7 +158,7 @@ public class CompanyGroupMapper {
         .id(entity.getId())
         .companyId(entity.getCompanyId())
         .product(entity.getProduct())
-        .enabled(entity.getEnabled())
+        .enabled(entity.isEnabled())
         .licenseExpiresAt(entity.getLicenseExpiresAt())
         .agreedUserCount(entity.getAgreedUserCount())
         .build();

@@ -1,17 +1,18 @@
 package com.gastroblue.controller;
 
+import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.facade.CompanyDefinitionFacade;
-import com.gastroblue.model.enums.ApplicationProduct;
 import com.gastroblue.model.request.CompanyProductSaveRequest;
 import com.gastroblue.model.request.CompanyProductUpdateRequest;
 import com.gastroblue.model.request.CompanySaveRequest;
 import com.gastroblue.model.request.CompanyUpdateRequest;
 import com.gastroblue.model.response.CompanyContextResponse;
+import com.gastroblue.model.response.CompanyDefinitionListResponse;
 import com.gastroblue.model.response.CompanyDefinitionResponse;
+import com.gastroblue.model.response.CompanyProductListResponse;
 import com.gastroblue.model.response.CompanyProductResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class CompanyDefinitionController {
   private final CompanyDefinitionFacade companyDefinitionFacade;
 
   @GetMapping("/{companyGroupId}/companies")
-  public ResponseEntity<List<CompanyDefinitionResponse>> findCompaniesByCompanyGroupId(
+  public ResponseEntity<CompanyDefinitionListResponse> findCompaniesByCompanyGroupId(
       @PathVariable(name = "companyGroupId") final String companyGroupId) {
     return ResponseEntity.ok(companyDefinitionFacade.findCompaniesByCompanyGroupId(companyGroupId));
   }
@@ -70,18 +71,16 @@ public class CompanyDefinitionController {
   }
 
   @PatchMapping("/{companyGroupId}/companies/{companyId}/products/{product}/toggle")
-  public ResponseEntity<CompanyDefinitionResponse> toggleCompanyProduct(
+  public ResponseEntity<CompanyProductResponse> toggleCompanyProduct(
       @PathVariable(name = "companyGroupId") final String companyGroupId,
       @PathVariable(name = "companyId") final String companyId,
       @PathVariable(name = "product") final ApplicationProduct product) {
-    // return ResponseEntity.ok(companyDefinitionFacade.toggleCompanyProduct(companyGroupId,
-    // companyId, product));
-    // TODO: implement
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(
+        companyDefinitionFacade.toggleCompanyProduct(companyGroupId, companyId, product));
   }
 
   @GetMapping("/{companyGroupId}/companies/{companyId}/products")
-  public ResponseEntity<List<CompanyProductResponse>> findCompanyProducts(
+  public ResponseEntity<CompanyProductListResponse> findCompanyProducts(
       @PathVariable final String companyGroupId, @PathVariable final String companyId) {
     return ResponseEntity.ok(
         companyDefinitionFacade.findCompanyProducts(companyGroupId, companyId));

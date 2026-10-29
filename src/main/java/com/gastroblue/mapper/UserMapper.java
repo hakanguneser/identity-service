@@ -1,24 +1,24 @@
 package com.gastroblue.mapper;
 
-import static com.gastroblue.util.DelimitedStringUtil.splitClean;
+import static com.gastroblue.commons.shared.util.DelimitedStringUtil.splitClean;
 
-import com.gastroblue.facade.EnumConfigurationFacade;
+import com.gastroblue.commons.helper.lookup.model.dto.BaseLookupModel;
+import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
+import com.gastroblue.commons.helper.lookup.service.ILookupService;
+import com.gastroblue.commons.shared.enums.Language;
 import com.gastroblue.model.entity.UserEntity;
 import com.gastroblue.model.entity.UserProductEntity;
-import com.gastroblue.model.enums.EnumTypes;
-import com.gastroblue.model.enums.Language;
+import com.gastroblue.model.enums.Lookups;
 import com.gastroblue.model.request.UserSaveRequest;
 import com.gastroblue.model.request.UserUpdateRequest;
 import com.gastroblue.model.response.UserDefinitionResponse;
-import com.gastroblue.model.shared.ResolvedEnum;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public class UserMapper {
 
   public static UserEntity toEntity(
@@ -46,17 +46,20 @@ public class UserMapper {
   public static UserDefinitionResponse toResponse(
       final UserEntity entity,
       final UserProductEntity userProduct,
-      final EnumConfigurationFacade facade) {
+      final ILookupService lookupService) {
     if (entity == null) {
       return null;
     }
-
+    LookupQuery base =
+        LookupQuery.of()
+            .companyGroupId(entity.getCompanyGroupId())
+            .product(userProduct != null ? userProduct.getProduct().name() : null);
     List<String> departmentKeys =
         userProduct != null ? splitClean(userProduct.getDepartments()) : Collections.emptyList();
 
-    List<ResolvedEnum> resolvedDepartmentList =
+    List<BaseLookupModel> resolvedDepartmentList =
         departmentKeys.stream()
-            .map(d -> facade.resolve(EnumTypes.DEPARTMENT, d, entity.getCompanyGroupId()))
+            .map(dept -> lookupService.find(base.lookup(Lookups.DEPARTMENT).key(dept)))
             .filter(Objects::nonNull)
             .toList();
 
@@ -68,26 +71,20 @@ public class UserMapper {
         .username(entity.getUsername())
         .departments(resolvedDepartmentList)
         .applicationRole(
-            userProduct
-                .getApplicationRole()
-                .toResolvedEnum()) // TODO: fix burada ApplicationRoleun REsolvedEnum'e
-        // dönüştürülmesi gerekiyor
+            userProduct != null
+                ? lookupService.find(
+                    base.lookup(Lookups.APPLICATION_ROLE)
+                        .key(userProduct.getApplicationRole().name()))
+                : null)
         .language(
-            facade.resolve(
-                EnumTypes.LANGUAGE, entity.getLanguage().name(), entity.getCompanyGroupId()))
+            lookupService.find(base.lookup(Lookups.LANGUAGE).key(entity.getLanguage().name())))
         .email(entity.getEmail())
-        .isActive(userProduct != null ? userProduct.isActive() : entity.isActive())
+        .isActive(userProduct != null && userProduct.isActive())
         .name(entity.getName())
         .surname(entity.getSurname())
         .phone(entity.getPhone())
-        .gender(
-            entity.getGender() != null
-                ? facade.resolve(EnumTypes.GENDER, entity.getGender(), entity.getCompanyGroupId())
-                : null)
-        .zone(
-            entity.getZone() != null
-                ? facade.resolve(EnumTypes.ZONE, entity.getZone(), entity.getCompanyGroupId())
-                : null)
+        .gender(lookupService.find(base.lookup(Lookups.GENDER).key(entity.getGender())))
+        .zone(lookupService.find(base.lookup(Lookups.ZONE).key(entity.getZone())))
         .build();
   }
 

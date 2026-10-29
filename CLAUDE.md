@@ -1,233 +1,348 @@
-# CLAUDE.md
+# identity-service — Claude Context
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project Overview
 
----
+GastroBlue kimlik doğrulama ve yetkilendirme servisi. Spring Boot 4.0.6 / Java 21 / PostgreSQL.
+Diğer servisler (tracker, formflow) bu servise JWT doğrulama için bağımlıdır.
 
-# Identity Service — Claude Code Kuralları
-
-## Proje Bağlamı
-
-GastroBlue çatısı altında geliştirilen tüm ürünlerin (Tracker, FormFlow, CheckApp, Admin-Panel) bağlandığı merkezi IAM servisidir.
-
-- **Framework:** Spring Boot 4.0.1
-- **Dil:** Java 21
-- **Paket:** `com.gastroblue`
-- **Port:** 7102
-- **DB:** PostgreSQL (JPA/Hibernate, `ddl-auto: update`)
-- **Auth:** JWT HS256, audience = `ApplicationProduct`
+**Koordinatlar**
+- Port: `7102` (varsayılan)
+- Base package: `com.gastroblue`
+- Maven group: `com.gastroblue`, artifactId: `identity-service`, version: `1.0.0`
 
 ---
 
-## Geliştirme Komutları
+## Bağımlılık Yapısı
 
-```bash
-# Derleme + Spotless formatlaması uygula
-mvn clean package
-
-# Testleri çalıştır
-mvn test
-
-# Tek bir test sınıfı çalıştır
-mvn test -Dtest=MyServiceTest
-
-# Spotless formatlamasını build olmadan uygula
-mvn spotless:apply
-
-# Uygulamayı lokal başlat (port 7102)
-mvn spring-boot:run
-
-# Docker image oluştur ve çalıştır
-docker build -t identity:latest .
-docker-compose up
+```
+gastroblue-parent (1.0.4)
+  └─ extends spring-boot-starter-parent:4.0.6
+       └─ identity-service
+            ├─ gastroblue-commons:1.7.0   (ortak kütüphane — GitHub Packages)
+            └─ postgresql (runtime)
 ```
 
-Swagger UI (swagger aktifken): `http://localhost:7102/swagger-ui.html`  
-Actuator endpoints: `/actuator/health`, `/actuator/prometheus`, `/actuator/metrics`  
-Debug port (Docker): `17102`
+**`gastroblue-commons`** auto-configuration ile çalışır (`AutoConfiguration.imports`). İçerdiği
+modüller:
+- `JwtService` / `IJwtService` — EC P-256 JWT imzalama ve doğrulama
+- `SecurityAutoConfig` — Spring Security filter zinciri, `JwtAuthenticationFilter`
+- `MailService` / `IMailService` — SMTP mail gönderimi
+- `LookupService` / `ILookupService` — kod→label çevirisi (cache destekli)
+- `ExceptionAutoConfig` — `@ControllerAdvice` hata yanıtları
+- `SwaggerAutoConfig` — OpenAPI / Swagger UI
+- `Auditable` — tüm entity'lerin kalıtım aldığı taban sınıf
+- `TracingAutoConfig` — istek izleme
+
+Commons kaynak kodu: `D:\git-clones\gastroblue-commons`
 
 ---
 
-## Mimari Kurallar (KESİN — İhlal Edilemez)
-
-### Katman Hiyerarşisi
+## Mimari — Katman Kuralları
 
 ```
 Controller  →  Facade  →  Service  →  Repository
 ```
 
-1. **Aynı katmandaki sınıflar birbirini çağıramaz.**
-   - Bir Controller başka bir Controller'ı çağıramaz.
-   - Bir Facade başka bir Facade'ı çağıramaz.
-   - Bir Service başka bir Service'i çağıramaz.
+| Katman | Sorumluluk | Kural |
+|--------|-----------|-------|
+| **Controller** | HTTP mapping, request/response | İş mantığı YOK; sadece facade çağrısı |
+| **Facade** | İş orchestration, yetki kontrolü | `@Transactional` burada; birden fazla service çağrısı burada birleşir |
+| **Service** | Tek bir aggregate üzerinde CRUD | Başka service'e bağımlılık yok; sadece kendi repository'si |
+| **Repository** | JPA/JPQL sorguları | Sadece veri erişimi |
 
-2. **Her Service yalnızca tek bir Repository'e aittir.**
-   - `UserDefinitionService` sadece `UserRepository` kullanır.
-   - Birden fazla repository erişimi gerekiyorsa, bu iş Facade katmanında koordine edilir.
-
-3. **Controller'da entity alınamaz/verilemez.**
-   - Controller metodlarının parametreleri ve dönüş tipleri yalnızca DTO (request/response) olmalıdır.
-   - Entity'ler hiçbir zaman controller metoduna girmemeli veya controller'dan çıkmamalıdır.
-
-4. **Her Service kendi request/response modellerini kullanır.**
-   - Servisler arası response paylaşımı yapılmaz.
-   - Ortak kullanım ihtiyacı varsa yeni bir DTO oluşturulur veya Facade'da dönüşüm yapılır.
-
-5. **İş mantığı Facade katmanındadır.**
-   - Controller yalnızca HTTP katmanıdır: validasyon, yönlendirme ve response dönme.
-   - Facade; service'leri koordine eder, iş akışlarını yönetir.
+- Facade → Service arası bağımlılık OK.
+- Service → Service bağımlılığı **yasak** (circular risk + test zorluğu).
+- Controller asla `@Transactional` almaz.
 
 ---
 
-## Domain Modeli
-
-### Organizasyonel Hiyerarşi
+## Paket Yapısı
 
 ```
-CompanyGroup  →  Company  →  User
+com.gastroblue
+├── annotations/validation/   Özel Bean Validation anotasyonları (@ValidPhoneNumber vb.)
+├── client/                   Dış servis HTTP istemcileri (Expo push)
+├── config/                   Spring @Configuration sınıfları
+├── controller/               @RestController'lar
+├── facade/                   İş orchestration (@Service)
+├── mapper/                   Entity↔DTO dönüşümleri (static metotlar)
+├── model/
+│   ├── base/                 Paylaşılan hafif DTO'lar (Company, CompanyGroup vb.)
+│   ├── entity/               JPA entity'leri
+│   ├── enums/                ErrorCode, MailTemplate, MailParameters, Lookups
+│   ├── request/              Gelen DTO'lar (Java records, Bean Validation)
+│   └── response/             Giden DTO'lar (Lombok veya record)
+├── repository/               Spring Data JPA repository'leri
+├── service/                  Tek-aggregate servisler
+└── util/                     Yardımcı sınıflar (PasswordGenerator, EmailDomainValidator)
 ```
 
-- **CompanyGroup:** Cati firma (örn. Hilton Group). EULA ve ürün tanımları bu seviyede.
-- **Company:** Alt firma / üye işyeri (örn. Hilton Kemer).
-- **User:** Sistemdeki kullanıcı. Her kullanıcı bir ürünle (`ApplicationProduct`) ilişkilidir.
+---
 
-### Kullanıcı Hiyerarşisi (Rol Bazlı)
+## Entity Kuralları
+
+### Taban Sınıf — `Auditable`
+
+Tüm entity'ler `Auditable`'dan kalıtım alır. Auditable alanları:
+
+| Alan | DB Kolonu | Tip |
+|------|-----------|-----|
+| `id` | `ID` VARCHAR(36) PK | `@UuidGenerator` — UUID, otomatik atanır |
+| `createdBy` | `CREATED_BY` | `@CreatedBy` |
+| `createdDate` | `CREATED_DATE` | `@CreatedDate` |
+| `lastModifiedBy` | `LAST_MODIFIED_BY` | `@LastModifiedBy` |
+| `lastModifiedDate` | `LAST_MODIFIED_DATE` | `@LastModifiedDate` |
+| `version` | `VERSION` BIGINT | `@Version` — optimistic locking |
+
+### Tablo / Kolon İsimlendirmesi
+
+- Tablo isimleri: `BÜYÜK_HARF_SNAKE_CASE` (örn. `COMPANY_GROUPS`, `USERS`)
+- Kolon isimleri: `BÜYÜK_HARF_SNAKE_CASE` (örn. `COMPANY_GROUP_ID`, `IS_ACTIVE`)
+- Boolean kolonlar: `IS_` ön eki (örn. `IS_ACTIVE`, `IS_ENABLED`)
+- Timestamp kolonlar: `_AT` son eki (örn. `LOCKED_UNTIL`, `PASSWORD_EXPIRES_AT`)
+
+### Kolon Sıralaması (entity field tanım sırası)
+
+1. Audit alanları (`Auditable`'dan gelir — kodda tekrar yazılmaz)
+2. Foreign key'ler (`COMPANY_GROUP_ID`, `COMPANY_ID`)
+3. Kimlik / anahtar alanlar (`USERNAME`, `EMAIL`)
+4. Detay alanlar (`NAME`, `SURNAME`, `PHONE`, `GENDER`, `ZONE`)
+5. Durum alanları (`PASSWORD_CHANGE_REQUIRED`, `PASSWORD_EXPIRES_AT`, `PASSWORD_VERSION`)
+6. Aktiflik / pasiflik alanı en sona (`IS_ACTIVE`, `IS_ENABLED`)
+
+### Yeni Kolon Eklerken
+
+```java
+@Column(name = "MY_COLUMN", nullable = false)
+@Builder.Default
+private int myField = 0;   // mevcut kayıtlar için güvenli default
+```
+
+`ddl-auto: update` → kolon otomatik eklenir ama `NOT NULL` + default için var olan satırları
+güncellemek gerekebilir:
+```sql
+UPDATE USERS SET MY_COLUMN = 0 WHERE MY_COLUMN IS NULL;
+```
+
+---
+
+## Güvenlik Modeli
+
+### JWT — EC P-256 Asimetrik Anahtar
+
+- **Private key** (`EC_PRIVATE_KEY`): imzalama — sadece identity-service'te
+- **Public key** (`EC_PUBLIC_KEY`): doğrulama — tüm servislerde commons üzerinden
+
+Token tipler: access token (60 dk) + refresh token (7 gün). Her ikisi de aynı `extraClaims`
+yapısını taşır.
+
+### JWT Claim'leri (`IJwtService` sabitleri)
+
+| Claim Adı | Sabit | Açıklama |
+|-----------|-------|---------|
+| `uid` | `JWT_USER_ID` | UUID |
+| `sub` | `SUBJECT` | username |
+| `prd` | `JWT_APPLICATION_PRODUCT` | `ApplicationProduct` enum adı |
+| `rol` | `JWT_ROLE` | `ApplicationRole` enum adı |
+| `cgId` | `JWT_COMPANY_GROUP_ID` | Şirket grubu UUID |
+| `cIds` | `JWT_COMPANY_IDS` | Sorumlu şirket UUID listesi |
+| `lang` | `JWT_LANGUAGE` | `Language` enum adı |
+| `depts` | `JWT_DEPARTMENTS` | Departman listesi |
+| `pwdVer` | `JWT_PASSWORD_VERSION` | Şifre versiyonu (revocation) |
+
+### Password Version (Stateless Token Revocation)
+
+`UserEntity.passwordVersion` (integer, default 1) JWT'ye `pwdVer` claim olarak yazılır.
+
+- **Şifre değişince** `passwordVersion++` yapılır → eski refresh token'lar geçersiz olur.
+- **Logout'ta** `passwordVersion++` yapılır → o kullanıcının tüm tokenları geçersiz olur.
+- `refreshToken()` içinde: `sessionUser.passwordVersion() != userEntity.getPasswordVersion()` →
+  `INVALID_JWT_TOKEN` hatası.
+- Null check zorunlu (eski tokenlar `pwdVer` taşımayabilir).
+
+### Rate Limiting / Account Locking
+
+`UserEntity` üzerinde:
+- `loginAttemptCount` — başarısız giriş sayacı (5 denemede hesap kilitlenir)
+- `lockedUntil` — kilit bitiş zamanı (15 dakika)
+- `isAccountNonLocked()` → `lockedUntil == null || lockedUntil.isBefore(now())`
+
+`UserDefinitionService.incrementLoginAttempts()`:
+- `loginAttemptCount >= 5` → `lockedUntil = now() + 15 min`, counter sıfırlanır
+- Aksi → counter artırılır
+
+### Sistem Token'ları (Servisler Arası)
+
+`application.yaml` → `gastroblue.commons.security.sys-tokens` altında statik token'lar:
+- `TRACKER_TOKEN` — Tracker servisi için
+- `FORMFLOW_TOKEN` — Formflow servisi için
+- `ADMIN_TOKEN` — Admin panel için (product: CHECK)
+
+---
+
+## Rol Hiyerarşisi
 
 ```
 ADMIN > GROUP_MANAGER > ZONE_MANAGER > COMPANY_MANAGER > SUPERVISOR > STAFF
 ```
 
-- Her rol yalnızca bir alt roldeki kullanıcı tanımlayabilir.
-- **Ürün ataması yalnızca ADMIN tarafından yapılır** (admin-panel üzerinden).
-- Diğer kullanıcılar oluştukları platform için otomatik product ile ilişkilendirilir.
+- `ADMIN`: Tüm şirket gruplarına erişir.
+- `GROUP_MANAGER`: Kendi şirket grubuna (companyGroupId) erişir; tüm şirketler görünür.
+- `ZONE_MANAGER`: Kendi zone'undaki şirketler (`UserEntity.zone == CompanyEntity.zone`).
+- `COMPANY_MANAGER / SUPERVISOR / STAFF`: Tek şirket (companyId).
 
-### Temel Entity'ler
+`isAdministrator()` → `ADMIN` veya `GROUP_MANAGER` için `true` döner.
 
-| Entity | Tablo | Açıklama |
-|--------|-------|----------|
-| `UserEntity` | `USERS` | Kullanıcı kimlik bilgileri |
-| `UserProductEntity` | `USER_PRODUCTS` | Kullanıcının ürün bazında rol ve departman bilgisi |
-| `CompanyGroupEntity` | `COMPANY_GROUPS` | Cati firma tanımı |
-| `CompanyEntity` | `COMPANIES` | Alt firma |
-| `CompanyGroupProductEntity` | `COMPANY_GROUP_PRODUCTS` | Ürün lisansı: apiUrl, apiVersion, agreedUserCount, licenseExpiresAt, enabled |
-| `CompanyGroupEulaContentEntity` | `COMPANY_GROUP_EULA_CONTENTS` | EULA versiyonları |
-| `EnumValueConfigurationEntity` | `ENUM_VALUE_CONFIGURATIONS` | Dinamik enum değerleri |
-| `ErrorMessageEntity` | `ERROR_MESSAGES` | Dil bazlı hata mesajları |
-| `CompanyProductEntity` | `COMPANY_PRODUCTS` | Şirketin ürün erişim tanımı |
-| `OutgoingMailLogEntity` | `OUTGOING_MAIL_LOGS` | Gönderilen e-postaların kaydı |
+### Yönetilebilir Roller
+
+Bir rol yalnızca kendisinden **düşük** roldeki kullanıcıları yönetebilir:
+- `ADMIN` → GROUP_MANAGER yönetir
+- `GROUP_MANAGER` → ZONE_MANAGER, COMPANY_MANAGER
+- `ZONE_MANAGER` → COMPANY_MANAGER
+- `COMPANY_MANAGER` → SUPERVISOR
+- `SUPERVISOR` → STAFF
 
 ---
 
-## Kod Yazım Kuralları
+## Multi-Tenancy
 
-### Genel
+- **Yatay izolasyon**: `companyGroupId` bazlı. Her şirket grubu bağımsız bir kiracıdır.
+- ADMIN hariç tüm sorgular `companyGroupId` filtresi içerir.
+- `SessionUser.companyGroupId()` — token'dan gelir; DB doğrulaması yapılmaz (performans).
+- ADMIN tokenları boş `companyIds` listesi taşır → tüm gruplara erişim anlamına gelir.
 
-- **Lombok** kullan: `@Data`, `@RequiredArgsConstructor`, `@Slf4j`, `@Builder`, `@Getter`, `@Setter`
-- **Spotless** (Google Java Format): Kod `mvn package` sırasında otomatik formatlanır. Yeni kod yazarken formata uy.
-- **Jakarta Validation** annotation'ları ile request DTO'larını valide et (`@NotBlank`, `@NotNull`, `@Valid` vb.)
-- `@Transactional` annotation'ı service metodlarında kullanılır (facade ve controller'da değil)
-- E-posta gönderimi `@Async("mailTaskExecutor")` ile asenkron yapılır
+---
 
-### Güvenlik
+## Kodlama Kuralları
 
-- Controller metodlarında oturum bilgisi için: `@AuthenticationPrincipal SessionUser sessionUser`
-- `SessionUser` immutable bir record'dur — doğrudan kullan, kopyalama
-- Şifreleme: `BCryptPasswordEncoder` — plain text şifre asla saklanmaz
+### Format
 
-### Enum Yönetimi
+- **Google Java Format** — Spotless Maven plugin ile zorlanır (`mvn spotless:apply`).
+- Build'den önce `spotless:check` çalışır; format hatası varsa build patlar.
+- Yeni bir şey yazınca mutlaka `./mvnw spotless:apply` çalıştır.
 
-- **Sabit enum'lar:** `ApplicationRole`, `ApplicationProduct` — kod içinde direkt kullanılır
-- **Dinamik enum'lar:** `Language`, `Department`, `Country`, `City`, `Zone`, `CompanySegment1-5` — DB'den gelir (`EnumValueConfigurationEntity`), companygroup bazında aktifleştirilebilir
-- Dinamik enum değerlerine doğrudan kod içinde referans verme
+### DTO Kuralları
+
+- **Request DTO'ları**: Java `record` + Bean Validation.
+  ```java
+  public record UserSaveRequest(
+      @NotBlank String username,
+      @Email String email) {}
+  ```
+- **Response DTO'ları**: Lombok `@Data` / `@Builder` veya record. Builder tercih edilir.
+- İstek/cevap DTO'larında asla JPA entity'si kullanılmaz.
+
+### Mapper Kuralları
+
+- `mapper/` paketindeki sınıflarda **static metotlar** (inject edilmez, yeni instance yaratılmaz).
+- `UserMapper.toResponse(entity, userProduct, lookupService)` gibi parametre ile.
+- MapStruct **kullanılmıyor** — manuel dönüşüm.
+
+### Transactional Kullanımı
+
+- Sadece yazma işlemleri: `@Transactional` (Facade veya Service'te).
+- Okuma işlemleri: `@Transactional(readOnly = true)` — gereksiz write-lock'u önler.
+- Controller'da `@Transactional` **yok**.
 
 ### Hata Yönetimi
 
-- Özel exception'lar: `IllegalDefinitionException`, `AccessDeniedException`, `ValidationException`
-- Tüm exception'lar `AbstractRuntimeException`'dan türer
-- `GlobalExceptionHelper` tüm hataları yakalar — yeni exception türleri eklemeden önce mevcut yapıya bak
-- Hata mesajları her zaman DB'den çekilir (`ErrorMessageEntity`) — hardcode mesaj yazma
+Commons'tan gelen exception tipleri:
+- `NotFoundException` → 404
+- `AccessDeniedException` → 403
+- `BusinessException` → 400
+
+Her exception bir `ErrorCode` (enum, `ErrorCodeBase` implement eder) alır.
+Yeni hata eklerken `ErrorCode.java`'ya enum sabiti eklenir, başka bir şey değişmez.
+
+### Loglama
+
+- Facade seviyesinde `@Slf4j` ile `log.info(...)` / `log.error(...)`.
+- Log mesajlarında **PII yazılmaz** (şifre, tam isim, e-posta içeriği gibi şeyler).
+- `UserEntity` → `@ToString` ile `password` field'ı `@ToString.Exclude`.
 
 ---
 
-## Login Akışı (Önemli)
+## Önemli Servisler
 
-1. Kullanıcı adı ve şifre doğrulanır
-2. `UserProductEntity` üzerinden ilgili ürün kaydı bulunur
-3. `CompanyGroupProductEntity` üzerinden `apiUrl` ve `apiVersion` alınır
-4. `passwordChangeRequired` ve EULA durumu kontrol edilir
-5. JWT üretilir, response dönülür
+### `AuthenticationFacade`
 
-Login endpoint'inde `CompanyGroupProductEntity` üzerindeki `enabled` alanı kontrol edilmeli.
+- `login()` — kimlik doğrulama, token üretimi, lisans kontrolü
+- `refreshToken()` — token yenileme + `passwordVersion` kontrolü
+- `logout()` — `passwordVersion++` ile token invalidation
+- `buildExtraClaims()` — JWT claim map'ini oluşturur (tüm claim'ler burada bir arada)
 
----
+### `UserDefinitionFacade`
 
-## Proje Dosya Yapısı
+- `saveUser()` — kullanıcı kaydı (rol hiyerarşisi + şirket grubu domain doğrulaması)
+- `updateUser()` — güncelleme (rol hiyerarşisi kontrolü)
+- `changePassword()` — şifre değiştirme; `passwordVersion` artırılır
+- `sendOtp()` — OTP ile şifre sıfırlama; `passwordVersion` artırılır
+- `findAccessibleUsers()` — role göre erişilebilir kullanıcı listesi
 
-```
-src/main/java/com/gastroblue/
-├── annotations/validation/     # @ValidPhoneNumber, @UniqueField vb.
-├── config/                     # Spring konfigürasyonları
-│   ├── AuthenticationConfig    # UserDetailsService, BCrypt, AuthManager
-│   ├── SecurityConfig          # HTTP güvenlik kuralları
-│   ├── JwtAuthenticationFilter # JWT doğrulama filtresi
-│   ├── JwtConfig               # Sistem token'ları → ApplicationProduct
-│   ├── MailConfig              # JavaMailSender, async executor
-│   ├── CacheConfig             # Caffeine cache
-│   ├── OpenApiConfig           # Swagger konfigürasyonu
-│   ├── PersistenceConfig       # JPA auditing (AuditorAware)
-│   └── tracing/RequestTracingFilter  # Trace ID, istek loglama
-├── controller/                 # REST controller'lar (HTTP katmanı)
-├── exception/                  # Custom exception'lar
-│   └── helper/GlobalExceptionHelper
-├── facade/                     # İş mantığı koordinasyonu
-├── mapper/                     # Entity ↔ DTO dönüştürücüler
-├── model/
-│   ├── base/SessionUser        # Immutable JWT payload (record)
-│   ├── entity/                 # JPA entity'leri
-│   │   └── base/Auditable      # id, audit alanları, version
-│   ├── enums/                  # ApplicationRole, ApplicationProduct vb.
-│   ├── request/                # İstek DTO'ları
-│   └── response/               # Yanıt DTO'ları
-├── repository/                 # Spring Data JPA repository'leri
-├── service/                    # Servis arayüzleri (IJwtService, IMailService)
-│   └── impl/                   # Servis implementasyonları
-└── util/                       # DateTimeUtil, PasswordGenerator, MailTemplateRenderer vb.
-```
+### `TokenGenerationService`
+
+`AuthenticationFacade` ve `UserDefinitionFacade` tarafından kullanılır.
+`IJwtService.generateToken(subject, extraClaims, expiryMs)` wrapper'ı.
 
 ---
 
-## Mapper Katmanı
+## Çevre Değişkenleri
 
-`mapper/` altında yalnızca üç mapper vardır — entity↔DTO dönüşümü burada yapılır:
-- `UserMapper` — `UserEntity` / `UserProductEntity` ↔ response DTO'ları
-- `CompanyGroupMapper` — `CompanyGroupEntity` ↔ response DTO'ları
-- `CompanyGroupEulaContentMapper` — EULA entity ↔ response DTO'ları
+Tüm değişkenler `application.yaml`'da `${ENV_VAR:default}` formatında tanımlıdır.
+Tam liste ve test değerleri `test.env` dosyasında mevcuttur.
 
-Yeni bir domain için mapper gerekiyorsa aynı pakette yeni bir sınıf oluştur.
-
----
-
-## Ortam Değişkenleri (Zorunlu — production)
+Kritik değişkenler:
 
 | Değişken | Açıklama |
-|----------|----------|
-| `DATABASE_HOST/PORT/NAME/USERNAME/PASSWORD` | PostgreSQL bağlantısı |
-| `JWT_SECRET_KEY` | HS256 imzalama anahtarı |
-| `MAIL_FROM`, `MAIL_PASSWORD` | SMTP kimlik bilgileri |
-| `MAIL_ADMIN_REDIRECT_ADDRESS` | Admin bildirim adresi |
-| `APP_ADMIN_REGISTRATION_ENABLED` | İlk ADMIN kaydına izin ver/verme |
-| `APP_SWAGGER_ENABLED` | Swagger UI aç/kapa |
-| `TT_TOKEN`, `FF_TOKEN`, `ADMIN_TOKEN` | Servisler arası sistem token'ları |
-
-Lokal geliştirmede `application.yaml` içindeki varsayılan değerler kullanılır.
+|----------|---------|
+| `EC_PRIVATE_KEY` | Base64 PKCS8 EC private key (JWT imzalama) |
+| `EC_PUBLIC_KEY` | Base64 X.509 EC public key (JWT doğrulama) |
+| `DATABASE_*` | PostgreSQL bağlantısı |
+| `TRACKER_TOKEN` | Tracker servisinin kimlik doğrulama token'ı |
+| `FORMFLOW_TOKEN` | Formflow servisinin kimlik doğrulama token'ı |
+| `ADMIN_TOKEN` | Admin panel token'ı |
+| `MAIL_ENABLED` | `false` → mail gönderilmez (test için) |
+| `APP_ADMIN_REGISTRATION_ENABLED` | `true` → ADMIN rolünde kullanıcı kaydı açık |
 
 ---
 
-## Önemli Notlar
+## Deployment
 
-- `HELP.md` Maven/Spring Boot referans dosyasıdır — proje dökümantasyonu `README.md`'dedir
-- Veritabanı şeması `ddl-auto: update` ile otomatik güncellenir — migration script'i yoktur
-- Request tracing: Her istek için UUID trace ID üretilir, response header'da `X-Trace-Id` olarak dönülür
-- Mail loglama: Her gönderim `OutgoingMailLogEntity`'ye kaydedilir
-- Sistem token'ları (TT_TOKEN, FF_TOKEN, ADMIN_TOKEN): Servisler arası iletişim için kullanılır, JWT filtresi bunları tanır
-- `EnumTypes` enum'u dinamik enum'ların tiplerini listeler; `EnumValueConfigurationEntity` bu tip + companyGroup + değer üçlüsüyle kayıt tutar
+```bash
+# Test ortamında çalıştırma (env file ile)
+./mvnw spring-boot:run -Dspring-boot.run.envFile=test.env
+
+# Docker
+docker compose --env-file test.env up --build
+```
+
+Docker Compose `docker-compose.yml` → `network_infra` external network'e bağlanır.
+Remote debug portu: `17102`.
+
+---
+
+## Veritabanı
+
+- `ddl-auto: update` — entity değişiklikleri otomatik uygulanır.
+- Timezone: `Europe/Istanbul` (Hikari `connection-init-sql` ile set edilir).
+- Connection pool: min 5, max 20 (HikariCP).
+- **Flyway** şu an entegre değil (`pom.xml`'de bağımlılık yok).
+  Migration SQL dosyaları `src/main/resources/db/migration/` altında hazır bekliyor:
+  - `V1__init.sql` — tam şema (`IF NOT EXISTS`)
+  - `V2__add_rate_limiting_and_password_version.sql` — yeni kolonlar
+  Flyway eklendiğinde `pom.xml`'e `flyway-core` + `application.yaml`'a config eklenmeli.
+
+---
+
+## Bekleyen / Dikkat Gerektiren Konular
+
+1. **`ErrorCode.PASSWORD_SAME_AS_OLD` eksik** — `UserDefinitionFacade.changePassword()` içinde
+   bu constant'a referans var ama `ErrorCode.java`'da tanımlı değil. Derleme hatası verebilir;
+   `ErrorCode`'a `PASSWORD_SAME_AS_OLD` eklenmeli.
+
+2. **`CompanyGroupService.findMyCompanyGroups()` — ZONE_MANAGER eksik** — switch case'de
+   `ZONE_MANAGER` branch'i yok. Bu rol için boş liste dönüyor. Düzeltmek için
+   `GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR` ile aynı branch'e eklenmeli.
+
+3. **Flyway entegrasyonu** — `test.env` + `CLAUDE.md` → Flyway yapılandırması için hazır.
+   `IF NOT EXISTS` kullanıldığından mevcut DB üzerinde de güvenle çalışır.

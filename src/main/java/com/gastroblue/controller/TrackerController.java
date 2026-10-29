@@ -3,7 +3,7 @@ package com.gastroblue.controller;
 import com.gastroblue.facade.TrackerFacade;
 import com.gastroblue.model.request.PushNotificationRequest;
 import com.gastroblue.model.request.TrackerUsersByIdsRequest;
-import com.gastroblue.model.response.tracker.PushNotificationAcceptedResponse;
+import com.gastroblue.model.response.tracker.PushNotificationResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyContextResponse;
 import com.gastroblue.model.response.tracker.TrackerCompanyUsersResponse;
 import jakarta.validation.Valid;
@@ -40,9 +40,9 @@ public class TrackerController {
   }
 
   @PostMapping("/users/push-notifications")
-  public ResponseEntity<PushNotificationAcceptedResponse> pushNotification(
+  public ResponseEntity<PushNotificationResponse> pushNotification(
       @Valid @RequestBody PushNotificationRequest request) {
-    return ResponseEntity.accepted().body(trackerFacade.enqueuePushNotifications(request));
+    return ResponseEntity.ok(trackerFacade.sendPushNotifications(request));
   }
 
   @PostMapping("/users/by-ids")
