@@ -65,16 +65,11 @@ gastroblue:
       public-key: ${EC_PUBLIC_KEY:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3AQzd7jGIvnvtHORNZ17vPPJEAlb1kfOmPfLr6HNOoJvutGvz4qhKgd8HPYLttVBWI50txLF/08sFsQRwqpw/Q==}
       token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
+      # Only tracker-service calls identity with a sys token (/api/v1/tracker/**). No default on purpose.
       sys-tokens:
         tracker:
-          token: ${TRACKER_TOKEN:TRACKER_TOKEN_NOT_CONFIGURED}
+          token: ${TRACKER_TOKEN}
           product: TRACKER
-        formflow:
-          token: ${FORMFLOW_TOKEN:FORMFLOW_TOKEN_NOT_CONFIGURED}
-          product: FORMFLOW
-        admin:
-          token: ${ADMIN_TOKEN:ADMIN_TOKEN_NOT_CONFIGURED}
-          product: CHECK
     tracing:
       enabled: true
     exception:
