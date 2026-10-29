@@ -181,6 +181,7 @@ public class UserDefinitionFacade {
   @Transactional
   public UserDefinitionResponse saveUser(UserSaveRequest request) {
     UserEntity managerUser = checkRegisteredUserRole(request);
+    checkAssignableRole(request.applicationRole());
     CompanyGroupEntity companyGroup = getRegistrationCompanyGroup(request);
     CompanyEntity company = getRegistrationCompany(request);
     if (request.email() != null && !request.email().isBlank()) {
@@ -268,8 +269,8 @@ public class UserDefinitionFacade {
       receivers.setTo(Collections.singletonList(managerUserEntity.getEmail()));
       activateManagerNote = true;
     } else {
+      // The temporary password goes to the user only; the manager is not copied.
       receivers.setTo(List.of(createdUserEntity.getEmail()));
-      receivers.setCc(List.of(managerUserEntity.getEmail()));
     }
 
     mailParams.put(FULL_NAME, createdUserEntity.getFullName());
@@ -310,6 +311,28 @@ public class UserDefinitionFacade {
           ErrorCode.USER_NOT_ALLOWED_FOR_REGISTRATION, "User email is required");
     }
     return sessionUserEntity;
+  }
+
+  /**
+   * A caller may only assign roles below its own level; ADMIN may also create ADMIN users.
+   * APP_CLIENT is a system role and is never assigned through this flow.
+   */
+  private static void checkAssignableRole(ApplicationRole requestedRole) {
+    if (requestedRole == null) {
+      return;
+    }
+    ApplicationRole callerRole = IJwtService.findSessionUserOrThrow().getApplicationRole();
+    boolean assignable =
+        requestedRole != ApplicationRole.APP_CLIENT
+            && (getManageableRoles(callerRole).contains(requestedRole)
+                || (callerRole != null
+                    && callerRole.isAdministrator()
+                    && requestedRole.isAdministrator()));
+    if (!assignable) {
+      throw new AccessDeniedException(
+          ErrorCode.ACCESS_DENIED,
+          "Role " + requestedRole + " cannot be assigned by " + callerRole);
+    }
   }
 
   // TODO burasi toparlanmali
@@ -392,16 +415,26 @@ public class UserDefinitionFacade {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     UserEntity managerUser = userService.findUserByUserName(sessionUser.username());
     UserEntity userEntity = userService.findById(userId);
-    userProductService
-        .findByUserIdAndProduct(userId, sessionUser.getApplicationProduct())
-        .ifPresent(
-            targetProduct -> {
-              if (!getManageableRoles(sessionUser.getApplicationRole())
-                  .contains(targetProduct.getApplicationRole())) {
-                throw new AccessDeniedException(
-                    ErrorCode.ACCESS_DENIED, "Insufficient role to reset this user's password");
-              }
-            });
+    boolean callerIsAdmin = sessionUser.getApplicationRole().isAdministrator();
+    if (!callerIsAdmin
+        && !Objects.equals(userEntity.getCompanyGroupId(), sessionUser.companyGroupId())) {
+      throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "User not accessible");
+    }
+    // The role check is mandatory: a user without a product record in the caller's product can
+    // only be reset by an ADMIN.
+    UserProductEntity targetProduct =
+        userProductService
+            .findByUserIdAndProduct(userId, sessionUser.getApplicationProduct())
+            .orElse(null);
+    boolean manageable =
+        targetProduct != null
+            ? getManageableRoles(sessionUser.getApplicationRole())
+                .contains(targetProduct.getApplicationRole())
+            : callerIsAdmin;
+    if (!manageable) {
+      throw new AccessDeniedException(
+          ErrorCode.ACCESS_DENIED, "Insufficient role to reset this user's password");
+    }
     String generatedPassword = PasswordGenerator.generate();
     userEntity.setPassword(passwordEncoder.encode(generatedPassword));
     userEntity.setPasswordChangeRequired(true);

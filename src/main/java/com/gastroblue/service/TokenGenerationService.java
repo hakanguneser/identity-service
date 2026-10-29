@@ -1,5 +1,6 @@
 package com.gastroblue.service;
 
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -20,10 +21,22 @@ public class TokenGenerationService {
     this.privateKey = loadPrivateKey(privateKeyBase64);
   }
 
-  public String generateToken(String subject, Map<String, Object> claims, long expiration) {
+  /** Short-lived token accepted by every service. */
+  public String generateAccessToken(String subject, Map<String, Object> claims, long expiration) {
+    return generateToken(subject, claims, IJwtService.TOKEN_TYPE_ACCESS, expiration);
+  }
+
+  /** Long-lived token accepted only by the refresh endpoint. */
+  public String generateRefreshToken(String subject, Map<String, Object> claims, long expiration) {
+    return generateToken(subject, claims, IJwtService.TOKEN_TYPE_REFRESH, expiration);
+  }
+
+  private String generateToken(
+      String subject, Map<String, Object> claims, String tokenType, long expiration) {
     long now = System.currentTimeMillis();
     return Jwts.builder()
         .claims(claims)
+        .claim(IJwtService.JWT_TOKEN_TYPE, tokenType)
         .subject(subject)
         .issuedAt(new Date(now))
         .expiration(new Date(now + expiration))
