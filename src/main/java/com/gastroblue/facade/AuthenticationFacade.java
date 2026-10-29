@@ -106,12 +106,12 @@ public class AuthenticationFacade {
         buildExtraClaims(
             userEntity, userProduct, product, getResponsibleCompanyIds(userEntity, userProduct));
     String token =
-        tokenGenerationService.generateToken(
+        tokenGenerationService.generateAccessToken(
             userEntity.getUsername(),
             extraClaims,
             TimeUnit.MINUTES.toMillis(jwtProperties.getTokenValidityInMinutes()));
     String refreshToken =
-        tokenGenerationService.generateToken(
+        tokenGenerationService.generateRefreshToken(
             userEntity.getUsername(),
             extraClaims,
             TimeUnit.DAYS.toMillis(jwtProperties.getRefreshTokenValidityInDays()));
@@ -126,7 +126,7 @@ public class AuthenticationFacade {
   }
 
   public AuthRefreshTokenResponse refreshToken(RefreshTokenRequest request) {
-    SessionUser sessionUser = jwtService.validateAndExtractToken(request.refreshToken());
+    SessionUser sessionUser = jwtService.validateAndExtractRefreshToken(request.refreshToken());
 
     UserEntity userEntity = userService.findUserByUserName(sessionUser.username());
     if (!userEntity.isActive()) {
@@ -143,23 +143,30 @@ public class AuthenticationFacade {
           ErrorCode.INVALID_JWT_TOKEN, "Password version mismatch — please log in again");
     }
 
-    if (sessionUser.getApplicationProduct() != null) {
-      UserProductEntity userProduct =
-          userProductService
-              .findByUserIdAndProduct(userEntity.getId(), sessionUser.getApplicationProduct())
-              .orElseThrow(() -> new AccessDeniedException(ErrorCode.COMPANY_PRODUCT_NOT_FOUND));
-      if (!userProduct.isActive()) {
-        throw new AccessDeniedException(
-            ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE, "UserProduct is not active");
-      }
+    ApplicationProduct product = sessionUser.getApplicationProduct();
+    if (product == null) {
+      throw new AccessDeniedException(
+          ErrorCode.INVALID_JWT_TOKEN, "Refresh token has no product; please log in again");
+    }
+    UserProductEntity userProduct =
+        userProductService
+            .findByUserIdAndProduct(userEntity.getId(), product)
+            .orElseThrow(() -> new AccessDeniedException(ErrorCode.COMPANY_PRODUCT_NOT_FOUND));
+    if (!userProduct.isActive()) {
+      throw new AccessDeniedException(
+          ErrorCode.COMPANY_PRODUCT_NOT_ACTIVE, "UserProduct is not active");
     }
 
-    HashMap<String, Object> extraClaims = IJwtService.toExtraClaims(sessionUser);
+    // Claims are rebuilt from the database so that role, company and department changes made
+    // after login take effect on the next refresh.
+    HashMap<String, Object> extraClaims =
+        buildExtraClaims(
+            userEntity, userProduct, product, getResponsibleCompanyIds(userEntity, userProduct));
     String newToken =
-        tokenGenerationService.generateToken(
-            sessionUser.username(),
+        tokenGenerationService.generateAccessToken(
+            userEntity.getUsername(),
             extraClaims,
-            TimeUnit.DAYS.toMillis(jwtProperties.getTokenValidityInMinutes()));
+            TimeUnit.MINUTES.toMillis(jwtProperties.getTokenValidityInMinutes()));
     return AuthRefreshTokenResponse.builder().token(newToken).build();
   }
 

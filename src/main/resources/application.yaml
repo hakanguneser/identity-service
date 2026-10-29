@@ -49,7 +49,7 @@ gastroblue:
   product: IDENTITY
   identity:
     token:
-      private-key: ${EC_PRIVATE_KEY:MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCC6MSk5LiOmSnpOyrNo2ID/GtPU2eAqHsN3shEHWPQOaw==}
+      private-key: ${EC_PRIVATE_KEY}
   commons:
     mail:
       enabled: ${MAIL_ENABLED:true}
@@ -62,7 +62,7 @@ gastroblue:
         password: ${MAIL_PASSWORD:}
     security:
       enabled: true
-      public-key: ${EC_PUBLIC_KEY:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3AQzd7jGIvnvtHORNZ17vPPJEAlb1kfOmPfLr6HNOoJvutGvz4qhKgd8HPYLttVBWI50txLF/08sFsQRwqpw/Q==}
+      public-key: ${EC_PUBLIC_KEY}
       token-validity-in-minutes: ${JWT_TOKEN_VALIDITY_IN_MINUTES:60}
       refresh-token-validity-in-days: ${JWT_REFRESH_TOKEN_VALIDITY_IN_DAYS:7}
       # Only tracker-service calls identity with a sys token (/api/v1/tracker/**). No default on purpose.
@@ -76,13 +76,13 @@ gastroblue:
       enabled: true
       cache: true
     swagger:
-      enabled: true
+      enabled: ${SWAGGER_ENABLED:false}
       title: Identity Service API
       version: 1.0
       description: GastroBlue kimlik doğrulama servisi
       contact:
         name: Hakan Guneser
         email: hakanguneser@gastroblueapp.com
-        url: https://www.gastrobluecheckapp.com/
+        url: https://www.gastroblue.com/
     lookup:
       cache: true

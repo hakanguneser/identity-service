@@ -1,22 +1,22 @@
 package com.gastroblue.util;
 
+import java.security.SecureRandom;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+/** Temporary passwords: 8 characters of upper-case letters and digits, in every environment. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PasswordGenerator {
 
-  private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
+  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  private static final int LENGTH = 8;
 
   public static String generate() {
-    String profile = System.getProperty("spring.profiles.active", "");
-    if (!profile.contains("prod")) {
-      return "12345";
+    StringBuilder password = new StringBuilder(LENGTH);
+    for (int i = 0; i < LENGTH; i++) {
+      password.append(ALPHABET.charAt(RANDOM.nextInt(ALPHABET.length())));
     }
-    return generate5DigitCode();
-  }
-
-  public static String generate5DigitCode() {
-    return String.format("%05d", RANDOM.nextInt(100000));
+    return password.toString();
   }
 }
