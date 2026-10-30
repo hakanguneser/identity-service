@@ -40,6 +40,7 @@ import com.gastroblue.service.UserDefinitionService;
 import com.gastroblue.service.UserProductService;
 import com.gastroblue.util.EmailDomainValidator;
 import com.gastroblue.util.PasswordGenerator;
+import com.gastroblue.util.TenantAccess;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -393,6 +394,8 @@ public class UserDefinitionFacade {
   public UserDefinitionResponse toggleUser(String userId) {
     SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     ApplicationProduct product = sessionUser.getApplicationProduct();
+    UserEntity userEntity = userService.findById(userId);
+    TenantAccess.requireSameCompanyGroup(sessionUser, userEntity.getCompanyGroupId());
 
     UserProductEntity userProduct =
         userProductService
@@ -406,7 +409,6 @@ public class UserDefinitionFacade {
     userProduct.setActive(!userProduct.isActive());
     UserProductEntity updatedProduct = userProductService.save(userProduct);
 
-    UserEntity userEntity = userService.findById(userId);
     return UserMapper.toResponse(userEntity, updatedProduct, lookupService);
   }
 
@@ -515,11 +517,12 @@ public class UserDefinitionFacade {
         .items(
             companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
                 .filter(CompanyEntity::isActive)
+                // Group-wide roles see every company; the others only the companies in their
+                // token. An empty list means no company, not all of them.
                 .filter(
                     company ->
-                        sessionUser.companyIds() == null
-                            || sessionUser.companyIds().isEmpty()
-                            || sessionUser.companyIds().contains(company.getId()))
+                        TenantAccess.isGroupWide(sessionUser)
+                            || sessionUser.getCompanyIdsOrEmptyList().contains(company.getId()))
                 .sorted(
                     Comparator.comparing(
                         c -> (c.getCompanyCode() + " - " + c.getCompanyName()).toLowerCase()))
@@ -558,6 +561,10 @@ public class UserDefinitionFacade {
 
   public CompanyContextResponse findUserCompanyContext(String userId) {
     UserEntity user = userService.findById(userId);
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    if (!Objects.equals(userId, sessionUser.userId())) {
+      TenantAccess.requireSameCompanyGroup(sessionUser, user.getCompanyGroupId());
+    }
     CompanyGroupDefinitionResponse companyGroup = null;
     CompanyDefinitionResponse company = null;
     if (user.getCompanyGroupId() != null) {
@@ -575,6 +582,21 @@ public class UserDefinitionFacade {
 
   public void updateLanguage(String userId, LanguageUpdateRequest request) {
     UserEntity userEntity = userService.findById(userId);
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
+    // Own language is always allowed; someone else's only by a manager of that user.
+    if (!Objects.equals(userId, sessionUser.userId())) {
+      TenantAccess.requireSameCompanyGroup(sessionUser, userEntity.getCompanyGroupId());
+      UserProductEntity userProduct = resolveUserProduct(userId);
+      boolean manageable =
+          userProduct != null
+              ? getManageableRoles(sessionUser.getApplicationRole())
+                  .contains(userProduct.getApplicationRole())
+              : sessionUser.getApplicationRole().isAdministrator();
+      if (!manageable) {
+        throw new AccessDeniedException(
+            ErrorCode.ACCESS_DENIED, "Insufficient role to update this user's language");
+      }
+    }
     userEntity.setLanguage(request.language());
     userService.updateUser(userEntity);
   }

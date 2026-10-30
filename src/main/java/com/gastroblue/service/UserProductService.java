@@ -1,11 +1,15 @@
 package com.gastroblue.service;
 
+import com.gastroblue.client.ExpoPushTokens;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.model.entity.UserProductEntity;
 import com.gastroblue.repository.UserProductRepository;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +42,29 @@ public class UserProductService {
   @Transactional
   public void updateEulaAcceptedAt(String userId, ApplicationProduct product) {
     userProductRepository.updateEulaAcceptedAt(userId, product, LocalDateTime.now());
+  }
+
+  /**
+   * Removes push tokens Expo no longer accepts. Tokens are matched in every stored form (bare and
+   * wrapped), so older rows are cleared as well; a token a user registered afterwards is kept.
+   *
+   * @return number of cleared rows
+   */
+  @Transactional
+  public int clearPushTokens(ApplicationProduct product, Collection<String> bareTokens) {
+    Set<String> storedForms = new HashSet<>();
+    for (String token : bareTokens) {
+      String bare = ExpoPushTokens.normalize(token);
+      if (bare != null) {
+        storedForms.add(bare);
+        storedForms.add("ExponentPushToken[" + bare + "]");
+        storedForms.add("ExpoPushToken[" + bare + "]");
+      }
+    }
+    if (storedForms.isEmpty()) {
+      return 0;
+    }
+    return userProductRepository.clearPushTokens(product, storedForms);
   }
 
   public long countActiveByCompanyIdAndProduct(String companyId, ApplicationProduct product) {

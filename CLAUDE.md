@@ -118,10 +118,10 @@ Tüm entity'ler `Auditable`'dan kalıtım alır. Auditable alanları:
 private int myField = 0;   // mevcut kayıtlar için güvenli default
 ```
 
-`ddl-auto: update` → kolon otomatik eklenir ama `NOT NULL` + default için var olan satırları
-güncellemek gerekebilir:
+Şema Flyway ile yönetilir; Hibernate yalnızca doğrular (`ddl-auto: validate`). Yeni kolon için
+yeni bir migration (`V2__...sql`) yazılır; var olan satırlar için default aynı dosyada verilir:
 ```sql
-UPDATE USERS SET MY_COLUMN = 0 WHERE MY_COLUMN IS NULL;
+ALTER TABLE users ADD COLUMN my_column int4 NOT NULL DEFAULT 0;
 ```
 
 ---
@@ -323,26 +323,11 @@ Remote debug portu: `17102`.
 
 ## Veritabanı
 
-- `ddl-auto: update` — entity değişiklikleri otomatik uygulanır.
+- Şema Flyway ile yönetilir (`src/main/resources/db/migration/`), Hibernate `ddl-auto: validate`.
+  - `V1__init.sql`: sıfırdan kurulum için tam şema, index'ler ve FK'ler, commons tabloları dahil.
+  - `baseline-on-migrate: false`: tablosu olan ama Flyway geçmişi olmayan bir veritabanında
+    uygulama başlamaz, hiçbir şeye dokunmaz.
+  - Seed veri yok: ilk ADMIN kullanıcısı elle eklenir.
+  - Uygulanmış bir migration dosyası değiştirilmez; her değişiklik yeni bir `V<n>__...sql` olur.
 - Timezone: `Europe/Istanbul` (Hikari `connection-init-sql` ile set edilir).
-- Connection pool: min 5, max 20 (HikariCP).
-- **Flyway** şu an entegre değil (`pom.xml`'de bağımlılık yok).
-  Migration SQL dosyaları `src/main/resources/db/migration/` altında hazır bekliyor:
-  - `V1__init.sql` — tam şema (`IF NOT EXISTS`)
-  - `V2__add_rate_limiting_and_password_version.sql` — yeni kolonlar
-  Flyway eklendiğinde `pom.xml`'e `flyway-core` + `application.yaml`'a config eklenmeli.
-
----
-
-## Bekleyen / Dikkat Gerektiren Konular
-
-1. **`ErrorCode.PASSWORD_SAME_AS_OLD` eksik** — `UserDefinitionFacade.changePassword()` içinde
-   bu constant'a referans var ama `ErrorCode.java`'da tanımlı değil. Derleme hatası verebilir;
-   `ErrorCode`'a `PASSWORD_SAME_AS_OLD` eklenmeli.
-
-2. **`CompanyGroupService.findMyCompanyGroups()` — ZONE_MANAGER eksik** — switch case'de
-   `ZONE_MANAGER` branch'i yok. Bu rol için boş liste dönüyor. Düzeltmek için
-   `GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR` ile aynı branch'e eklenmeli.
-
-3. **Flyway entegrasyonu** — `test.env` + `CLAUDE.md` → Flyway yapılandırması için hazır.
-   `IF NOT EXISTS` kullanıldığından mevcut DB üzerinde de güvenle çalışır.
+- Connection pool: `DB_POOL_MIN_IDLE` (2) / `DB_POOL_MAX_SIZE` (10), HikariCP.

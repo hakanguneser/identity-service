@@ -30,6 +30,7 @@ import com.gastroblue.service.CompanyService;
 import com.gastroblue.service.UserDefinitionService;
 import com.gastroblue.service.UserProductService;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,10 @@ public class TrackerFacade {
                   if (user == null || userProduct == null) {
                     return null;
                   }
+                  if (StringUtils.hasText(request.companyGroupId())
+                      && !request.companyGroupId().equals(user.getCompanyGroupId())) {
+                    return null;
+                  }
                   return TrackerMapper.toUser(user, userProduct, lookupService);
                 })
             .filter(Objects::nonNull)
@@ -150,6 +155,8 @@ public class TrackerFacade {
             .stream()
             .collect(Collectors.toMap(ExpoPushResult::token, r -> r, (first, second) -> first));
 
+    clearUnregisteredTokens(resultByToken.values());
+
     List<PushNotificationResult> results =
         userIds.stream()
             .map(userId -> toPushResult(userId, tokenByUserId.get(userId), resultByToken))
@@ -169,6 +176,32 @@ public class TrackerFacade {
         .failureCount(results.size() - successCount)
         .results(results)
         .build();
+  }
+
+  /**
+   * Expo answers DeviceNotRegistered when the app was removed or the user signed out on that
+   * device; the token will never work again. Clearing it turns later sends into NoTokenFound until
+   * the app registers a new one. A failure here must not fail the push response.
+   */
+  private void clearUnregisteredTokens(Collection<ExpoPushResult> expoResults) {
+    List<String> unregistered =
+        expoResults.stream()
+            .filter(
+                r -> PushNotificationError.DEVICE_NOT_REGISTERED.getCode().equals(r.errorCode()))
+            .map(ExpoPushResult::token)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+    if (unregistered.isEmpty()) {
+      return;
+    }
+    try {
+      int cleared = userProductService.clearPushTokens(ApplicationProduct.TRACKER, unregistered);
+      log.info(
+          "Cleared unregistered push tokens: tokens={}, rows={}", unregistered.size(), cleared);
+    } catch (RuntimeException e) {
+      log.error("Unregistered push tokens could not be cleared", e);
+    }
   }
 
   private static PushNotificationResult toPushResult(

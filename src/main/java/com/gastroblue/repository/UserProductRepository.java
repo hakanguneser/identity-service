@@ -3,6 +3,7 @@ package com.gastroblue.repository;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.model.entity.UserProductEntity;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,16 @@ public interface UserProductRepository extends JpaRepository<UserProductEntity, 
       @Param("userId") String userId,
       @Param("product") ApplicationProduct product,
       @Param("now") LocalDateTime now);
+
+  @Modifying
+  @Query(
+      """
+      update UserProductEntity up
+      set up.pushToken = null
+      where up.product = :product and up.pushToken in :tokens
+      """)
+  int clearPushTokens(
+      @Param("product") ApplicationProduct product, @Param("tokens") Collection<String> tokens);
 
   @Modifying
   @Query(
