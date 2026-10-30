@@ -19,14 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(
-    name = "USERS",
-    uniqueConstraints = {@UniqueConstraint(name = "UK_USERS", columnNames = "USERNAME")},
-    indexes = {
-      @Index(name = "IDX_USERS_COMPANY_GROUP_ID", columnList = "COMPANY_GROUP_ID"),
-      @Index(name = "IDX_USERS_COMPANY_ID_ACTIVE", columnList = "COMPANY_ID, IS_ACTIVE"),
-      @Index(name = "IDX_USERS_PASSWORD_EXPIRES_AT", columnList = "PASSWORD_EXPIRES_AT")
-    })
+@Table(name = "USERS")
 public class UserEntity extends Auditable implements UserDetails {
 
   @Column(name = "COMPANY_ID", length = 36)

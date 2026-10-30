@@ -36,9 +36,6 @@ services:
       # System tokens (inter-service auth)
       TRACKER_TOKEN: ${TRACKER_TOKEN:?TRACKER_TOKEN is required}
 
-      # App
-      APP_ADMIN_REGISTRATION_ENABLED: ${APP_ADMIN_REGISTRATION_ENABLED}
-
       # Mail
       MAIL_ENABLED: ${MAIL_ENABLED}
       MAIL_LOG_ENABLED: ${MAIL_LOG_ENABLED}

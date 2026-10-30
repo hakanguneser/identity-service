@@ -4,8 +4,9 @@ spring:
 
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:identity}
-    username: ${DATABASE_USERNAME:identity_admin}
-    password: ${DATABASE_PASSWORD:postgres}
+    # No default credentials: a missing variable fails startup instead of trying a guess.
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     hikari:
       connection-init-sql: SET TIMEZONE TO 'Europe/Istanbul'
       pool-name: identity-hikari
@@ -45,9 +46,6 @@ management:
 
 
 app:
-  admin:
-    registration:
-      enabled: ${APP_ADMIN_REGISTRATION_ENABLED:true}
   expo:
     base-url: ${EXPO_PUSH_BASE_URL:https://exp.host}
     access-token: ${EXPO_ACCESS_TOKEN:}
