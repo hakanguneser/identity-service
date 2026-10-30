@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum MailTemplate implements BaseMailTemplate {
-  INITIAL_PASSWORD("initial-password", "GastroBlue – Hesabınız Oluşturuldu"),
-  RESET_PASSWORD("reset-password", "GastroBlue – Şifreniz Yenilendi");
+  INITIAL_PASSWORD("initial-password", "GastroBlue hesabınız oluşturuldu"),
+  RESET_PASSWORD("reset-password", "GastroBlue şifreniz yenilendi");
 
   private final String templateName;
   private final String subject;

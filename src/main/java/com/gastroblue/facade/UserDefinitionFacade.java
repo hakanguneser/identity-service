@@ -39,6 +39,7 @@ import com.gastroblue.service.CompanyService;
 import com.gastroblue.service.UserDefinitionService;
 import com.gastroblue.service.UserProductService;
 import com.gastroblue.util.EmailDomainValidator;
+import com.gastroblue.util.MailBranding;
 import com.gastroblue.util.PasswordGenerator;
 import com.gastroblue.util.TenantAccess;
 import java.time.LocalDateTime;
@@ -219,6 +220,7 @@ public class UserDefinitionFacade {
         INITIAL_PASSWORD,
         savedUserEntity,
         savedUserProduct,
+        savedUserProduct != null ? savedUserProduct.getProduct() : product,
         managerUser,
         generatedPassword,
         companyGroup.getName(),
@@ -255,6 +257,7 @@ public class UserDefinitionFacade {
       MailTemplate mailTemplate,
       UserEntity createdUserEntity,
       UserProductEntity userProduct,
+      ApplicationProduct product,
       UserEntity managerUserEntity,
       String generatedPassword,
       String companyGroupName,
@@ -283,18 +286,24 @@ public class UserDefinitionFacade {
       mailParams.put(APPLICATION_ROLE, createdUser.getApplicationRole().getDisplay());
     }
 
+    // Shown as "A, B" in the mail, not as a list literal.
     mailParams.put(
         DEPARTMENT,
         createdUser.getDepartments().stream()
             .filter(Objects::nonNull)
             .map(BaseLookupModel::getDisplay)
-            .toList());
+            .collect(Collectors.joining(", ")));
     if (createdUser.getZone() != null) {
       mailParams.put(ZONE, createdUser.getZone().getDisplay());
     }
     mailParams.put(COMPANY_NAME, companyName);
     mailParams.put(COMPANY_GROUP_NAME, companyGroupName);
-    mailService.sendMail(mailTemplate, receivers, mailParams);
+    mailParams.put(TRACKER_LOGO, MailBranding.hasLogo(product));
+    mailParams.put(HEADER_TEXT, MailBranding.headerText(product));
+    mailParams.put(STORE_LINKS, MailBranding.hasStoreLinks(product));
+    mailParams.put(APP_STORE_URL, MailBranding.appStoreUrl(product));
+    mailParams.put(PLAY_STORE_URL, MailBranding.playStoreUrl(product));
+    mailService.sendMail(mailTemplate, receivers, mailParams, MailBranding.attachments(product));
   }
 
   private UserEntity checkRegisteredUserRole(UserSaveRequest request) {
@@ -463,6 +472,7 @@ public class UserDefinitionFacade {
         RESET_PASSWORD,
         userEntity,
         null,
+        sessionUser.getApplicationProduct(),
         managerUser,
         generatedPassword,
         companyGroupName,
