@@ -19,12 +19,13 @@ public class EmailDomainValidator {
   public static void validateAllowedDomains(
       List<String> allowedDomains, List<String> mailAddresses) {
 
-    if (allowedDomains == null || allowedDomains.isEmpty()) {
-      if (mailAddresses == null || mailAddresses.isEmpty()) {
-        return;
-      }
-      throw new NotFoundException(
-          ErrorCode.INVALID_MAIL_DOMAINS, "At least one domain must be specified");
+    // No domain restriction defined: every address is accepted.
+    if (allowedDomains == null
+        || allowedDomains.stream().noneMatch(d -> d != null && !d.isBlank())) {
+      return;
+    }
+    if (mailAddresses == null || mailAddresses.isEmpty()) {
+      return;
     }
 
     Set<String> normalizedAllowedDomains =
@@ -53,10 +54,14 @@ public class EmailDomainValidator {
   }
 
   public static boolean isDomainAllowed(String mail, String allowedDomains) {
-    if (mail == null || allowedDomains == null) {
+    if (mail == null) {
       return false;
     }
-    Set<String> normalizedAllowedDomains = new HashSet<>(splitClean(allowedDomains));
+    Set<String> normalizedAllowedDomains =
+        allowedDomains == null ? Set.of() : new HashSet<>(splitClean(allowedDomains));
+    if (normalizedAllowedDomains.isEmpty()) {
+      return true;
+    }
     return isDomainAllowed(mail, normalizedAllowedDomains);
   }
 }
