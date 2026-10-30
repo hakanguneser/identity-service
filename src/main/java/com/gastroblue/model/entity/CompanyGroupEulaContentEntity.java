@@ -14,18 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(
-    name = "COMPANY_GROUP_EULA_CONTENT",
-    indexes = {
-      @Index(
-          name = "IDX_CG_EULA_ACTIVE_RANGE",
-          columnList = "COMPANY_GROUP_ID, PRODUCT, LANGUAGE, START_DATE, END_DATE")
-    },
-    uniqueConstraints = {
-      @UniqueConstraint(
-          name = "UK_CG_EULA_CONTENT",
-          columnNames = {"COMPANY_GROUP_ID", "PRODUCT", "LANGUAGE", "EULA_VERSION"})
-    })
+@Table(name = "COMPANY_GROUP_EULA_CONTENT")
 public class CompanyGroupEulaContentEntity extends Auditable {
 
   @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)

@@ -13,14 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(
-    name = "USER_PRODUCTS",
-    uniqueConstraints = {
-      @UniqueConstraint(
-          name = "UK_USER_PRODUCTS",
-          columnNames = {"USER_ID", "PRODUCT"})
-    },
-    indexes = {@Index(name = "IDX_USER_PRODUCTS_USER_ID", columnList = "USER_ID")})
+@Table(name = "USER_PRODUCTS")
 public class UserProductEntity extends Auditable {
 
   @Column(name = "USER_ID", nullable = false, length = 36)
