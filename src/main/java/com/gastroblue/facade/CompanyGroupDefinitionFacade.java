@@ -3,6 +3,8 @@ package com.gastroblue.facade;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.lookup.model.dto.LookupQuery;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
+import com.gastroblue.commons.helper.security.service.IJwtService;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyGroupEntity;
@@ -21,6 +23,7 @@ import com.gastroblue.model.response.DropdownResponse;
 import com.gastroblue.service.CompanyGroupProductService;
 import com.gastroblue.service.CompanyGroupService;
 import com.gastroblue.util.EmailDomainValidator;
+import com.gastroblue.util.TenantAccess;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,7 @@ public class CompanyGroupDefinitionFacade {
   private final ILookupService lookupService;
 
   public CompanyGroupDefinitionResponse saveCompanyGroup(CompanyGroupSaveRequest request) {
+    TenantAccess.requireAdmin();
     EmailDomainValidator.validateAllowedDomains(
         request.mailDomains().stream().toList(), request.groupMails().stream().toList());
     CompanyGroupEntity savedEntity = companyGroupService.save(request);
@@ -43,22 +47,32 @@ public class CompanyGroupDefinitionFacade {
 
   public CompanyGroupDefinitionResponse updateCompanyGroup(
       String companyGroupId, CompanyGroupUpdateRequest request) {
+    TenantAccess.requireGroupManagement(companyGroupId);
     EmailDomainValidator.validateAllowedDomains(request.mailDomains(), request.groupMails());
     return CompanyGroupMapper.toResponse(companyGroupService.update(companyGroupId, request));
   }
 
   public CompanyGroupDefinitionListResponse findAllCompanyGroups() {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     return CompanyGroupDefinitionListResponse.builder()
         .companyGroups(
-            companyGroupService.findAll().stream().map(CompanyGroupMapper::toResponse).toList())
+            companyGroupService.findAll().stream()
+                .filter(
+                    group ->
+                        TenantAccess.isUnbound(sessionUser)
+                            || group.getId().equals(sessionUser.companyGroupId()))
+                .map(CompanyGroupMapper::toResponse)
+                .toList())
         .build();
   }
 
   public CompanyGroupDefinitionResponse findCompanyGroupById(String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return CompanyGroupMapper.toResponse(companyGroupService.findByIdOrThrow(companyGroupId));
   }
 
   public CompanyGroupProductListResponse findCompanyGroupProducts(String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     companyGroupService.findByIdOrThrow(companyGroupId);
     return CompanyGroupProductListResponse.builder()
         .products(
@@ -70,6 +84,8 @@ public class CompanyGroupDefinitionFacade {
 
   public CompanyGroupProductResponse saveCompanyGroupProduct(
       String companyGroupId, CompanyGroupProductSaveRequest request) {
+    // The product apiUrl is where the group clients send their tokens: ADMIN only.
+    TenantAccess.requireAdmin();
     companyGroupService.findByIdOrThrow(companyGroupId);
     companyGroupProductService
         .findByCompanyGroupIdAndProduct(companyGroupId, request.product())
@@ -93,6 +109,7 @@ public class CompanyGroupDefinitionFacade {
 
   public CompanyGroupProductResponse updateCompanyGroupProduct(
       String companyGroupId, ApplicationProduct product, CompanyGroupProductUpdateRequest request) {
+    TenantAccess.requireAdmin();
     companyGroupService.findByIdOrThrow(companyGroupId);
     CompanyGroupProductEntity existing =
         companyGroupProductService.findByCompanyGroupIdAndProductOrThrow(companyGroupId, product);
@@ -104,6 +121,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findZones(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -112,6 +130,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findCountries(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -120,6 +139,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findCities(final String companyGroupId, final String country) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -131,6 +151,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findSegment1(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -139,6 +160,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findSegment2(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -147,6 +169,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findSegment3(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -155,6 +178,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findSegment4(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(
@@ -163,6 +187,7 @@ public class CompanyGroupDefinitionFacade {
   }
 
   public DropdownResponse findSegment5(final String companyGroupId) {
+    TenantAccess.requireCompanyGroup(companyGroupId);
     return DropdownResponse.builder()
         .items(
             lookupService.findAll(

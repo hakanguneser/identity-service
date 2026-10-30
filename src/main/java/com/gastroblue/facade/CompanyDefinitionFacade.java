@@ -6,6 +6,7 @@ import static com.gastroblue.commons.shared.util.DelimitedStringUtil.split;
 import com.gastroblue.commons.helper.exception.type.BusinessException;
 import com.gastroblue.commons.helper.exception.type.NotFoundException;
 import com.gastroblue.commons.helper.lookup.service.ILookupService;
+import com.gastroblue.commons.helper.security.model.dto.SessionUser;
 import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.mapper.CompanyGroupMapper;
 import com.gastroblue.model.entity.CompanyEntity;
@@ -26,6 +27,7 @@ import com.gastroblue.service.CompanyGroupService;
 import com.gastroblue.service.CompanyProductService;
 import com.gastroblue.service.CompanyService;
 import com.gastroblue.util.EmailDomainValidator;
+import com.gastroblue.util.TenantAccess;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,9 +44,14 @@ public class CompanyDefinitionFacade {
   private final ILookupService lookupService;
 
   public CompanyDefinitionListResponse findCompaniesByCompanyGroupId(String companyGroupId) {
+    SessionUser sessionUser = TenantAccess.requireCompanyGroup(companyGroupId);
     return CompanyDefinitionListResponse.builder()
         .companies(
             companyService.findByCompanyGroupId(companyGroupId).stream()
+                .filter(
+                    company ->
+                        TenantAccess.isGroupWide(sessionUser)
+                            || sessionUser.getCompanyIdsOrEmptyList().contains(company.getId()))
                 .map(entity -> CompanyGroupMapper.toResponse(entity, lookupService))
                 .toList())
         .build();
@@ -52,11 +59,13 @@ public class CompanyDefinitionFacade {
 
   public CompanyDefinitionResponse findCompanyByCompanyIdAndCompanyGroupId(
       String companyGroupId, String companyId) {
+    TenantAccess.requireCompany(companyGroupId, companyId);
     CompanyEntity entity = companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     return CompanyGroupMapper.toResponse(entity, lookupService);
   }
 
   public CompanyDefinitionResponse saveCompany(String companyGroupId, CompanySaveRequest request) {
+    TenantAccess.requireGroupManagement(companyGroupId);
     CompanyGroupEntity companyGroup = companyGroupService.findByIdOrThrow(companyGroupId);
     EmailDomainValidator.validateAllowedDomains(
         split(companyGroup.getMailDomains()), request.companyMail());
@@ -69,6 +78,7 @@ public class CompanyDefinitionFacade {
 
   public CompanyDefinitionResponse updateCompany(
       String companyGroupId, String companyId, CompanyUpdateRequest request) {
+    TenantAccess.requireGroupManagement(companyGroupId);
     CompanyGroupEntity companyGroup = companyGroupService.findByIdOrThrow(companyGroupId);
     CompanyEntity entityToBeUpdated =
         companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
@@ -91,11 +101,13 @@ public class CompanyDefinitionFacade {
   }
 
   public CompanyDefinitionResponse toggleCompanyStatus(String companyGroupId, String companyId) {
+    TenantAccess.requireGroupManagement(companyGroupId);
     CompanyEntity companyEntity = companyService.toggleCompanyStatus(companyGroupId, companyId);
     return CompanyGroupMapper.toResponse(companyEntity, lookupService);
   }
 
   public CompanyProductListResponse findCompanyProducts(String companyGroupId, String companyId) {
+    TenantAccess.requireCompany(companyGroupId, companyId);
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     return CompanyProductListResponse.builder()
         .products(
@@ -107,6 +119,8 @@ public class CompanyDefinitionFacade {
 
   public CompanyProductResponse saveCompanyProduct(
       String companyGroupId, String companyId, CompanyProductSaveRequest request) {
+    // Company products carry the license (expiry, user limit): ADMIN only.
+    TenantAccess.requireAdmin();
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     companyGroupProductService.findByCompanyGroupIdAndProductOrThrow(
         companyGroupId, request.product());
@@ -134,6 +148,7 @@ public class CompanyDefinitionFacade {
       String companyId,
       ApplicationProduct product,
       CompanyProductUpdateRequest request) {
+    TenantAccess.requireAdmin();
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     CompanyProductEntity existing =
         companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
@@ -145,6 +160,7 @@ public class CompanyDefinitionFacade {
 
   public void deleteCompanyProduct(
       String companyGroupId, String companyId, ApplicationProduct product) {
+    TenantAccess.requireAdmin();
     companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     CompanyProductEntity existing =
         companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
@@ -153,6 +169,7 @@ public class CompanyDefinitionFacade {
 
   public CompanyContextResponse findCompanyAndGroupContext(String groupCode, String companyCode) {
     CompanyGroupEntity group = companyGroupService.findByGroupCode(groupCode);
+    TenantAccess.requireCompanyGroup(group.getId());
     CompanyEntity company =
         companyService
             .findByCompanyCode(companyCode)
@@ -162,6 +179,11 @@ public class CompanyDefinitionFacade {
                   return new NotFoundException(
                       ErrorCode.COMPANY_NOT_FOUND, "Company not found: " + companyCode);
                 });
+    if (!group.getId().equals(company.getCompanyGroupId())) {
+      throw new NotFoundException(
+          ErrorCode.COMPANY_NOT_FOUND,
+          "Company not found in group: " + groupCode + " / " + companyCode);
+    }
 
     return CompanyContextResponse.builder()
         .companyGroup(CompanyGroupMapper.toResponse(group))
@@ -171,6 +193,8 @@ public class CompanyDefinitionFacade {
 
   public CompanyProductResponse toggleCompanyProduct(
       String companyGroupId, String companyId, ApplicationProduct product) {
+    TenantAccess.requireAdmin();
+    companyService.findByCompanyGroupIdAndId(companyGroupId, companyId);
     CompanyProductEntity companyProductEntity =
         companyProductService.findByCompanyIdAndProductOrThrow(companyId, product);
     companyProductEntity.setEnabled(!companyProductEntity.isEnabled());

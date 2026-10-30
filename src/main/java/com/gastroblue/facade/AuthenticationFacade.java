@@ -23,6 +23,7 @@ import com.gastroblue.model.request.PushTokenRequest;
 import com.gastroblue.model.request.RefreshTokenRequest;
 import com.gastroblue.model.response.*;
 import com.gastroblue.service.*;
+import com.gastroblue.util.TenantAccess;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -193,9 +194,10 @@ public class AuthenticationFacade {
         log.info("Company group not found: {}", sessionUser.companyGroupId());
       }
       List<Company> companyList;
-      if (sessionUser.companyIds() != null) {
+      // Group-wide roles carry an empty company list and see the whole group.
+      if (!TenantAccess.isGroupWide(sessionUser)) {
         companyList =
-            companyService.findByBaseIdIn(sessionUser.companyIds()).stream()
+            companyService.findByBaseIdIn(sessionUser.getCompanyIdsOrEmptyList()).stream()
                 .map(CompanyGroupMapper::toBase)
                 .toList();
       } else {
@@ -219,11 +221,14 @@ public class AuthenticationFacade {
   }
 
   public AuthUserCompaniesResponse findMyCompanies() {
+    SessionUser sessionUser = IJwtService.findSessionUserOrThrow();
     return AuthUserCompaniesResponse.builder()
         .companies(
-            companyService
-                .findByCompanyGroupId(IJwtService.findSessionUserOrThrow().companyGroupId())
-                .stream()
+            companyService.findByCompanyGroupId(sessionUser.companyGroupId()).stream()
+                .filter(
+                    company ->
+                        TenantAccess.isGroupWide(sessionUser)
+                            || sessionUser.getCompanyIdsOrEmptyList().contains(company.getId()))
                 .map(entity -> CompanyGroupMapper.toAuthResponse(entity, lookupService))
                 .toList())
         .build();

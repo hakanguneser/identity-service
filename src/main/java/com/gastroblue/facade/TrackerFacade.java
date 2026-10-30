@@ -95,6 +95,10 @@ public class TrackerFacade {
                   if (user == null || userProduct == null) {
                     return null;
                   }
+                  if (StringUtils.hasText(request.companyGroupId())
+                      && !request.companyGroupId().equals(user.getCompanyGroupId())) {
+                    return null;
+                  }
                   return TrackerMapper.toUser(user, userProduct, lookupService);
                 })
             .filter(Objects::nonNull)

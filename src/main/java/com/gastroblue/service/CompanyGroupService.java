@@ -70,9 +70,11 @@ public class CompanyGroupService {
     SessionUser user = IJwtService.findSessionUserOrThrow();
     return switch (user.getApplicationRole()) {
       case ADMIN -> findAll();
-      case GROUP_MANAGER, COMPANY_MANAGER, SUPERVISOR ->
-          List.of(findByIdOrThrow(user.companyGroupId()));
-      default -> List.of();
+      // Every other role belongs to exactly one group (ZONE_MANAGER and STAFF were missing).
+      default ->
+          user.companyGroupId() != null
+              ? List.of(findByIdOrThrow(user.companyGroupId()))
+              : List.of();
     };
   }
 
