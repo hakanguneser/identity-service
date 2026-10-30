@@ -29,9 +29,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -68,8 +68,15 @@ public class AuthenticationFacade {
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(request.username(), request.password()));
       userEntity = (UserEntity) authentication.getPrincipal();
-    } catch (LockedException e) {
-      throw new AccessDeniedException(ErrorCode.ACCOUNT_LOCKED, "Account is temporarily locked");
+    } catch (AccountStatusException e) {
+      // Locked, disabled or expired accounts get the same answer as a wrong password, so the
+      // response does not tell whether a username exists or what state it is in. Spring checks
+      // the account state before the password. DisabledException used to surface as a 500.
+      log.info(
+          "Login rejected: username={}, reason={}",
+          request.username(),
+          e.getClass().getSimpleName());
+      throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
     } catch (BadCredentialsException e) {
       userService.incrementLoginAttempts(request.username());
       throw new AccessDeniedException(INVALID_USERNAME_OR_PASSWORD);
