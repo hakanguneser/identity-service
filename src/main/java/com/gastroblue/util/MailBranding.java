@@ -21,7 +21,27 @@ public class MailBranding {
   private static final String CONTENT_ID = "tracker-logo";
   private static final String PATH = "mail/tracker-logo.png";
 
+  // GastroBlue Tracker store pages (same app id on both stores:
+  // com.gastroblueco.thermometertracking).
+  private static final String TRACKER_APP_STORE_URL =
+      "https://apps.apple.com/tr/app/gastroblue-tracker/id6759391154";
+  private static final String TRACKER_PLAY_STORE_URL =
+      "https://play.google.com/store/apps/details?id=com.gastroblueco.thermometertracking";
+
   private static volatile byte[] cachedBytes;
+
+  /** Store download links are shown for Tracker users only. */
+  public static boolean hasStoreLinks(ApplicationProduct product) {
+    return product == ApplicationProduct.TRACKER;
+  }
+
+  public static String appStoreUrl(ApplicationProduct product) {
+    return hasStoreLinks(product) ? TRACKER_APP_STORE_URL : null;
+  }
+
+  public static String playStoreUrl(ApplicationProduct product) {
+    return hasStoreLinks(product) ? TRACKER_PLAY_STORE_URL : null;
+  }
 
   public static boolean hasLogo(ApplicationProduct product) {
     return product == ApplicationProduct.TRACKER;

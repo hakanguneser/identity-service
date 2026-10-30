@@ -18,7 +18,10 @@ public enum MailParameters implements BaseMailParameters {
   COMPANY_GROUP_NAME("companyGroupName"),
   FULL_NAME("fullName"),
   TRACKER_LOGO("trackerLogo"),
-  HEADER_TEXT("headerText");
+  HEADER_TEXT("headerText"),
+  STORE_LINKS("storeLinks"),
+  APP_STORE_URL("appStoreUrl"),
+  PLAY_STORE_URL("playStoreUrl");
 
   private final String key;
 }

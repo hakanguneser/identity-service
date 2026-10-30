@@ -300,6 +300,9 @@ public class UserDefinitionFacade {
     mailParams.put(COMPANY_GROUP_NAME, companyGroupName);
     mailParams.put(TRACKER_LOGO, MailBranding.hasLogo(product));
     mailParams.put(HEADER_TEXT, MailBranding.headerText(product));
+    mailParams.put(STORE_LINKS, MailBranding.hasStoreLinks(product));
+    mailParams.put(APP_STORE_URL, MailBranding.appStoreUrl(product));
+    mailParams.put(PLAY_STORE_URL, MailBranding.playStoreUrl(product));
     mailService.sendMail(mailTemplate, receivers, mailParams, MailBranding.attachments(product));
   }
 

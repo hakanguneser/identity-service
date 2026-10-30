@@ -21,6 +21,9 @@ class PasswordMailTemplateTest {
     String html = render(template, ApplicationProduct.TRACKER, true);
 
     assertThat(html).contains("cid:tracker-logo").doesNotContain("GastroBlue Check APP");
+    assertThat(html).contains("apps.apple.com/tr/app/gastroblue-tracker/id6759391154");
+    assertThat(html)
+        .contains("play.google.com/store/apps/details?id=com.gastroblueco.thermometertracking");
     assertCommon(html);
   }
 
@@ -30,6 +33,7 @@ class PasswordMailTemplateTest {
     String html = render(template, ApplicationProduct.CHECK, false);
 
     assertThat(html).doesNotContain("cid:tracker-logo").contains("GastroBlue Check APP");
+    assertThat(html).doesNotContain("App Store", "Google Play");
     assertThat(html).doesNotContain("Merhaba Ayşe Yönetici");
     assertCommon(html);
   }
@@ -60,6 +64,9 @@ class PasswordMailTemplateTest {
     params.put(MailParameters.COMPANY_GROUP_NAME, "Demo Group");
     params.put(MailParameters.TRACKER_LOGO, MailBranding.hasLogo(product));
     params.put(MailParameters.HEADER_TEXT, MailBranding.headerText(product));
+    params.put(MailParameters.STORE_LINKS, MailBranding.hasStoreLinks(product));
+    params.put(MailParameters.APP_STORE_URL, MailBranding.appStoreUrl(product));
+    params.put(MailParameters.PLAY_STORE_URL, MailBranding.playStoreUrl(product));
     return loader.loadAndRender(template.getTemplateName(), params);
   }
 }
