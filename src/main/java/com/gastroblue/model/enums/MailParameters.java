@@ -16,7 +16,9 @@ public enum MailParameters implements BaseMailParameters {
   ZONE("zone"),
   COMPANY_NAME("companyName"),
   COMPANY_GROUP_NAME("companyGroupName"),
-  FULL_NAME("fullName");
+  FULL_NAME("fullName"),
+  TRACKER_LOGO("trackerLogo"),
+  HEADER_TEXT("headerText");
 
   private final String key;
 }
