@@ -23,4 +23,11 @@ public class EligibilityController {
     UserEligibilityResponse response = eligibilityFacade.trackerAddUser();
     return ResponseEntity.ok(response);
   }
+
+  @GetMapping("/add-user")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<UserEligibilityResponse> addUser2() {
+    UserEligibilityResponse response = eligibilityFacade.trackerAddUser();
+    return ResponseEntity.ok(response);
+  }
 }
