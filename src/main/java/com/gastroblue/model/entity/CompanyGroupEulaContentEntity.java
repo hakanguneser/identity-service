@@ -17,7 +17,8 @@ import lombok.*;
 @Table(name = "COMPANY_GROUP_EULA_CONTENT")
 public class CompanyGroupEulaContentEntity extends Auditable {
 
-  @Column(name = "COMPANY_GROUP_ID", nullable = false, length = 36)
+  // Null: global text, used by every group that has no text of its own (see findActiveContent).
+  @Column(name = "COMPANY_GROUP_ID", length = 36)
   private String companyGroupId;
 
   @Enumerated(EnumType.STRING)
