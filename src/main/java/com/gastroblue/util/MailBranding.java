@@ -6,7 +6,10 @@ import com.gastroblue.commons.shared.enums.ApplicationProduct;
 import com.gastroblue.model.enums.ErrorCode;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.experimental.UtilityClass;
 import org.springframework.core.io.ClassPathResource;
 
@@ -28,7 +31,15 @@ public class MailBranding {
   private static final String TRACKER_PLAY_STORE_URL =
       "https://play.google.com/store/apps/details?id=com.gastroblueco.thermometertracking";
 
-  private static volatile byte[] cachedBytes;
+  // Official store badges (Google Play: Turkish PNG; App Store: Apple's badge rendered to PNG,
+  // since most mail clients do not show SVG).
+  private static final String APP_STORE_BADGE_ID = "app-store-badge";
+  private static final String APP_STORE_BADGE_PATH = "mail/app-store-badge.png";
+  private static final String GOOGLE_PLAY_BADGE_ID = "google-play-badge";
+  private static final String GOOGLE_PLAY_BADGE_PATH = "mail/google-play-badge.png";
+  private static final String PNG = "image/png";
+
+  private static final Map<String, byte[]> CACHE = new ConcurrentHashMap<>();
 
   /** Store download links are shown for Tracker users only. */
   public static boolean hasStoreLinks(ApplicationProduct product) {
@@ -62,24 +73,37 @@ public class MailBranding {
     };
   }
 
+  /**
+   * Inline images of the mail: the Tracker logo and, with the store links, the official App Store
+   * and Google Play badges (templates use cid:app-store-badge and cid:google-play-badge).
+   */
   public static List<MailAttachment> attachments(ApplicationProduct product) {
-    if (!hasLogo(product)) {
-      return List.of();
+    List<MailAttachment> attachments = new ArrayList<>();
+    if (hasLogo(product)) {
+      attachments.add(MailAttachment.inline(CONTENT_ID, "tracker-logo.png", bytes(PATH), PNG));
     }
-    return List.of(MailAttachment.inline(CONTENT_ID, "tracker-logo.png", bytes(), "image/png"));
+    if (hasStoreLinks(product)) {
+      attachments.add(
+          MailAttachment.inline(
+              APP_STORE_BADGE_ID, "app-store-badge.png", bytes(APP_STORE_BADGE_PATH), PNG));
+      attachments.add(
+          MailAttachment.inline(
+              GOOGLE_PLAY_BADGE_ID, "google-play-badge.png", bytes(GOOGLE_PLAY_BADGE_PATH), PNG));
+    }
+    return attachments;
   }
 
-  private static byte[] bytes() {
-    byte[] bytes = cachedBytes;
-    if (bytes == null) {
-      try (InputStream in = new ClassPathResource(PATH).getInputStream()) {
-        bytes = in.readAllBytes();
-        cachedBytes = bytes;
-      } catch (IOException e) {
-        throw new BusinessException(
-            ErrorCode.MAIL_LOGO_NOT_FOUND, "Mail logo could not be loaded: " + e.getMessage());
-      }
-    }
-    return bytes;
+  private static byte[] bytes(String path) {
+    return CACHE.computeIfAbsent(
+        path,
+        p -> {
+          try (InputStream in = new ClassPathResource(p).getInputStream()) {
+            return in.readAllBytes();
+          } catch (IOException e) {
+            throw new BusinessException(
+                ErrorCode.MAIL_LOGO_NOT_FOUND,
+                "Mail image could not be loaded: " + p + " " + e.getMessage());
+          }
+        });
   }
 }
