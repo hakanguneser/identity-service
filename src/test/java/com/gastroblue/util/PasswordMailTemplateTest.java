@@ -8,6 +8,7 @@ import com.gastroblue.model.enums.MailParameters;
 import com.gastroblue.model.enums.MailTemplate;
 import java.util.EnumMap;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -24,6 +25,7 @@ class PasswordMailTemplateTest {
     assertThat(html).contains("apps.apple.com/tr/app/gastroblue-tracker/id6759391154");
     assertThat(html)
         .contains("play.google.com/store/apps/details?id=com.gastroblueco.thermometertracking");
+    assertThat(html).contains("cid:app-store-badge", "cid:google-play-badge");
     assertCommon(html);
   }
 
@@ -33,7 +35,7 @@ class PasswordMailTemplateTest {
     String html = render(template, ApplicationProduct.CHECK, false);
 
     assertThat(html).doesNotContain("cid:tracker-logo").contains("GastroBlue Check APP");
-    assertThat(html).doesNotContain("App Store", "Google Play");
+    assertThat(html).doesNotContain("App Store", "Google Play", "cid:app-store-badge");
     assertThat(html).doesNotContain("Merhaba Ayşe Yönetici");
     assertCommon(html);
   }
@@ -43,6 +45,12 @@ class PasswordMailTemplateTest {
   void managerNoteOnlyWhenTheUserHasNoMail(MailTemplate template) {
     assertThat(render(template, ApplicationProduct.TRACKER, true))
         .contains("Merhaba Ayşe Yönetici");
+  }
+
+  @Test
+  void trackerMailCarriesLogoAndBothBadgesInline() {
+    assertThat(MailBranding.attachments(ApplicationProduct.TRACKER)).hasSize(3);
+    assertThat(MailBranding.attachments(ApplicationProduct.CHECK)).isEmpty();
   }
 
   private static void assertCommon(String html) {
