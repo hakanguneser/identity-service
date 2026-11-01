@@ -29,7 +29,8 @@ public enum ErrorCode implements ErrorCodeBase {
   USER_NOT_ELIGIBLE_SUPERVISOR_OR_ABOVE,
   USER_PRODUCT_NOT_FOUND,
   ACCOUNT_LOCKED,
-  MAIL_LOGO_NOT_FOUND;
+  MAIL_LOGO_NOT_FOUND,
+  DEPARTMENT_REQUIRED;
 
   @Override
   public String code() {
