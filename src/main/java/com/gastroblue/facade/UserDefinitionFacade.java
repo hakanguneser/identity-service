@@ -58,6 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDefinitionFacade {
 
   private static final String DEPARTMENT_ALL = "ALL";
+  // Department of a TRACKER user created without departments.
+  private static final String TRACKER_DEFAULT_DEPARTMENT = "MANAGEMENT";
 
   private final UserDefinitionService userService;
   private final CompanyGroupService companyGroupService;
@@ -186,6 +188,8 @@ public class UserDefinitionFacade {
     checkAssignableRole(request.applicationRole());
     CompanyGroupEntity companyGroup = getRegistrationCompanyGroup(request);
     CompanyEntity company = getRegistrationCompany(request);
+    ApplicationProduct product = getApplicationProduct(request.product());
+    List<String> departments = getDepartments(request, product);
     if (request.email() != null && !request.email().isBlank()) {
       List<String> mailDomains = DelimitedStringUtil.split(companyGroup.getMailDomains());
       if (!mailDomains.isEmpty()) {
@@ -201,8 +205,6 @@ public class UserDefinitionFacade {
             passwordEncoder.encode(generatedPassword));
     UserEntity savedUserEntity = userService.save(entityToBeSaved);
 
-    ApplicationProduct product = getApplicationProduct(request.product());
-
     UserProductEntity savedUserProduct = null;
     if (product != null && request.applicationRole() != null) {
       UserProductEntity userProduct =
@@ -210,7 +212,7 @@ public class UserDefinitionFacade {
               .userId(savedUserEntity.getId())
               .product(product)
               .applicationRole(request.applicationRole())
-              .departments(DelimitedStringUtil.join(getDepartments(request)))
+              .departments(DelimitedStringUtil.join(departments))
               .active(true)
               .build();
       savedUserProduct = userProductService.save(userProduct);
@@ -245,8 +247,15 @@ public class UserDefinitionFacade {
     return product;
   }
 
-  private List<String> getDepartments(UserSaveRequest request) {
+  private static List<String> getDepartments(UserSaveRequest request, ApplicationProduct product) {
     List<String> departments = Optional.ofNullable(request.departments()).orElse(List.of());
+    if (departments.isEmpty()) {
+      if (product == ApplicationProduct.TRACKER) {
+        return List.of(TRACKER_DEFAULT_DEPARTMENT);
+      }
+      throw new BusinessException(
+          ErrorCode.DEPARTMENT_REQUIRED, "Departments are required for product " + product);
+    }
     if (departments.contains(DEPARTMENT_ALL)) {
       return List.of(DEPARTMENT_ALL);
     }
