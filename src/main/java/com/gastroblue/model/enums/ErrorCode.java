@@ -30,7 +30,8 @@ public enum ErrorCode implements ErrorCodeBase {
   USER_PRODUCT_NOT_FOUND,
   ACCOUNT_LOCKED,
   MAIL_LOGO_NOT_FOUND,
-  DEPARTMENT_REQUIRED;
+  DEPARTMENT_REQUIRED,
+  INVALID_APP_VERSION;
 
   @Override
   public String code() {

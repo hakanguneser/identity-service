@@ -18,8 +18,9 @@ public record UserSaveRequest(
     String companyGroupId,
     String companyId,
     @NotNull(message = "{validation.applicationRole.check.null}") ApplicationRole applicationRole,
-    // Empty: TRACKER users get MANAGEMENT; the other products require departments.
-    List<@ValidLookup(lookup = Lookups.class, constant = "DEPARTMENT") String> departments,
+    // Optional, plain strings for now (no DEPARTMENT lookup check), like gender. Empty: TRACKER
+    // users get TRACKER; the other products require departments.
+    List<String> departments,
     @NotBlank(message = "{validation.name.check.null}")
         @Size(min = 3, max = 100, message = "{validation.name.size.3.100}")
         String name,
@@ -28,6 +29,6 @@ public record UserSaveRequest(
         String surname,
     @ValidPhoneNumber String phone,
     @Email(message = "{validation.email}") String email,
-    @ValidLookup(lookup = Lookups.class, constant = "GENDER") String gender,
+    String gender,
     @ValidLookup(lookup = Lookups.class, constant = "ZONE") String zone,
     ApplicationProduct product) {}

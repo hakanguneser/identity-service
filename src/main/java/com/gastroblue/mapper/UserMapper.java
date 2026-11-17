@@ -37,7 +37,6 @@ public class UserMapper {
         .phone(request.phone())
         .name(request.name())
         .surname(request.surname())
-        .gender(request.gender())
         .zone(request.zone())
         .passwordChangeRequired(true)
         .build();

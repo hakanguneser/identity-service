@@ -4,6 +4,7 @@ import com.gastroblue.commons.helper.security.config.AbstractSecurityConfig;
 import com.gastroblue.commons.shared.enums.ApplicationRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,6 +22,8 @@ public class SecurityConfig extends AbstractSecurityConfig {
       AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
           auth) {
     auth.requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh").permitAll();
+    // Called on app start, before login.
+    auth.requestMatchers(HttpMethod.GET, "/api/v1/app-versions/check").permitAll();
     auth.requestMatchers("/api/v1/definition/company-groups/**")
         .hasAnyRole(
             ApplicationRole.ADMIN.name(),
