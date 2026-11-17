@@ -28,6 +28,6 @@ public record UserSaveRequest(
         String surname,
     @ValidPhoneNumber String phone,
     @Email(message = "{validation.email}") String email,
-    @ValidLookup(lookup = Lookups.class, constant = "GENDER") String gender,
+    String gender,
     @ValidLookup(lookup = Lookups.class, constant = "ZONE") String zone,
     ApplicationProduct product) {}
