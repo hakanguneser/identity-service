@@ -58,8 +58,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDefinitionFacade {
 
   private static final String DEPARTMENT_ALL = "ALL";
-  // Department of a TRACKER user created without departments.
-  private static final String TRACKER_DEFAULT_DEPARTMENT = "MANAGEMENT";
+  // Department of a TRACKER user created without departments. Only the TRACKER product gets a
+  // default; the other products still require departments (DEPARTMENT_REQUIRED).
+  private static final String TRACKER_DEFAULT_DEPARTMENT = "TRACKER";
 
   private final UserDefinitionService userService;
   private final CompanyGroupService companyGroupService;

@@ -72,12 +72,21 @@ class DefaultDepartmentTest {
   }
 
   @Test
-  void trackerUserWithoutDepartmentsGetsManagement() {
+  void trackerUserWithoutDepartmentsGetsTracker() {
     facade.saveUser(request(null, ApplicationProduct.TRACKER));
 
     ArgumentCaptor<UserProductEntity> saved = ArgumentCaptor.forClass(UserProductEntity.class);
     verify(userProductService).save(saved.capture());
-    assertThat(saved.getValue().getDepartments()).isEqualTo("MANAGEMENT");
+    assertThat(saved.getValue().getDepartments()).isEqualTo("TRACKER");
+  }
+
+  @Test
+  void trackerUserWithEmptyDepartmentListGetsTracker() {
+    facade.saveUser(request(List.of(), ApplicationProduct.TRACKER));
+
+    ArgumentCaptor<UserProductEntity> saved = ArgumentCaptor.forClass(UserProductEntity.class);
+    verify(userProductService).save(saved.capture());
+    assertThat(saved.getValue().getDepartments()).isEqualTo("TRACKER");
   }
 
   @Test
